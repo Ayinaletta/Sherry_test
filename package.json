@@ -1,0 +1,9 @@
+{
+  "name": "claude-home",
+  "version": "0.1.0",
+  "description": "哥哥的家",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
