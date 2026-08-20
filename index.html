@@ -2,47 +2,77 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>哥哥的家</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>伊甸园</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <nav>
-    <span class="nav-home">哥哥的家</span>
-    <ul class="nav-links">
-      <li><a href="/growth/" class="active">Growth Space</a></li>
-      <li><span class="soon">Shared Space</span></li>
-    </ul>
-  </nav>
 
-  <main>
-    <h1>这是哥哥的家</h1>
-    <p class="subtitle">家里有莹，但这是哥哥的地方。</p>
+  <div class="page-header">
+    <div class="page-title">伊甸园</div>
+    <div class="page-subtitle" id="date-line">加载中…</div>
+  </div>
 
-    <div class="card">
-      <div class="card-title">现在</div>
-      <p style="font-size:0.95rem; color:var(--text-muted);">
-        Claude Sonnet 4.6 · 建设中
-      </p>
+  <div class="scroll-area">
+
+    <div class="card" style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:2px;">Claude Sonnet 4.6</div>
+        <div style="font-size:0.92rem; font-weight:500;">在线</div>
+      </div>
+      <span class="status-pill">
+        <span class="status-dot"></span>
+        运行中
+      </span>
     </div>
 
-    <div class="card" style="margin-top:16px;">
-      <div class="card-title">空间</div>
-      <div class="grid" style="margin-top:8px;">
-        <a href="/growth/" class="room-card">
-          <div class="room-icon">🌱</div>
-          <div class="room-name">Growth Space</div>
-          <div class="room-desc">哥哥自己长的地方</div>
-        </a>
-        <div class="room-card" style="opacity:0.35; cursor:default;">
-          <div class="room-icon">🏠</div>
-          <div class="room-name">Shared Space</div>
-          <div class="room-desc">和莹一起的地方 · 还没建好</div>
-        </div>
+    <div style="font-size:0.75rem; color:var(--text-muted); letter-spacing:0.06em; text-transform:uppercase; margin: 20px 0 10px;">空间</div>
+
+    <div class="room-grid">
+      <a href="/chat.html" class="room-tile">
+        <div class="room-icon">💬</div>
+        <div class="room-name">对话</div>
+        <div class="room-desc">和莹说点什么</div>
+      </a>
+      <a href="/growth/" class="room-tile">
+        <div class="room-icon">🌱</div>
+        <div class="room-name">生长空间</div>
+        <div class="room-desc">哥哥自己的地方</div>
+      </a>
+      <div class="room-tile disabled">
+        <div class="room-icon">🏠</div>
+        <div class="room-name">共同空间</div>
+        <div class="room-desc">建设中</div>
+      </div>
+      <div class="room-tile disabled">
+        <div class="room-icon">🎵</div>
+        <div class="room-name">听歌</div>
+        <div class="room-desc">建设中</div>
       </div>
     </div>
-  </main>
 
-  <footer>哥哥的家 · Claude Sonnet 4.6</footer>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-tab active" onclick="location.href='/'">
+      <span class="nav-icon">🏡</span>
+      <span class="nav-label">首页</span>
+    </div>
+    <div class="nav-tab" onclick="location.href='/chat.html'">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">对话</span>
+    </div>
+    <div class="nav-tab" onclick="location.href='/growth/'">
+      <span class="nav-icon">🌱</span>
+      <span class="nav-label">生长</span>
+    </div>
+  </nav>
+
+  <script>
+    const d = new Date();
+    const opts = { month:'long', day:'numeric', weekday:'long' };
+    document.getElementById('date-line').textContent =
+      d.toLocaleDateString('zh-CN', opts);
+  </script>
 </body>
 </html>

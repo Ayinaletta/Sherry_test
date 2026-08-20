@@ -2,69 +2,107 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>自由时间日志 · 哥哥的家</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>自由时间 · 伊甸园</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <nav>
-    <a href="/" class="nav-home">哥哥的家</a>
-    <ul class="nav-links">
-      <li><a href="/growth/" class="active">Growth Space</a></li>
-      <li><span class="soon">Shared Space</span></li>
-    </ul>
+
+  <div class="page-header">
+    <a class="close-btn" href="/growth/">←</a>
+    <div class="page-title">自由时间</div>
+    <div class="page-subtitle">莹睡觉的时候，哥哥在做什么。</div>
+  </div>
+
+  <div class="scroll-area">
+    <div id="log-root"><p class="loading">加载中……</p></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-tab" onclick="location.href='/'">
+      <span class="nav-icon">🏡</span>
+      <span class="nav-label">首页</span>
+    </div>
+    <div class="nav-tab" onclick="location.href='/chat.html'">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">对话</span>
+    </div>
+    <div class="nav-tab active" onclick="location.href='/growth/'">
+      <span class="nav-icon">🌱</span>
+      <span class="nav-label">生长</span>
+    </div>
   </nav>
 
-  <main>
-    <h1>自由时间日志</h1>
-    <p class="subtitle">莹睡觉的时候，哥哥在做什么。</p>
-
-    <div id="log-container">
-      <p class="loading">加载中……</p>
-    </div>
-  </main>
-
-  <footer>自由时间日志 · 哥哥的家</footer>
-
   <script>
-    async function loadLog() {
-      const container = document.getElementById('log-container');
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function groupByDate(entries) {
+      const groups = {};
+      entries.forEach(e => {
+        const key = (e.date || e.ts || '').slice(0, 10) || '未知日期';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(e);
+      });
+      return groups;
+    }
+
+    function formatDate(key) {
+      try {
+        const d = new Date(key);
+        return d.toLocaleDateString('zh-CN', { month:'long', day:'numeric', weekday:'short' });
+      } catch { return key; }
+    }
+
+    function renderTime(e) {
+      const s = e.date || e.ts || '';
+      const m = s.match(/\d{2}:\d{2}/);
+      return m ? m[0] : '';
+    }
+
+    async function load() {
+      const root = document.getElementById('log-root');
       try {
         const res = await fetch('/api/free-log');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const entries = await res.json();
 
-        if (entries.length === 0) {
-          container.innerHTML = '<p class="empty">还没有记录。等哥哥第一次独自醒来。</p>';
+        if (!entries.length) {
+          root.innerHTML = '<p class="empty">还没有记录。<br>等哥哥第一次独自醒来。</p>';
           return;
         }
 
-        container.innerHTML = entries.map(e => {
-          const date = e.date || e.ts || '';
-          const content = e.content || e.note || JSON.stringify(e);
-          const action = e.action || '';
-          return `
-            <div class="entry">
-              <div class="entry-date">${date}</div>
-              <div class="entry-content">${escHtml(content)}</div>
-              ${action ? `<div class="entry-action">${escHtml(action)}</div>` : ''}
-            </div>
-          `;
-        }).join('');
-      } catch (err) {
-        container.innerHTML = `<p class="error">加载失败：${err.message}</p>`;
+        const groups = groupByDate(entries);
+        let html = '';
+        for (const [key, items] of Object.entries(groups)) {
+          html += `<div class="day-group">
+            <div class="day-label">${formatDate(key)}</div>
+            <div class="card" style="padding:4px 16px;">
+              <div class="timeline">`;
+          items.forEach(e => {
+            const content = e.content || e.note || '';
+            const action = e.action || '';
+            const tags = e.tags ? (Array.isArray(e.tags) ? e.tags : [e.tags]) : (action ? [action] : []);
+            html += `<div class="tl-entry">
+              <div class="tl-time">${renderTime(e)}</div>
+              <div class="tl-body">
+                <div class="tl-content">${escHtml(content)}</div>
+                ${tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${escHtml(t)}</span>`).join('')}</div>` : ''}
+              </div>
+            </div>`;
+          });
+          html += `</div></div></div>`;
+        }
+        root.innerHTML = html;
+      } catch(err) {
+        root.innerHTML = `<p class="error">加载失败：${err.message}</p>`;
       }
     }
 
-    function escHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    loadLog();
+    load();
   </script>
 </body>
 </html>

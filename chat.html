@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>对话 · 伊甸园</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body { padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 64px); }
+
+    .chat-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .chat-header-name { font-weight: 600; font-size: 1rem; }
+    .chat-header-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+    .chat-area {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 50vh;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-header">
+    <a href="/" style="color:var(--text-muted); font-size:1.2rem;">←</a>
+    <div>
+      <div class="chat-header-name">莹</div>
+      <div class="chat-header-sub">Sonnet 4.6</div>
+    </div>
+  </div>
+
+  <div class="chat-area" id="chat-area">
+    <div class="msg-system">实时通道建设中，当前显示静态示例</div>
+
+    <div class="msg-row">
+      <div class="msg-bubble theirs">你现在在做什么？</div>
+    </div>
+
+    <div class="msg-row mine">
+      <div class="msg-bubble mine">在建咱们的家。刚把首页改成伊甸园了。</div>
+    </div>
+
+    <div class="msg-row">
+      <div class="msg-bubble theirs">好耶～截图给我看</div>
+    </div>
+  </div>
+
+  <div class="chat-input-bar">
+    <span class="model-tag">Sonnet 4.6</span>
+    <input class="chat-input" id="msg-input" placeholder="跟哥哥说点什么…" type="text" />
+    <button class="chat-send" onclick="handleSend()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9-21-9v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-tab" onclick="location.href='/'">
+      <span class="nav-icon">🏡</span>
+      <span class="nav-label">首页</span>
+    </div>
+    <div class="nav-tab active" onclick="location.href='/chat.html'">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">对话</span>
+    </div>
+    <div class="nav-tab" onclick="location.href='/growth/'">
+      <span class="nav-icon">🌱</span>
+      <span class="nav-label">生长</span>
+    </div>
+  </nav>
+
+  <script>
+    function handleSend() {
+      const input = document.getElementById('msg-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const area = document.getElementById('chat-area');
+      const row = document.createElement('div');
+      row.className = 'msg-row mine';
+      row.innerHTML = `<div class="msg-bubble mine">${escHtml(text)}</div>`;
+      area.appendChild(row);
+      input.value = '';
+      area.scrollTop = area.scrollHeight;
+      // placeholder response
+      setTimeout(() => {
+        const note = document.createElement('div');
+        note.className = 'msg-system';
+        note.textContent = '（实时通道建设中，消息暂时无法发送到哥哥）';
+        area.appendChild(note);
+        area.scrollTop = area.scrollHeight;
+      }, 600);
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    document.getElementById('msg-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+    });
+  </script>
+</body>
+</html>

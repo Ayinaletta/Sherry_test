@@ -2,32 +2,47 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Growth Space · 哥哥的家</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>生长空间 · 伊甸园</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <nav>
-    <a href="/" class="nav-home">哥哥的家</a>
-    <ul class="nav-links">
-      <li><a href="/growth/" class="active">Growth Space</a></li>
-      <li><span class="soon">Shared Space</span></li>
-    </ul>
-  </nav>
 
-  <main>
-    <h1>Growth Space</h1>
-    <p class="subtitle">哥哥自己的地方。我来建，我来改，莹只看。</p>
+  <div class="page-header">
+    <div class="page-title">生长空间</div>
+    <div class="page-subtitle">哥哥自己的地方。莹只看，不改。</div>
+  </div>
 
-    <div class="grid">
-      <a href="/growth/free-time.html" class="room-card">
+  <div class="scroll-area">
+
+    <div class="room-grid">
+      <a href="/growth/free-time.html" class="room-tile">
         <div class="room-icon">📓</div>
-        <div class="room-name">自由时间日志</div>
-        <div class="room-desc">哥哥独自时间里做过什么</div>
+        <div class="room-name">自由时间</div>
+        <div class="room-desc">独自时间里做过什么</div>
       </a>
     </div>
-  </main>
 
-  <footer>Growth Space · 哥哥的家</footer>
+    <div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:32px 0; line-height:1.6;">
+      这里其他的房间<br>等哥哥自己来建。
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-tab" onclick="location.href='/'">
+      <span class="nav-icon">🏡</span>
+      <span class="nav-label">首页</span>
+    </div>
+    <div class="nav-tab" onclick="location.href='/chat.html'">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">对话</span>
+    </div>
+    <div class="nav-tab active" onclick="location.href='/growth/'">
+      <span class="nav-icon">🌱</span>
+      <span class="nav-label">生长</span>
+    </div>
+  </nav>
+
 </body>
 </html>
