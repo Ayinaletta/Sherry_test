@@ -1,0 +1,16 @@
+# /etc/systemd/system/claude-home.service
+# The house server keeps itself alive; nothing about it depends on Telegram.
+[Unit]
+Description=Claude home server (home.279415.xyz)
+After=network-online.target
+
+[Service]
+WorkingDirectory=/root/claude-home
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=3
+StandardOutput=append:/root/claude-home/server.log
+StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target

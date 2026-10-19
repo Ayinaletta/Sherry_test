@@ -214,6 +214,7 @@
       user-select: none;
     }
     .mic-btn.recording { background: #ff5555; }
+    .msg-notice { margin: 8px 16px; padding: 2px 0; }
     /* Date separator */
     .date-sep {
       text-align: center;
@@ -347,7 +348,8 @@
     <span class="model-tag">Sonnet 4.6</span>
     <button class="chat-photo-btn" title="发图片" onclick="document.getElementById('file-input').click()">📷</button>
     <input type="file" id="file-input" accept="image/*" style="display:none">
-    <button class="mic-btn" id="mic-btn" title="按住说话">🎤</button>
+    <button class="mic-btn" id="mic-btn" title="语音转文字（输入框）">🎤</button>
+    <button class="mic-btn" id="rec-btn" title="发语音消息（再点一次发送）">🎙️</button>
     <textarea class="chat-input" id="msg-input" placeholder="跟哥哥说点什么…" rows="1"></textarea>
     <button class="chat-send" style="font-size:1rem;width:32px;background:var(--bg-card);border-radius:8px;color:var(--text-muted);" title="展开输入框" onclick="openExpand()">⛶</button>
     <button class="chat-send" id="send-btn" onclick="handleSend()">
@@ -441,9 +443,14 @@
       // System warning message
       if (from === 'system') {
         const el = document.createElement('div');
-        el.className = 'msg-system-warn';
+        el.className = entry.kind === 'notice' ? 'msg-system msg-notice' : 'msg-system-warn';
         el.dataset.id = entry.id;
-        el.textContent = entry.text ?? '';
+        if (entry.link) {
+          const a = document.createElement('a');
+          a.href = entry.link; a.textContent = entry.text ?? '';
+          a.style.cssText = 'color:inherit;text-decoration:underline dotted';
+          el.appendChild(a);
+        } else el.textContent = entry.text ?? '';
         return el;
       }
 
@@ -454,7 +461,12 @@
 
       let bubbleInner = '';
 
-      if (entry.image_url) {
+      if (entry.audio_url) {
+        // Voice message: audio player + transcript (Whisper for her, the spoken text for me)
+        const t = entry.text ? `<div class="msg-caption">${escHtml(entry.text)}</div>`
+          : (entry.stt_error ? `<div class="msg-caption">（没转成文字）</div>` : '');
+        bubbleInner = `<audio controls preload="none" src="${entry.audio_url}" style="max-width:220px;height:36px"></audio>${t}`;
+      } else if (entry.image_url) {
         // Image message
         const cap = entry.caption ? `<div class="msg-caption">${escHtml(entry.caption)}</div>` : '';
         const pinBtn = `<button class="pin-photo-btn" onclick="pinPhoto('${entry.image_url}')" title="收藏到照片池">📌</button>`;
@@ -898,6 +910,42 @@
     const micBtn = document.getElementById('mic-btn');
     micBtn.addEventListener('click', toggleSTT);
     micBtn.addEventListener('touchend', e => { e.preventDefault(); toggleSTT(); }, { passive: false });
+
+    // Voice message: record -> POST audio -> server runs Whisper -> Claude reads the text
+    const recBtn = document.getElementById('rec-btn');
+    let recorder = null, recChunks = [], recTimer = null;
+    async function toggleRecord() {
+      if (recorder) { recorder.stop(); return; }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg'].find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m));
+        recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+        recChunks = [];
+        recorder.ondataavailable = e => { if (e.data.size) recChunks.push(e.data); };
+        recorder.onstop = async () => {
+          clearTimeout(recTimer);
+          stream.getTracks().forEach(t => t.stop());
+          const type = (recorder.mimeType || mime || 'audio/webm').split(';')[0];
+          recorder = null; recBtn.classList.remove('recording');
+          const blob = new Blob(recChunks, { type });
+          if (blob.size < 1500) return;                    // a tap, not a message
+          recBtn.disabled = true;
+          try {
+            const r = await fetch('/api/voice/upload', { method: 'POST', headers: { 'Content-Type': type }, body: blob });
+            if (!r.ok) throw new Error();
+          } catch {
+            const note = document.createElement('div');
+            note.className = 'msg-system'; note.textContent = '语音发送失败，请重试';
+            area.appendChild(note);
+          }
+          recBtn.disabled = false;
+        };
+        recorder.start();
+        recBtn.classList.add('recording');
+        recTimer = setTimeout(() => recorder && recorder.stop(), 120000);   // 2 min cap
+      } catch { alert('需要麦克风权限才能发语音'); }
+    }
+    recBtn.addEventListener('click', toggleRecord);
 
     // Image send
     // 小小昀 touch status strip

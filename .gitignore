@@ -32,3 +32,10 @@ node_modules/
 
 # python cache
 __pycache__/
+
+# home runtime data
+.claude_key
+events.jsonl
+inbox.jsonl
+reading/
+qr_meta.json

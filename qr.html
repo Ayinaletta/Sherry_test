@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>扫码</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  body { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 28px 16px 40px; min-height: 100vh; }
+  .back { align-self: flex-start; color: var(--text-muted); text-decoration: none; font-size: .85rem; }
+  h1 { font-size: 1.1rem; font-weight: 600; }
+  .frame { background: #fff; padding: 14px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+  .frame img { display: block; width: min(76vw, 300px); height: auto; image-rendering: pixelated; }
+  .frame.old { opacity: .35; filter: grayscale(1); }
+  #timer { font-variant-numeric: tabular-nums; color: var(--text-muted); font-size: .9rem; }
+  #timer.urgent { color: #d9534f; }
+  .hint { color: var(--text-soft); font-size: .8rem; text-align: center; line-height: 1.7; max-width: 300px; }
+</style>
+</head>
+<body>
+<a class="back" href="/">‹ 首页</a>
+<h1 id="label">等昀推一个二维码过来…</h1>
+<div class="frame old" id="frame" style="display:none"><img id="img" alt="二维码"></div>
+<div id="timer"></div>
+<div class="hint" id="hint">昀截好码会自动出现在这里，不用刷新。<br>手机上直接用对应的 App 扫屏幕上的码（同一台手机扫不了，可以长按保存后在 App 里选「相册」）。</div>
+<script>
+let meta = null, tick = null;
+function render() {
+  if (!meta) return;
+  document.getElementById('label').textContent = meta.label;
+  document.getElementById('frame').style.display = '';
+  document.getElementById('img').src = '/api/qr/image?t=' + meta.ts;
+  document.getElementById('hint').style.display = 'none';
+  clearInterval(tick);
+  const update = () => {
+    const left = Math.round(meta.ts / 1000 + meta.ttl - Date.now() / 1000);
+    const t = document.getElementById('timer'), f = document.getElementById('frame');
+    if (left <= 0) { t.textContent = '可能已过期，让昀再截一个'; t.className = 'urgent'; f.classList.add('old'); clearInterval(tick); return; }
+    f.classList.remove('old');
+    t.textContent = `剩余 ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+    t.className = left <= 30 ? 'urgent' : '';
+  };
+  update(); tick = setInterval(update, 1000);
+}
+fetch('/api/qr/current').then(r => r.json()).then(d => { meta = d.qr; render(); }).catch(() => {});
+function live() {
+  const es = new EventSource('/api/events');
+  es.onmessage = m => {
+    const e = JSON.parse(m.data);
+    if (e.type === '扫码') fetch('/api/qr/current').then(r => r.json()).then(d => { meta = d.qr; render(); });
+  };
+  es.onerror = () => { es.close(); setTimeout(live, 3000); };
+}
+live();
+</script>
+</body>
+</html>

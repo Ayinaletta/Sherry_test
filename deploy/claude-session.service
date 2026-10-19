@@ -1,0 +1,16 @@
+# /etc/systemd/system/claude-session.service
+# Keeps Claude Code alive in tmux session "claude-tg" without the Telegram plugin.
+# The house types events into this session (see lib/core.js toClaude).
+[Unit]
+Description=Claude Code tmux session
+After=network-online.target
+
+[Service]
+Type=forking
+User=root
+ExecStart=/root/claude-home/deploy/ensure_session.sh
+ExecStop=/usr/bin/tmux kill-session -t claude-tg
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

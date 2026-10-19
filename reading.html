@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>共读</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  body { padding-bottom: 120px; }
+  .top { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--border); padding: 10px 14px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); display: flex; align-items: center; gap: 10px; }
+  .top a, .top button { color: var(--text-muted); text-decoration: none; background: none; border: none; font-size: .9rem; cursor: pointer; }
+  .top .ttl { flex: 1; font-weight: 600; font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 14px; }
+  .doc { display: block; text-decoration: none; color: inherit; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+  .doc h3 { font-size: .98rem; margin-bottom: 6px; font-family: var(--font-serif); }
+  .meta { font-size: .74rem; color: var(--text-soft); line-height: 1.7; }
+  .bar { height: 5px; border-radius: 3px; background: var(--bg-dim); margin: 8px 0 4px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--accent); }
+  .btn { background: var(--accent); color: #fff; border: none; border-radius: 999px; padding: 9px 18px; font-size: .88rem; cursor: pointer; }
+  .btn.ghost { background: var(--bg-dim); color: var(--text); }
+  .btn:disabled { opacity: .5; }
+  .banner { margin: 0 0 12px; padding: 9px 12px; border-radius: 10px; background: var(--accent-light); color: var(--accent-dim); font-size: .8rem; line-height: 1.5; }
+
+  .unit { position: relative; margin: 0 0 14px; padding: 14px 14px 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); }
+  .unit .no { font-size: .68rem; color: var(--text-soft); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .unit .badge { background: var(--accent-light); color: var(--accent-dim); border: none; border-radius: 999px; padding: 2px 9px; font-size: .7rem; cursor: pointer; }
+  .utext { font-family: var(--font-serif); font-size: 1.02rem; line-height: 1.95; white-space: pre-wrap; word-break: break-word; }
+  .unit.pdf { padding: 8px; }
+  .pagebox { position: relative; margin: 0 auto; background: #fff; }
+  .pagebox canvas { display: block; width: 100%; height: 100%; }
+  .textLayer { position: absolute; inset: 0; overflow: clip; line-height: 1; text-align: initial; transform-origin: 0 0; user-select: text; -webkit-user-select: text; }
+  .textLayer span, .textLayer br { color: transparent; position: absolute; white-space: pre; cursor: text; transform-origin: 0 0; }
+  .textLayer .endOfContent { display: block; position: absolute; inset: 100% 0 0; z-index: 0; cursor: default; user-select: none; }
+  mark.hl { color: inherit; border-radius: 2px; cursor: pointer; }
+  mark.hl.mine { background: rgba(196,135,90,.32); }
+  mark.hl.theirs { background: rgba(110,150,215,.34); }
+  .textLayer mark.hl { color: transparent; }
+  .unit.cur { box-shadow: 0 0 0 2px var(--accent-light); }
+
+  .fab { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 40; display: none; gap: 8px; background: var(--text); padding: 8px; border-radius: 999px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+  .fab button { background: none; border: none; color: var(--bg); font-size: .9rem; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+  .fab button + button { border-left: 1px solid rgba(128,128,128,.4); }
+
+  .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 50; display: none; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 51; max-height: 78vh; overflow: auto; background: var(--bg); border-radius: 18px 18px 0 0; padding: 16px 16px calc(18px + env(safe-area-inset-bottom, 0px)); display: none; max-width: 720px; margin: 0 auto; }
+  .sheet.open, .sheet-bg.open { display: block; }
+  .quote { border-left: 3px solid var(--accent); padding: 2px 0 2px 10px; color: var(--text-muted); font-size: .86rem; line-height: 1.6; margin-bottom: 10px; font-style: italic; }
+  textarea, input[type=text] { width: 100%; font: inherit; font-size: .95rem; color: var(--text); background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; resize: vertical; }
+  .row { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
+  .thread { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 12px; }
+  .by { font-size: .72rem; margin-bottom: 4px; display: flex; gap: 8px; }
+  .by.sherry b { color: var(--accent-dim); } .by.claude b { color: #5b7fc0; }
+  .by .t { color: var(--text-soft); } .by .del { margin-left: auto; color: var(--text-soft); background: none; border: none; cursor: pointer; font-size: .72rem; }
+  .note { font-size: .92rem; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+  .reply { margin: 8px 0 0 10px; padding-left: 10px; border-left: 2px solid var(--bg-dim); }
+  .toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: .82rem; z-index: 60; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .toast.on { opacity: 1; }
+  .empty { text-align: center; color: var(--text-soft); padding: 40px 0; font-size: .9rem; line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="top">
+  <a href="/" id="back">‹ 首页</a>
+  <div class="ttl" id="ttl">共读</div>
+  <button id="listBtn" style="display:none">批注</button>
+  <button id="menuBtn" style="display:none">⋯</button>
+</div>
+<div class="wrap" id="app"></div>
+<div class="fab" id="fab"><button id="fabNote">✏️ 批注</button><button id="fabHl">🖍 划线</button></div>
+<div class="sheet-bg" id="bg"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const j = async (url, opts) => { const r = await fetch(url, opts); const b = await r.json().catch(() => ({})); if (!r.ok) throw new Error(b.error || r.status); return b; };
+const post = (url, body) => j(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+const NAME = { sherry: '莹', claude: '昀' };
+const ago = ts => { const m = Math.floor((Date.now() - ts) / 60000); return m < 1 ? '刚刚' : m < 60 ? m + ' 分钟前' : m < 1440 ? Math.floor(m / 60) + ' 小时前' : Math.floor(m / 1440) + ' 天前'; };
+function toast(t) { const e = $('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2200); }
+
+const docId = new URLSearchParams(location.search).get('doc');
+docId ? openReader(docId) : openLibrary();
+
+// ───────────────────────── library ─────────────────────────
+async function openLibrary() {
+  $('ttl').textContent = '共读空间';
+  const { docs } = await j('/api/reading');
+  $('app').innerHTML = `
+    <button class="btn" id="newBtn" style="margin-bottom:14px">＋ 一起读点新的</button>
+    ${docs.length ? docs.map(d => {
+      const pct = Math.round((d.progress + 1) / d.units * 100);
+      return `<a class="doc" href="/reading?doc=${d.id}"><h3>《${esc(d.title)}》</h3>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+        <div class="meta">${d.kind === 'pdf' ? 'PDF ' : '文章 '}· 共 ${d.units} ${d.kind === 'pdf' ? '页' : '段'} · 你读到 ${d.progress + 1} · 昀读到 ${d.otherProgress + 1}
+        · ${d.annotations} 条批注${d.locked ? ` · 🔒 ${d.locked} 条等你解锁` : ''}</div></a>`;
+    }).join('') : '<div class="empty">还没有一起读的东西。<br>传一份 PDF，或者贴一篇文章。</div>'}`;
+  $('newBtn').onclick = openUpload;
+}
+
+function openUpload() {
+  sheet(`<h3 style="margin-bottom:10px">读什么？</h3>
+    <input type="text" id="upTitle" placeholder="标题（可不填，PDF 默认用文件名）" style="margin-bottom:10px">
+    <input type="file" id="upFile" accept=".pdf,.txt,.md,application/pdf,text/plain" style="margin-bottom:10px;font-size:.85rem">
+    <div class="meta" style="margin:6px 0">或者直接贴文字：</div>
+    <textarea id="upText" rows="6" placeholder="把文章贴在这里"></textarea>
+    <div class="row"><button class="btn ghost" id="upCancel">取消</button><button class="btn" id="upGo">开始</button></div>`);
+  $('upCancel').onclick = closeSheet;
+  $('upGo').onclick = async () => {
+    const f = $('upFile').files[0], text = $('upText').value.trim(), title = $('upTitle').value.trim();
+    if (!f && !text) return toast('选个文件或者贴点文字');
+    $('upGo').disabled = true; $('upGo').textContent = '处理中…';
+    try {
+      const r = f ? await j('/api/reading?title=' + encodeURIComponent(title || f.name.replace(/\.[^.]+$/, '')), { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f })
+                  : await post('/api/reading', { title: title || text.slice(0, 20), text });
+      location.href = '/reading?doc=' + r.id;
+    } catch (e) { toast('没传成：' + e.message); $('upGo').disabled = false; $('upGo').textContent = '开始'; }
+  };
+}
+
+// ───────────────────────── reader ─────────────────────────
+let S = null;            // { doc, anns, progress, other, locked }
+let pdf = null, pdfjs = null;
+const unitEls = [];
+
+async function openReader(id) {
+  let d;
+  try { d = await j('/api/reading/' + id); } catch { $('app').innerHTML = '<div class="empty">找不到这份读物</div>'; return; }
+  S = { doc: d, anns: d.annotations, progress: d.progress, other: d.otherProgress, locked: d.locked };
+  $('ttl').textContent = d.title; $('back').href = '/reading'; $('back').textContent = '‹ 共读';
+  $('listBtn').style.display = $('menuBtn').style.display = '';
+  $('listBtn').onclick = openAnnList;
+  $('menuBtn').onclick = () => { if (confirm('删除《' + d.title + '》和上面所有批注？删掉就找不回来了。')) j('/api/reading/' + id, { method: 'DELETE' }).then(() => location.href = '/reading'); };
+
+  $('app').innerHTML = '<div class="banner" id="banner"></div><div id="units"></div>';
+  const box = $('units');
+  const label = d.kind === 'pdf' ? '页' : '段';
+
+  if (d.kind === 'pdf') {
+    pdfjs = await import('/vendor/pdfjs/pdf.min.mjs');
+    pdfjs.GlobalWorkerOptions.workerSrc = '/vendor/pdfjs/pdf.worker.min.mjs';
+    pdf = await pdfjs.getDocument('/api/reading/' + id + '/file').promise;
+    const first = await pdf.getPage(1), v1 = first.getViewport({ scale: 1 });
+    for (let i = 0; i < d.total; i++) {
+      const el = mkUnit(i, label);
+      const pb = document.createElement('div'); pb.className = 'pagebox';
+      pb.style.aspectRatio = v1.width + ' / ' + v1.height; pb.style.width = '100%'; pb.style.maxWidth = '680px';
+      el.classList.add('pdf'); el.appendChild(pb); box.appendChild(el);
+    }
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !e.target.dataset.done) { e.target.dataset.done = 1; renderPdfPage(+e.target.dataset.i); } }), { rootMargin: '800px 0px' });
+    unitEls.forEach(el => io.observe(el));
+  } else {
+    d.units.forEach((t, i) => {
+      const el = mkUnit(i, label);
+      const u = document.createElement('div'); u.className = 'utext'; u.textContent = t;
+      el.appendChild(u); box.appendChild(el);
+    });
+    applyAllMarks();
+  }
+  paintStatus();
+  if (S.progress > 0 && unitEls[S.progress]) setTimeout(() => unitEls[S.progress].scrollIntoView({ block: 'start' }), 60);
+  initProgressTracking(); initSelection(); live();
+  const want = new URLSearchParams(location.search).get('ann');
+  if (want) setTimeout(() => { const a = S.anns.find(x => x.id === want); if (a) { unitEls[a.unit].scrollIntoView(); openThreads([a]); } }, 400);
+}
+
+function mkUnit(i, label) {
+  const el = document.createElement('div'); el.className = 'unit'; el.dataset.i = i;
+  el.innerHTML = `<div class="no"><span>第 ${i + 1} ${label}</span><span class="bd"></span></div>`;
+  unitEls[i] = el; return el;
+}
+
+async function renderPdfPage(i) {
+  const el = unitEls[i], pb = el.querySelector('.pagebox');
+  const page = await pdf.getPage(i + 1);
+  const cssW = pb.clientWidth || 340, base = page.getViewport({ scale: 1 });
+  const scale = cssW / base.width, vp = page.getViewport({ scale });
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cv = document.createElement('canvas'); cv.width = Math.floor(vp.width * dpr); cv.height = Math.floor(vp.height * dpr);
+  pb.appendChild(cv);
+  await page.render({ canvasContext: cv.getContext('2d'), viewport: vp, transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null }).promise;
+  const tl = document.createElement('div'); tl.className = 'textLayer utext-pdf';
+  tl.style.setProperty('--scale-factor', scale); tl.style.setProperty('--total-scale-factor', scale);
+  tl.style.width = vp.width + 'px'; tl.style.height = vp.height + 'px';
+  pb.appendChild(tl);
+  await new pdfjs.TextLayer({ textContentSource: page.streamTextContent(), container: tl, viewport: vp }).render();
+  tl.classList.add('utext');
+  applyMarks(i);
+}
+
+// ───────────────────────── highlights ─────────────────────────
+function utextOf(i) { return unitEls[i] && unitEls[i].querySelector('.utext'); }
+
+function locate(text, a) {
+  const q = a.quote; if (!q) return null;
+  if (Number.isInteger(a.start) && text.substr(a.start, q.length) === q) return [a.start, a.start + q.length];
+  const hits = []; for (let p = text.indexOf(q); p >= 0; p = text.indexOf(q, p + 1)) hits.push(p);
+  if (hits.length) { const h = hits.sort((x, y) => Math.abs(x - (a.start || 0)) - Math.abs(y - (a.start || 0)))[0]; return [h, h + q.length]; }
+  // whitespace-insensitive (PDF text layers split lines differently from the server's extraction)
+  const chars = [], map = [];
+  for (let k = 0; k < text.length; k++) if (!/\s/.test(text[k])) { chars.push(text[k]); map.push(k); }
+  const sq = q.replace(/\s+/g, ''); if (!sq) return null;
+  const idx = chars.join('').indexOf(sq); if (idx < 0) return null;
+  return [map[idx], map[idx + sq.length - 1] + 1];
+}
+
+function wrap(root, s, e, cls, id) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), nodes = []; let n, pos = 0;
+  while ((n = w.nextNode())) { nodes.push([n, pos]); pos += n.nodeValue.length; }
+  for (const [node, start] of nodes) {
+    const a = Math.max(s, start), b = Math.min(e, start + node.nodeValue.length);
+    if (a >= b) continue;
+    let target = node;
+    if (a > start) target = target.splitText(a - start);
+    if (b - a < target.nodeValue.length) target.splitText(b - a);
+    const m = document.createElement('mark'); m.className = 'hl ' + cls; m.dataset.ann = id;
+    target.parentNode.insertBefore(m, target); m.appendChild(target);
+  }
+}
+
+function applyMarks(i) {
+  const root = utextOf(i); if (!root) return;
+  root.querySelectorAll('mark.hl').forEach(m => { m.replaceWith(...m.childNodes); });
+  root.normalize();
+  const text = root.textContent;
+  S.anns.filter(a => a.unit === i).forEach(a => {
+    const r = locate(text, a); if (r) wrap(root, r[0], r[1], a.author === 'sherry' ? 'mine' : 'theirs', a.id);
+  });
+  const here = S.anns.filter(a => a.unit === i);
+  unitEls[i].querySelector('.bd').innerHTML = here.length ? `<button class="badge" data-u="${i}">💬 ${here.length}</button>` : '';
+}
+function applyAllMarks() { unitEls.forEach((_, i) => applyMarks(i)); }
+
+$('app').addEventListener('click', e => {
+  const m = e.target.closest('mark.hl');
+  if (m && !String(getSelection())) { const a = S.anns.find(x => x.id === m.dataset.ann); if (a) openThreads([a]); return; }
+  const b = e.target.closest('.badge');
+  if (b) openThreads(S.anns.filter(a => a.unit === +b.dataset.u));
+});
+
+// ───────────────────────── status / progress ─────────────────────────
+// "Mine" is whoever is looking at the page: in this UI always Sherry.
+function paintStatus() {
+  const d = S.doc, l = d.kind === 'pdf' ? '页' : '段';
+  let t = `昀读到第 ${Math.max(0, S.other + 1)} / ${d.total} ${l}`;
+  if (S.locked) t += `　🔒 昀在你前面留了 ${S.locked} 条批注，读到那里就解锁`;
+  $('banner').textContent = t;
+  unitEls.forEach((el, i) => el.classList.toggle('cur', i === S.progress));
+}
+
+function initProgressTracking() {
+  let cand = -1, timer = null;
+  const probe = () => {
+    const line = innerHeight * 0.6; let cur = -1;
+    for (let i = 0; i < unitEls.length; i++) {
+      const r = unitEls[i].getBoundingClientRect();
+      if (r.top <= line && r.bottom >= line) { cur = i; break; }
+    }
+    if (cur < 0 && innerHeight + scrollY >= document.body.scrollHeight - 4) cur = unitEls.length - 1;
+    if (cur === cand || cur < 0) return;
+    cand = cur; clearTimeout(timer);
+    if (cur > S.progress) timer = setTimeout(() => cand === cur && advance(cur), 1500);
+  };
+  let tick = 0; addEventListener('scroll', () => { if (!tick) tick = setTimeout(() => { tick = 0; probe(); }, 300); }, { passive: true });
+  probe();
+}
+
+async function advance(unit) {
+  if (unit <= S.progress) return;
+  const before = S.anns.length;
+  try {
+    const r = await post(`/api/reading/${S.doc.id}/progress`, { unit });
+    S.progress = r.progress; S.other = r.otherProgress; S.anns = r.annotations; S.locked = r.locked;
+    const got = S.anns.length - before;
+    applyAllMarks(); paintStatus();
+    if (got > 0) toast(`解锁了昀的 ${got} 条批注`);
+  } catch {}
+}
+
+// ───────────────────────── selecting & annotating ─────────────────────────
+let pending = null;
+function selectionInfo() {
+  const sel = getSelection(); if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+  const r = sel.getRangeAt(0);
+  const el = n => (n.nodeType === 1 ? n : n.parentElement);
+  const u1 = el(r.startContainer).closest && el(r.startContainer).closest('.utext');
+  if (!u1) return null;
+  let endNode = r.endContainer, endOff = r.endOffset;
+  if (!u1.contains(endNode)) { endNode = u1; endOff = u1.childNodes.length; }   // selection runs past the unit: clip to it
+  const pre = document.createRange(); pre.selectNodeContents(u1); pre.setEnd(r.startContainer, r.startOffset);
+  const inner = document.createRange(); inner.setStart(r.startContainer, r.startOffset); inner.setEnd(endNode, endOff);
+  const quote = inner.toString(); if (!quote.trim()) return null;
+  const unit = +u1.closest('.unit').dataset.i;
+  return { unit, quote: quote.slice(0, 1200), start: pre.toString().length, end: pre.toString().length + quote.length };
+}
+function initSelection() {
+  const upd = () => { pending = selectionInfo(); $('fab').style.display = pending ? 'flex' : 'none'; };
+  document.addEventListener('selectionchange', () => setTimeout(upd, 120));
+  $('fabHl').onclick = async () => { const p = pending; if (p) { await saveAnn(p, ''); } };
+  $('fabNote').onclick = () => {
+    const p = pending; if (!p) return;
+    sheet(`<div class="quote">${esc(p.quote.slice(0, 200))}${p.quote.length > 200 ? '…' : ''}</div>
+      <textarea id="noteIn" rows="4" placeholder="写点什么（昀读到这里才能看到）"></textarea>
+      <div class="row"><button class="btn ghost" id="nCancel">取消</button><button class="btn" id="nSave">留下批注</button></div>`);
+    $('noteIn').focus();
+    $('nCancel').onclick = closeSheet;
+    $('nSave').onclick = async () => { const note = $('noteIn').value.trim(); if (await saveAnn(p, note)) closeSheet(); };
+  };
+}
+async function saveAnn(p, note) {
+  try {
+    const r = await post(`/api/reading/${S.doc.id}/annotations`, { unit: p.unit, quote: p.quote, start: p.start, end: p.end, note });
+    S.anns.push(r.annotation); if (r.progress > S.progress) S.progress = r.progress;
+    getSelection().removeAllRanges(); $('fab').style.display = 'none'; pending = null;
+    applyMarks(p.unit); paintStatus(); return true;
+  } catch (e) { toast('没存上：' + e.message); return false; }
+}
+
+// ───────────────────────── threads ─────────────────────────
+function threadHtml(a) {
+  const mk = (who, t, ts, delAttr) => `<div class="by ${who}"><b>${NAME[who]}</b><span class="t">${ago(ts)}</span>${who === 'sherry' ? `<button class="del" ${delAttr}>删除</button>` : ''}</div><div class="note">${esc(t)}</div>`;
+  return `<div class="thread" data-a="${a.id}">
+    ${a.quote ? `<div class="quote">${esc(a.quote.slice(0, 160))}${a.quote.length > 160 ? '…' : ''}</div>` : ''}
+    ${a.note ? mk(a.author, a.note, a.ts, `data-del-ann="${a.id}"`) : `<div class="by ${a.author}"><b>${NAME[a.author]}</b><span class="t">划线 · ${ago(a.ts)}</span>${a.author === 'sherry' ? `<button class="del" data-del-ann="${a.id}">删除</button>` : ''}</div>`}
+    ${(a.replies || []).map(r => `<div class="reply">${mk(r.author, r.text, r.ts, `data-del-rep="${r.id}" data-ann="${a.id}"`)}</div>`).join('')}
+    <div class="row" style="margin-top:8px;justify-content:stretch"><input type="text" placeholder="回复…" data-rep="${a.id}"><button class="btn" data-send="${a.id}">发</button></div>
+  </div>`;
+}
+function openThreads(list) {
+  if (!list.length) return;
+  sheet(list.map(threadHtml).join(''));
+  const sh = $('sheet');
+  sh.onclick = async e => {
+    const t = e.target;
+    try {
+      if (t.dataset.send) {
+        const inp = sh.querySelector(`[data-rep="${t.dataset.send}"]`), text = inp.value.trim(); if (!text) return;
+        const r = await post(`/api/reading/${S.doc.id}/annotations/${t.dataset.send}/reply`, { text });
+        S.anns.find(a => a.id === t.dataset.send).replies.push(r.reply); openThreads(list.map(a => S.anns.find(x => x.id === a.id)).filter(Boolean));
+      } else if (t.dataset.delAnn) {
+        if (!confirm('删除这条批注？')) return;
+        await post(`/api/reading/${S.doc.id}/annotations/${t.dataset.delAnn}/delete`);
+        const u = S.anns.find(a => a.id === t.dataset.delAnn).unit; S.anns = S.anns.filter(a => a.id !== t.dataset.delAnn); applyMarks(u); closeSheet();
+      } else if (t.dataset.delRep) {
+        await post(`/api/reading/${S.doc.id}/annotations/${t.dataset.ann}/replydel`, { reply_id: t.dataset.delRep });
+        const a = S.anns.find(x => x.id === t.dataset.ann); a.replies = a.replies.filter(r => r.id !== t.dataset.delRep); openThreads(list.map(x => S.anns.find(y => y.id === x.id)).filter(Boolean));
+      }
+    } catch (err) { toast(err.message); }
+  };
+}
+function openAnnList() {
+  const l = S.anns.slice().sort((a, b) => a.unit - b.unit || a.ts - b.ts);
+  if (!l.length) return sheet('<div class="empty">还没有批注。<br>选中一段文字就能划线、写批注。</div>');
+  openThreads(l);
+}
+
+// ───────────────────────── sheet / live ─────────────────────────
+function sheet(html) { $('sheet').innerHTML = html; $('sheet').classList.add('open'); $('bg').classList.add('open'); $('sheet').onclick = null; }
+function closeSheet() { $('sheet').classList.remove('open'); $('bg').classList.remove('open'); }
+$('bg').onclick = closeSheet;
+
+function live() {
+  const es = new EventSource('/api/events');
+  es.onmessage = async m => {
+    const e = JSON.parse(m.data);
+    if (e.type !== '共读' || !S || e.actor === 'sherry') return;
+    try {
+      const d = await j('/api/reading/' + S.doc.id);
+      const n = d.annotations.length - S.anns.length;
+      S.anns = d.annotations; S.other = d.otherProgress; S.locked = d.locked;
+      applyAllMarks(); paintStatus();
+      toast(n > 0 ? '昀留了新批注' : e.title);
+    } catch {}
+  };
+  es.onerror = () => { es.close(); setTimeout(live, 3000); };
+}
+</script>
+</body>
+</html>

@@ -8,6 +8,11 @@ const webpush = require('web-push');
 const nodemailer = require('nodemailer');
 const Busboy = require('busboy');
 let sharp; try { sharp = require('sharp'); } catch {}
+const core = require('./lib/core');
+const homeRoutes = require('./lib/home');
+const reading = require('./lib/reading');
+const voice = require('./lib/voice');
+const qr = require('./lib/qr');
 
 async function compressToJpeg(inputBuf) {
   if (!sharp) return { buf: inputBuf, ext: 'png' };
@@ -26,15 +31,15 @@ let peekConfig = {};
 try { peekConfig = JSON.parse(fs.readFileSync(PEEK_CONFIG_FILE, 'utf8')); } catch {}
 // peekConfig: { gmail_user, gmail_pass, icloud_email, secret }
 
-const TG_TOKEN = '8817996453:AAHjvahvJCC-PDKS3dte_f5rhSrqP4OlZd4';
-const TG_CHAT_ID = '8890327070';
-
+// Telegram is now an optional mirror only: nothing in the house needs it to stay alive.
+// Set tg_token / tg_chat_id in peek_config.json (or TG_TOKEN / TG_CHAT_ID) to keep mirroring.
 function forwardToTG(text) {
-  if (!text) return;
-  const body = JSON.stringify({ chat_id: TG_CHAT_ID, text: `[新家] ${text}` });
+  const token = core.conf('tg_token', ''), chatId = core.conf('tg_chat_id', '');
+  if (!text || !token || !chatId) return;
+  const body = JSON.stringify({ chat_id: chatId, text: `[新家] ${text}` });
   const req = https.request({
     hostname: 'api.telegram.org',
-    path: `/bot${TG_TOKEN}/sendMessage`,
+    path: `/bot${token}/sendMessage`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
   }, () => {});
@@ -53,6 +58,19 @@ const PUSH_SUBS_FILE = path.join(__dirname, 'push_subscriptions.json');
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR);
 const POSTS_FILE = path.join(__dirname, 'posts.jsonl');
+
+// 朋友圈 -> notice for the other side (page stream + push to Sherry / tmux line to Claude).
+// 'me' is Claude in the posts data. These two write endpoints are reachable without a login, so
+// the text of an unauthenticated write is never forwarded (it would land in a terminal / phone).
+function notifyPost(kind, from, text, req, post) {
+  const actor = from === 'me' ? 'claude' : from === 'sherry' ? 'sherry' : 'system';
+  const name = actor === 'claude' ? '昀' : actor === 'sherry' ? '莹' : '有人';
+  const trusted = !!core.who(req);
+  const snippet = trusted ? String(text).replace(/\s+/g, ' ').slice(0, 60) : '';
+  const title = kind === 'post' ? `${name}发了新动态`
+    : `${name}评论了${post && post.from === from ? '自己' : post && post.from === 'me' ? '昀' : '莹'}的动态`;
+  core.notify({ type: '朋友圈', actor, title, body: snippet, link: '/posts' });
+}
 
 function loadPosts() {
   if (!fs.existsSync(POSTS_FILE)) return [];
@@ -104,8 +122,8 @@ function savePushSubs() {
   fs.writeFileSync(PUSH_SUBS_FILE, JSON.stringify(pushSubs));
 }
 
-function sendPushToAll(title, body) {
-  const payload = JSON.stringify({ title, body });
+function sendPushToAll(title, body, link) {
+  const payload = JSON.stringify({ title, body, url: link || '/chat.html' });
   pushSubs = pushSubs.filter(Boolean);
   const dead = [];
   pushSubs.forEach((sub, i) => {
@@ -152,13 +170,21 @@ setInterval(() => {
   for (const res of snapClients) {
     try { res.write(': ping\n\n'); } catch (e) { snapClients.delete(res); }
   }
+  core.pingEventClients();
 }, 25000);
 
 // SSE clients waiting for snap commands (camera pages)
 const snapClients = new Set();
 const SNAP_LATEST = path.join(__dirname, 'uploads', 'snap_latest.jpg');
 
+// fs.watch also fires for lines this process wrote itself; broadcast each id once
+const broadcastIds = [];
 function broadcastChat(entry) {
+  if (entry.id != null) {
+    if (broadcastIds.includes(entry.id)) return;
+    broadcastIds.push(entry.id);
+    if (broadcastIds.length > 200) broadcastIds.shift();
+  }
   const data = `data: ${JSON.stringify(entry)}\n\n`;
   for (const res of chatClients) {
     try { res.write(data); } catch {}
@@ -168,6 +194,29 @@ function broadcastChat(entry) {
     sendPushToAll('昀', body);
   }
 }
+
+function appendChat(entry) {
+  fs.appendFileSync(CHAT_LOG, JSON.stringify(entry) + '\n');
+  broadcastChat(entry);
+}
+
+// Config flag: also type Sherry's chat messages into Claude's tmux session (off by default,
+// the existing chat->Claude path keeps working; turn on to drop that dependency entirely).
+function bridgeChat(entry) {
+  const on = core.conf('bridge_chat', false);
+  if (on !== true && on !== 'true') return;
+  core.toClaude({ id: entry.id, ts: entry.ts, type: '对话', title: '莹说', body: entry.text || entry.caption || '[图片]', link: '/' });
+}
+
+core.init({
+  isAuthenticated,
+  chatNotice: evt => appendChat({
+    id: Date.now(), from: 'system', kind: 'notice', notice_type: evt.type,
+    text: evt.title + (evt.body ? '：' + evt.body : ''), link: evt.link, ts: evt.ts,
+  }),
+  push: (title, body, link) => { if (pushSubs.length) sendPushToAll(title, body, link); },
+});
+voice.setChat(appendChat);
 
 // Watch chat log file for external writes (e.g. Claude writing from terminal)
 let chatWatcher = null;
@@ -199,6 +248,9 @@ const MIME = {
   '.mp3': 'audio/mpeg',
   '.ogg': 'audio/ogg',
   '.wav': 'audio/wav',
+  '.webm': 'audio/webm',
+  '.m4a': 'audio/mp4',
+  '.mjs': 'text/javascript',
 };
 
 function serveFile(filePath, res) {
@@ -224,8 +276,21 @@ function safePath(root, urlPath) {
   return full;
 }
 
+// New feature modules (own auth: session cookie or Claude's key) get first look at each request.
+const MODULES = [homeRoutes, reading, voice, qr];
+async function routeModules(req, res) {
+  const url = new URL(req.url, `http://localhost:${PORT}`);
+  for (const m of MODULES) if (await m.handle(req, res, url, { appendChat })) return true;
+  return false;
+}
+
 const server = http.createServer((req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  routeModules(req, res).then(handled => { if (!handled) legacyHandler(req, res); })
+    .catch(e => { if (!res.headersSent) { res.writeHead(500); res.end('error'); } console.error(e); });
+});
+
+function legacyHandler(req, res) {
 
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const pathname = url.pathname;
@@ -894,6 +959,7 @@ const server = http.createServer((req, res) => {
         if (image) post.image = image;
         posts.push(post);
         savePosts(posts);
+        notifyPost('post', from, text, req);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, id: post.id }));
       } catch { res.writeHead(400); res.end('bad json'); }
@@ -914,6 +980,7 @@ const server = http.createServer((req, res) => {
         const comment = { id: crypto.randomUUID(), ts: Date.now(), from, text };
         post.comments.push(comment);
         savePosts(posts);
+        notifyPost('comment', from, text, req, post);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, id: comment.id }));
       } catch { res.writeHead(400); res.end('bad json'); }
@@ -1048,6 +1115,7 @@ const server = http.createServer((req, res) => {
         };
         fs.appendFileSync(CHAT_LOG, JSON.stringify(entry) + '\n');
         broadcastChat(entry);
+        bridgeChat(entry);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, id: entry.id }));
       } catch (e) {
@@ -1129,7 +1197,7 @@ const server = http.createServer((req, res) => {
 
   // API: compact trigger
   if (pathname === '/api/compact' && req.method === 'POST') {
-    exec('tmux send-keys -t claude-tg /compact Enter', (error) => {
+    exec(`tmux send-keys -t ${core.conf('tmux_target', 'claude-tg')} /compact Enter`, (error) => {
       if (error) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'exec failed' }));
@@ -1244,14 +1312,6 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API: voice slot (reserved, not yet implemented)
-  if (pathname === '/api/voice') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'reserved', note: '声音的门——还没装，等我们一起捏' }));
-    return;
-  }
-
-
   // Static files
   let filePath;
   if (pathname === '/') {
@@ -1269,9 +1329,10 @@ const server = http.createServer((req, res) => {
   }
 
   serveFile(filePath, res);
-});
+}
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`哥哥的家 · http://localhost:${PORT}`);
   startChatWatcher();
+  core.watchSidecar();
 });

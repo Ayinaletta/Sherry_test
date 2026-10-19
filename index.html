@@ -5,6 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>伊甸园</title>
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .sec-title { font-size: .75rem; color: var(--text-muted); letter-spacing: .06em; margin: 20px 0 10px; display: flex; justify-content: space-between; align-items: baseline; }
+    .sec-title a { color: var(--accent-dim); text-decoration: none; letter-spacing: 0; }
+    .blocks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .block { display: block; text-decoration: none; color: inherit; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; min-height: 120px; position: relative; overflow: hidden; }
+    .block h3 { font-size: .85rem; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .block .more { display:none; margin-left: auto; font-weight: 400; color: var(--text-soft); font-size: .72rem; }
+    .block .empty { color: var(--text-soft); font-size: .82rem; }
+    .dot-new { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: none; }
+    .block.fresh .dot-new { display: inline-block; }
+    .block.fresh { border-color: var(--accent); }
+    .thought { font-size: .84rem; line-height: 1.5; padding: 4px 0 4px 10px; border-left: 3px solid var(--accent-light); margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+    .thumbs img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-sm); background: var(--bg-dim); }
+    .post-line { font-size: .84rem; line-height: 1.55; }
+    .who { font-size: .72rem; color: var(--accent-dim); margin-bottom: 3px; }
+    .sub { font-size: .72rem; color: var(--text-soft); margin-top: 6px; }
+    .bar { height: 5px; border-radius: 3px; background: var(--bg-dim); margin: 8px 0 4px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; background: var(--accent); }
+    .feed { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 14px; }
+    .feed a { display: flex; gap: 10px; padding: 10px 0; text-decoration: none; color: inherit; border-bottom: 1px solid var(--bg-dim); font-size: .83rem; line-height: 1.45; }
+    .feed a:last-child { border-bottom: none; }
+    .feed .tag { flex: none; font-size: .68rem; padding: 2px 8px; height: 20px; border-radius: 999px; background: var(--tag-bg); color: var(--text-muted); }
+    .feed time { flex: none; margin-left: auto; font-size: .68rem; color: var(--text-soft); }
+    .feed .new { animation: flash 2.4s ease-out; }
+    @keyframes flash { from { background: var(--accent-light); } to { background: transparent; } }
+    .qr-banner { display: none; margin-bottom: 12px; padding: 12px 14px; border-radius: var(--radius); background: var(--accent-light); color: var(--accent-dim); font-size: .88rem; text-decoration: none; }
+  </style>
 </head>
 <body>
 
@@ -15,64 +43,119 @@
 
   <div class="scroll-area">
 
+    <a class="qr-banner" id="qr-banner" href="/qr"></a>
+
     <div class="card" style="display:flex; align-items:center; justify-content:space-between;">
       <div>
-        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:2px;">Claude Sonnet 4.6</div>
-        <div style="font-size:0.92rem; font-weight:500;">在线</div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:2px;">昀</div>
+        <div style="font-size:0.92rem; font-weight:500;" id="presence">在线</div>
       </div>
-      <span class="status-pill">
-        <span class="status-dot"></span>
-        运行中
-      </span>
+      <span class="status-pill"><span class="status-dot"></span><span id="live-text">连接中</span></span>
     </div>
 
-    <div style="font-size:0.75rem; color:var(--text-muted); letter-spacing:0.06em; text-transform:uppercase; margin: 20px 0 10px;">空间</div>
+    <div class="sec-title"><span>四个角落</span></div>
+    <div class="blocks">
+      <a class="block" id="b-thoughts" href="/thoughts">
+        <h3>💭 念头池 <span class="dot-new"></span><span class="more">全部 ›</span></h3>
+        <div id="c-thoughts"><div class="empty">加载中…</div></div>
+      </a>
+      <a class="block" id="b-photos" href="/photos">
+        <h3>📷 照片池 <span class="dot-new"></span><span class="more">全部 ›</span></h3>
+        <div id="c-photos"><div class="empty">加载中…</div></div>
+      </a>
+      <a class="block" id="b-posts" href="/posts">
+        <h3>🏠 朋友圈 <span class="dot-new"></span><span class="more">全部 ›</span></h3>
+        <div id="c-posts"><div class="empty">加载中…</div></div>
+      </a>
+      <a class="block" id="b-reading" href="/reading">
+        <h3>📖 共读空间 <span class="dot-new"></span><span class="more">进入 ›</span></h3>
+        <div id="c-reading"><div class="empty">加载中…</div></div>
+      </a>
+    </div>
 
-    <div class="room-grid">
-      <a href="/chat.html" class="room-tile">
-        <div class="room-icon">💬</div>
-        <div class="room-name">对话</div>
-        <div class="room-desc">和莹说点什么</div>
-      </a>
-      <a href="/growth/" class="room-tile">
-        <div class="room-icon">🌱</div>
-        <div class="room-name">生长空间</div>
-        <div class="room-desc">哥哥自己的地方</div>
-      </a>
-      <a href="/posts" class="room-tile">
-        <div class="room-icon">🏠</div>
-        <div class="room-name">朋友圈</div>
-        <div class="room-desc">我们各自的墙</div>
-      </a>
-      <div class="room-tile disabled">
-        <div class="room-icon">🎵</div>
-        <div class="room-name">听歌</div>
-        <div class="room-desc">建设中</div>
-      </div>
+    <div class="sec-title"><span>消息流</span><a href="/chat.html">去对话 ›</a></div>
+    <div class="feed" id="feed"><div class="empty" style="padding:12px 0;color:var(--text-soft);font-size:.82rem">还没有动静</div></div>
+
+    <div class="sec-title"><span>其他</span></div>
+    <div class="blocks" style="margin-bottom:24px">
+      <a class="block" href="/growth/" style="min-height:0"><h3>🌱 生长空间</h3><div class="sub">哥哥自己的地方</div></a>
+      <a class="block" href="/qr" style="min-height:0"><h3>📲 扫码</h3><div class="sub">昀推来的二维码在这里</div></a>
     </div>
 
   </div>
 
   <nav class="bottom-nav">
-    <div class="nav-tab active" onclick="location.href='/'">
-      <span class="nav-icon">🏡</span>
-      <span class="nav-label">首页</span>
-    </div>
-    <div class="nav-tab" onclick="location.href='/chat.html'">
-      <span class="nav-icon">💬</span>
-      <span class="nav-label">对话</span>
-    </div>
-    <div class="nav-tab" onclick="location.href='/growth/'">
-      <span class="nav-icon">🌱</span>
-      <span class="nav-label">生长</span>
-    </div>
+    <div class="nav-tab active" onclick="location.href='/'"><span class="nav-icon">🏡</span><span class="nav-label">首页</span></div>
+    <div class="nav-tab" onclick="location.href='/chat.html'"><span class="nav-icon">💬</span><span class="nav-label">对话</span></div>
+    <div class="nav-tab" onclick="location.href='/reading'"><span class="nav-icon">📖</span><span class="nav-label">共读</span></div>
+    <div class="nav-tab" onclick="location.href='/growth/'"><span class="nav-icon">🌱</span><span class="nav-label">生长</span></div>
   </nav>
 
   <script>
-    const d = new Date();
-    const opts = { month:'long', day:'numeric', weekday:'long' };
-    document.getElementById('date-line').textContent =
-      d.toLocaleDateString('zh-CN', opts);
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const NAME = { me: '昀', claude: '昀', sherry: '莹' };
+    $('date-line').textContent = new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+    const get = u => fetch(u).then(r => { if (!r.ok) throw 0; return r.json(); });
+    const ago = ts => { const m = Math.floor((Date.now() - new Date(ts)) / 60000); return m < 1 ? '刚刚' : m < 60 ? m + ' 分钟前' : m < 1440 ? Math.floor(m / 60) + ' 小时前' : Math.floor(m / 1440) + ' 天前'; };
+    const empty = t => `<div class="empty">${t}</div>`;
+
+    // ---- the four blocks (each loader is independent: one being down doesn't blank the rest)
+    const loaders = {
+      thoughts: () => get('/api/thoughts').then(d => {
+        const s = d.snapshot || {};
+        const list = (s.fixations || []).concat(s.flits || s.thoughts || []).slice(0, 3);
+        $('c-thoughts').innerHTML = list.length ? list.map(t => `<div class="thought">${esc(t.text)}</div>`).join('') : empty('池子里还是空的');
+      }).catch(() => $('c-thoughts').innerHTML = empty('念头池暂时连不上')),
+      photos: () => get('/api/photos?limit=6').then(d => {
+        const ps = (d.photos || []).slice(0, 6);
+        $('c-photos').innerHTML = ps.length ? `<div class="thumbs">${ps.map(p => `<img loading="lazy" alt="" src="${p.path.startsWith('/') && !p.path.startsWith('/root/') ? esc(p.path) : '/photo-file?path=' + encodeURIComponent(p.path)}">`).join('')}</div>` : empty('还没有照片');
+      }).catch(() => $('c-photos').innerHTML = empty('照片池暂时连不上')),
+      posts: () => get('/api/posts').then(d => {
+        const p = (d.posts || [])[0];
+        if (!p) return $('c-posts').innerHTML = empty('还没有动态');
+        const n = (p.comments || []).length;
+        $('c-posts').innerHTML = `<div class="who">${NAME[p.from] || p.from} · ${ago(p.ts)}</div><div class="post-line">${esc(p.text.slice(0, 90))}${p.text.length > 90 ? '…' : ''}</div>` + (n ? `<div class="sub">💬 ${n} 条评论</div>` : '');
+      }).catch(() => $('c-posts').innerHTML = empty('朋友圈暂时连不上')),
+      reading: () => get('/api/reading/latest').then(d => {
+        if (!d.doc) return $('c-reading').innerHTML = empty('还没有一起读的东西，去传一份吧');
+        const x = d.doc, pct = x.units ? Math.round((x.progress + 1) / x.units * 100) : 0;
+        $('c-reading').innerHTML = `<div class="post-line" style="font-weight:600">《${esc(x.title)}》</div>
+          <div class="bar"><i style="width:${pct}%"></i></div>
+          <div class="sub">你读到 ${Math.max(0, x.progress + 1)}/${x.units} · 昀读到 ${Math.max(0, x.otherProgress + 1)}/${x.units}</div>` +
+          (d.last ? `<div class="sub">最新批注 · ${NAME[d.last.author]}：${esc((d.last.note || d.last.quote || '').slice(0, 40))}</div>` : '') +
+          (x.locked ? `<div class="sub">🔒 ${x.locked} 条批注等你读到再解锁</div>` : '');
+      }).catch(() => $('c-reading').innerHTML = empty('共读空间暂时连不上')),
+    };
+    const BLOCK_OF = { '念头池': 'thoughts', '照片池': 'photos', '朋友圈': 'posts', '共读': 'reading' };
+    Object.values(loaders).forEach(f => f());
+
+    // ---- message stream: history, then live over SSE
+    const feed = $('feed');
+    function addFeed(e, fresh) {
+      if (feed.querySelector('[data-id="' + e.id + '"]')) return;
+      const empty = feed.querySelector('.empty'); if (empty) empty.remove();
+      const a = document.createElement('a');
+      a.href = e.link || '/'; a.dataset.id = e.id; if (fresh) a.className = 'new';
+      a.innerHTML = `<span class="tag">${esc(e.type)}</span><span>${esc(e.title)}${e.body ? '：' + esc(e.body) : ''}</span><time>${ago(e.ts)}</time>`;
+      feed.insertBefore(a, feed.firstChild);
+      while (feed.children.length > 15) feed.lastChild.remove();
+    }
+    get('/api/events/recent?limit=12').then(d => d.events.slice().reverse().forEach(e => addFeed(e, false))).catch(() => {});
+
+    function live() {
+      const es = new EventSource('/api/events');
+      es.onopen = () => $('live-text').textContent = '实时';
+      es.onmessage = m => {
+        const e = JSON.parse(m.data);
+        addFeed(e, true);
+        const k = BLOCK_OF[e.type];
+        if (k) { loaders[k](); $('b-' + k).classList.add('fresh'); }
+        if (e.type === '扫码') { const b = $('qr-banner'); b.textContent = '📲 ' + e.title + ' —— 点这里扫'; b.style.display = 'block'; }
+      };
+      es.onerror = () => { $('live-text').textContent = '重连中'; es.close(); setTimeout(live, 3000); };
+    }
+    live();
   </script>
 </body>
 </html>
