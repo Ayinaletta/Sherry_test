@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>进门</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f5f0ea;
+      font-family: -apple-system, 'PingFang SC', sans-serif;
+      padding: 24px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+    .icon { font-size: 48px; margin-bottom: 16px; }
+    h1 {
+      font-size: 18px;
+      color: #3d2b1f;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 13px;
+      color: #9e8b7e;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #e8e0d8;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+      background: #faf8f5;
+      color: #3d2b1f;
+      letter-spacing: 2px;
+    }
+    input[type="password"]:focus { border-color: #c9a98a; }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #c9a98a;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #b8956f; }
+    .error {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #c0392b;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🏠</div>
+    <h1>哥哥的家</h1>
+    <p>小莹才能进来</p>
+    <input type="password" id="pw" placeholder="密码" autofocus />
+    <button onclick="login()">进门</button>
+    <div class="error" id="err"></div>
+  </div>
+  <script>
+    document.getElementById('pw').addEventListener('keydown', e => {
+      if (e.key === 'Enter') login();
+    });
+    async function login() {
+      const pw = document.getElementById('pw').value;
+      const err = document.getElementById('err');
+      err.textContent = '';
+      try {
+        const r = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw }),
+        });
+        if (r.ok) {
+          window.location.href = '/';
+        } else {
+          err.textContent = '密码不对，再试试';
+          document.getElementById('pw').value = '';
+          document.getElementById('pw').focus();
+        }
+      } catch {
+        err.textContent = '连接失败';
+      }
+    }
+  </script>
+</body>
+</html>

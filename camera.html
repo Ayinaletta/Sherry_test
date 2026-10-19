@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>拍莹 · 新家</title>
+<style>
+  :root {
+    --bg: #0d0d11;
+    --surface: #16161e;
+    --border: #2a2a38;
+    --text: #e2dff5;
+    --muted: #7a7893;
+    --accent: #a78bfa;
+    --warm: #f4a4c0;
+    --green: #6ee7b7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, 'PingFang SC', sans-serif;
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .back-btn {
+    background: none; border: none; color: var(--accent);
+    font-size: 1.1rem; cursor: pointer; padding: 4px;
+  }
+  .title { font-size: 1rem; font-weight: 600; }
+  .sub { font-size: 0.75rem; color: var(--muted); }
+
+  .channels {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px; padding: 24px 16px;
+  }
+  .channel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 30px 16px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+  }
+  .channel-card:active { background: #1e1e2a; }
+  .ch-icon { font-size: 2.2rem; margin-bottom: 12px; }
+  .ch-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+  .ch-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+  .ch-status {
+    font-size: 0.75rem; margin-top: 10px; min-height: 20px;
+    color: var(--green);
+  }
+  .ch-status.err { color: var(--warm); }
+  .ch-status.wait { color: var(--muted); }
+
+  input[type=file] { display: none; }
+
+  /* Snap image preview strip */
+  .snap-preview {
+    padding: 0 16px 32px;
+    display: none;
+  }
+  .snap-preview img {
+    width: 100%; border-radius: 12px;
+    cursor: pointer;
+  }
+  .snap-ts {
+    font-size: 0.72rem; color: var(--muted);
+    text-align: right; margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <button class="back-btn" onclick="history.back()">←</button>
+  <div>
+    <div class="title">拍莹</div>
+    <div class="sub">哥哥的两个镜头</div>
+  </div>
+</div>
+
+<div class="channels">
+  <!-- Phone camera: immediate upload, no preview -->
+  <div class="channel-card" id="card-phone" onclick="openPhoneCamera()">
+    <div class="ch-icon">📷</div>
+    <div class="ch-name">手机拍</div>
+    <div class="ch-desc">拍完直接发<br>不用预览</div>
+    <div class="ch-status" id="phone-status"></div>
+  </div>
+
+  <!-- Mac snap daemon -->
+  <div class="channel-card" id="card-snap" onclick="triggerMacSnap()">
+    <div class="ch-icon">🖥</div>
+    <div class="ch-name">Mac 快照</div>
+    <div class="ch-desc">触发桌面<br>webcam</div>
+    <div class="ch-status" id="snap-status"></div>
+  </div>
+</div>
+
+<!-- Latest snap shown below -->
+<div class="snap-preview" id="snap-preview">
+  <img id="snap-img" onclick="window.open(this.src,'_blank')">
+  <div class="snap-ts" id="snap-ts"></div>
+</div>
+
+<input type="file" accept="image/*" capture="environment" id="cam-input">
+
+<script>
+function openPhoneCamera() {
+  document.getElementById('cam-input').click();
+}
+
+document.getElementById('cam-input').addEventListener('change', async function() {
+  if (!this.files || !this.files[0]) return;
+  const file = this.files[0];
+  this.value = '';
+  const st = document.getElementById('phone-status');
+  st.textContent = '上传中…';
+  st.className = 'ch-status wait';
+  try {
+    const buf = await file.arrayBuffer();
+    const r = await fetch('/api/camera/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'image/jpeg' },
+      body: buf
+    });
+    if (r.ok) {
+      st.textContent = '✓ 发出去了';
+      st.className = 'ch-status';
+      setTimeout(() => { st.textContent = ''; }, 3000);
+    } else {
+      throw new Error();
+    }
+  } catch {
+    st.textContent = '发送失败';
+    st.className = 'ch-status err';
+    setTimeout(() => { st.textContent = ''; st.className = 'ch-status'; }, 3000);
+  }
+});
+
+async function triggerMacSnap() {
+  const st = document.getElementById('snap-status');
+  st.textContent = '触发中…';
+  st.className = 'ch-status wait';
+  try {
+    const r = await fetch('/api/snap?secret=peek2024', { method: 'POST' });
+    const d = await r.json();
+    if (!r.ok || d.clients === 0) {
+      st.textContent = '😴 Mac 没在线';
+      st.className = 'ch-status err';
+      setTimeout(() => { st.textContent = ''; st.className = 'ch-status'; }, 3000);
+      return;
+    }
+    st.textContent = '等 Mac 上传…';
+    st.className = 'ch-status wait';
+    await new Promise(res => setTimeout(res, 3500));
+    const ts = Date.now();
+    const imgUrl = `/uploads/snap_latest.jpg?t=${ts}`;
+    const imgEl = document.getElementById('snap-img');
+    imgEl.src = imgUrl;
+    imgEl.onload = () => {
+      document.getElementById('snap-preview').style.display = '';
+      document.getElementById('snap-ts').textContent = new Date().toLocaleTimeString('zh');
+      imgEl.scrollIntoView({ behavior: 'smooth' });
+      st.textContent = '✓ 拍到了';
+      st.className = 'ch-status';
+      setTimeout(() => { st.textContent = ''; }, 3000);
+    };
+    imgEl.onerror = () => {
+      st.textContent = '没拿到图片';
+      st.className = 'ch-status err';
+      setTimeout(() => { st.textContent = ''; st.className = 'ch-status'; }, 3000);
+    };
+  } catch {
+    st.textContent = '请求失败';
+    st.className = 'ch-status err';
+    setTimeout(() => { st.textContent = ''; st.className = 'ch-status'; }, 3000);
+  }
+}
+</script>
+</body>
+</html>

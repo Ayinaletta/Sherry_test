@@ -1,0 +1,2184 @@
+<!doctype html><html><head><!-- frame-runtime --><script>window.__FRAME_PREAMBLE={"v":1,"capabilities":{"artifact":"artifact.BB12_bB_.js","assets":"assets.8Gk803W0.js","comments":"comments.hEoja5zd.js","db":"db.DoKNwgX8.js","downloads":"downloads.th1YuAIk.js","embed":"embed.eqL6deQM.js","endpoints":"endpoints.CooJFPzL.js","mcp":"mcp.Ch3NPscy.js","network":"network.B5UA9Su4.js","permissions":"permissions.BNySkLV5.js","room":"room.Dc3WDo3b.js","sample":"sample.C2869FGz.js","self":"artifact.BB12_bB_.js","user":"user.BpKav-Rf.js"},"transforms":"_transforms.CFvxlJPo.js","comments":"_comments.CZyY2kKd.js","translate":"_translate.5HCW4BJh.js","ldx":"_ldx.DN_oVYra.js"}                                                                                                                                                                                                                                                                                        </script><script>(function(){"use strict";var St=["light","dark","system"],At=/^[A-Za-z0-9_-]{1,64}$/,$e=/^[a-zA-Z_:][a-zA-Z0-9_:.-]{0,127}$/,kt=new Set(["class","hidden","value","checked","style","title","alt","placeholder","lang","dir","role","tabindex","disabled","readonly","contenteditable","open","colspan","rowspan"]);function Tt(t){const e=t.toLowerCase();return e.startsWith("data-")||e.startsWith("aria-")||kt.has(e)}var Xe="data-ldx-props";function Rt(t,e){if(e.toLowerCase()===Xe)return!0;const n=t.getAttribute(Xe);if(n===null)return!1;try{const o=JSON.parse(n);if(o===null||typeof o!="object"||Array.isArray(o))return!0;const l=e.toLowerCase();return Object.keys(o).some(a=>a.toLowerCase()===l)}catch{return!0}}var Dr="http://www.w3.org/1999/xhtml",Ot="http://www.w3.org/2000/svg",Lt=new Set(["script","style","iframe","noscript","noframes","noembed","xmp","plaintext","template","title","textarea","object","embed"]),Pt=new Set(["script","style"]);function Mt(t){const e=t.localName.toLowerCase();return t.namespaceURI==="http://www.w3.org/1999/xhtml"?!Lt.has(e):t.namespaceURI===Ot?!Pt.has(e):!1}function ke(t,e){return t===e||(t===160||t===32)&&(e===160||e===32)}function Nt(t,e){const n=t.length,o=e.length;let l=0;for(;l<n&&l<o&&ke(t.charCodeAt(l),e.charCodeAt(l));)l++;let a=0;for(;a<n-l&&a<o-l&&ke(t.charCodeAt(n-1-a),e.charCodeAt(o-1-a));)a++;return{p:l,s:a}}function Ct(t,e){const n=t.firstChild;if(t.childNodes.length!==1||n===null||n.nodeType!==Node.TEXT_NODE){t.textContent=e;return}const o=n.data,l=o.length,a=e.length,{p:f,s:d}=Nt(o,e);f===l&&d===0&&l===a||n.replaceData(f,l-f-d,e.slice(f,a-d));const _=n.data,m=t.ownerDocument.getSelection?.()??null,y=m!==null&&m.rangeCount>0&&(m.anchorNode===n||m.focusNode===n)?{anchor:m.anchorNode,anchorOffset:m.anchorOffset,focus:m.focusNode,focusOffset:m.focusOffset}:null;let A=-1,p=-1;for(let w=0;w<_.length&&w<e.length;w++){const R=_.charCodeAt(w),L=e.charCodeAt(w);R!==L&&ke(R,L)&&(A<0&&(A=w),p=w)}const v=A>=0;if(v&&n.replaceData(A,p-A+1,e.slice(A,p+1)),v&&y!==null&&y.anchor!==null&&y.focus!==null)try{m.setBaseAndExtent(y.anchor,y.anchorOffset,y.focus,y.focusOffset)}catch{}}var jt=new Set(["html","head","body","frameset"]);function It(t){return t.namespaceURI==="http://www.w3.org/1999/xhtml"&&jt.has(t.localName)}function xt(t){if(t===null||typeof t!="object")return!1;const e=t;if(typeof e.target!="string"||!At.test(e.target)||e.text!==void 0&&typeof e.text!="string")return!1;if(e.attrsSet!==void 0){if(e.attrsSet===null||typeof e.attrsSet!="object")return!1;for(const[n,o]of Object.entries(e.attrsSet))if(!$e.test(n)||typeof o!="string")return!1}if(e.attrsRemoved!==void 0){if(!Array.isArray(e.attrsRemoved))return!1;for(const n of e.attrsRemoved)if(typeof n!="string"||!$e.test(n))return!1}return!0}function Ft(t,e){if(t===null||typeof t!="object")return!1;const{seq:n,elements:o}=t;if(typeof n!="number"||!Number.isSafeInteger(n)||!Array.isArray(o)||o.length===0||o.length>64)return!1;for(let l=0;l<o.length;l++)if(!e(o[l]))return!1;return!0}function Dt(t){return t===null||typeof t!="object"?!1:Ft(t.__frame_patch,xt)}function Ht(t){if(t===null||typeof t!="object")return!1;const e=t.__frame_init;return e!==null&&typeof e=="object"}function qt(t){return t!==null&&typeof t=="object"&&t.__frame_size_poke===!0}function Bt(t){if(t===null||typeof t!="object")return!1;const e=t.__frame_host_visible;return e!==null&&typeof e=="object"&&typeof e.visible=="boolean"}function Ut(t){if(t===null||typeof t!="object")return!1;const e=t.__frame_theme;if(e===null||typeof e!="object")return!1;const n=e.theme;return typeof n=="string"&&St.includes(n)}var zt=["ok","empty","snapshot_error","snapshot_timeout","unclonable","oversize","unavailable","restore_error","withheld"],Kt=["TypeError","RangeError","ReferenceError","SyntaxError","DataCloneError","QuotaExceededError","AbortError","TimeoutError","SecurityError","Error","other"];function Wt(t){return typeof t=="string"&&Kt.includes(t)?t:"other"}var $t=Object.freeze({until:null,now:!1}),Xt="__claude_hot",Yt="__claude_hot_in",Gt=/^__claude_hot(?:_in)?(?::|$)/,Ye=/^[0-9a-z]{1,32}$/,Te=t=>t===void 0?Xt:"__claude_hot:"+t,ne=t=>t===void 0?Yt:"__claude_hot_in:"+t;function Vt(t){let e=null;try{e=H(JSON.parse(t)?.hot)}catch{return null}return e===null||typeof e.k!="string"||!Ye.test(e.k)?null:oe(e.g)?{k:e.k,g:e.g}:{k:e.k}}var Hr=262144,Jt=3e3,Ge=/^[a-z0-9._:-]{1,64}$/,Zt=["none","hot-restart","hard-reload"],Qt=["asset","doc","added","removed"],er=1500,tr=/^[0-9a-f]{64}$/;function H(t){return t!==null&&typeof t=="object"?t:null}function oe(t){return typeof t=="number"&&Number.isInteger(t)&&t>=0&&t<2**31}function Ve(t){return t===void 0||typeof t=="number"&&Number.isFinite(t)}function rr(t){return t===void 0||typeof t=="string"&&Ge.test(t)}function Je(t){const e=H(t);return e!==null&&(e.until===null||typeof e.until=="number"&&Number.isFinite(e.until))&&typeof e.now=="boolean"}function Re(t){const e=H(t);return e!==null&&typeof e.ver=="string"&&e.ver.length<=128&&Ve(e.seq)&&typeof e.handoff=="string"&&zt.includes(e.handoff)&&rr(e.note)}function nr(t){const e=H(t);return e!==null&&oe(e.gen)&&(e.phase==="final"||e.phase==="pending")&&(e.from===null||Re(e.from))}function or(t){const e=H(t);return e!==null&&e.kv===1&&oe(e.gen)&&Re(e.from)&&Object.hasOwn(e,"data")}function ar(t){const e=H(t);return e!==null&&e.__frame_hot_snapshot===!0&&oe(e.gen)&&typeof e.timeoutMs=="number"&&e.timeoutMs>=0&&e.timeoutMs<=6e4&&(e.handoff===void 0||typeof e.handoff=="boolean")&&(e.deadline===void 0||Je(e.deadline))&&Ve(e.seq)&&(e.note===void 0||typeof e.note=="string")&&(e.key===void 0||typeof e.key=="string")}function lr(t){const e=H(t);return e!==null&&e.__frame_hot_start===!0&&oe(e.gen)&&Re(e.from)}function Ze(t){const e=H(t);return e!==null&&typeof e.ver=="string"&&e.ver.length<=128&&Number.isFinite(e.seq)}function Qe(t){if(t==null||typeof t=="string")return!0;const e=H(t);return e!==null&&typeof e.doc=="string"&&typeof e.profile=="string"}function sr(t){const e=H(t);return e!==null&&typeof e.path=="string"&&Qt.includes(e.kind)&&Qe(e.from)&&Qe(e.to)}function ir(t){return t===null?null:Object.freeze(t.filter(sr))}function cr(t){const e=H(t);return e!==null&&e.__frame_hot_update===!0&&Number.isFinite(e.id)&&Ze(e.from)&&Ze(e.to)&&(e.changed===null||Array.isArray(e.changed))&&Zt.includes(e.required)&&Je(e.deadline)&&typeof e.verdictTimeoutMs=="number"&&e.verdictTimeoutMs>=0&&e.verdictTimeoutMs<=6e4&&(e.preflight===void 0||typeof e.preflight=="string"&&tr.test(e.preflight))}var V=/^[\w.-]+\.js$/;function ur(t,e,n){return n?"inert":typeof e=="string"&&V.test(e)?t?[e]:"inert":t?"inert":"framed"}var et=Object.freeze({[Symbol("claude.hot.restart")]:!0});function tt(t,e){let n;try{n=t??sessionStorage}catch{return null}const o=Te(e?.k),l=ne(e?.k);let a=null;try{a=n.getItem(o)}catch{}try{n.removeItem(o)}catch{}try{const d=[];for(let _=0;_<n.length;_++){const m=n.key(_);m!==null&&m!==l&&Gt.test(m)&&d.push(m)}for(const _ of d)n.removeItem(_)}catch{}let f=null;if(a!==null&&!(e!==null&&e.g===void 0))try{const d=JSON.parse(a);or(d)&&(e===null||d.gen===e.g)&&(f=d)}catch{}if(f===null)try{n.removeItem(l)}catch{}return f}function fr(){const t=/^\/_f\/([^/]{1,128})\//.exec(location.pathname);return t?t[1]:""}var de="{}";function ae(t){if(!t)return null;const e={ver:t.ver,handoff:t.handoff};return t.seq!==void 0&&(e.seq=t.seq),t.note!==void 0&&(e.note=t.note),e}function rt(t,e){return t!==null&&t.note===void 0&&e?.note!==void 0?{...t,note:e.note}:t}function nt(t){const e=t?.k;return e!==null&&typeof e=="object"?e:void 0}function dr(t,e,n,o=null){const l=setTimeout,a=clearTimeout,f=queueMicrotask,d=performance.now.bind(performance),_=new TextEncoder,m=fr();let y=null;try{y=sessionStorage}catch{}const A={storage:y,fetch:typeof fetch=="function"?fetch.bind(globalThis):null,entry:location.origin+location.pathname+location.search,ver:m,key:o?.k};let p=o?.k;const v=typeof requestAnimationFrame=="function"?requestAnimationFrame:r=>l(()=>r(d()),16);let w=e?.data??{},R=ae(e?.from),L=e?.gen??0,h=e!==null,k=!1,b=!1,j=null,le=!1;const se=new AbortController;let ie=null,I=null,Z=null,ge=!1,ce=()=>{};const s=new Promise(r=>{ce=r});let g=!1,E=!1,x=!1,N,T=null,P=!1,Q=!1;const ue=r=>{for(const i of[Te(r),ne(r)])try{y?.removeItem(i)}catch{}},F=(r,i)=>{try{i!==null&&n.post(r,i)}catch{}},u=()=>{const r={__frame_hot:!0,ready:I!==null,accept:Z!==null};g&&(r.readData=!0),x&&(r.threw=!0),T?.assess&&(r.preflight=!0),F(r,j)};let ee=!1,K=!1,B=!1,te=!1;const U=()=>{ee||!le||B||(ee=!0,F({__frame_reveal_hold:!0},"*"))},we=()=>new Promise(r=>{let i,c=0;const S=C=>{if(i===void 0)i=C;else if(C!==i||++c>=8){r();return}try{v(S)}catch{r()}};try{v(S)}catch{r()}}),pt=()=>{B=!0,F({__frame_reveal_ready:!0},"*")},He=r=>{K||(K=!0,r.then(i=>i===!1?void 0:we().then(pt)))},Mr=()=>{te||!B||(te=!0,we().then(pt))},be=(r=!1)=>{if(ge||I===null||!h||!b)return;ge=!0;const i=I,c=w;f(()=>{let S=!1;try{i(c),S=!0}finally{ce(S)}}),He(r?s:n.dcl.then(()=>s))},Ee=r=>typeof r=="string"&&Ge.test(r)?r:void 0,mt=r=>{const i={__frame_hot_restart:!0},c=Ee(r?.note);c!==void 0&&(i.note=c),r?.required==="hard-reload"&&(i.required="hard-reload"),F(i,j)},_t=Object.freeze({get data(){return b||(E=!0),!h&&!g&&(g=!0,b&&u()),w},get from(){return R},get gen(){return L},signal:se.signal,snapshot(r){typeof r=="function"&&(ie=r)},ready(r){typeof r!="function"||I!==null||(I=r,U(),u(),k&&F({__frame_hot_ready:!0,gen:L},j),be())},accept(r){typeof r=="function"&&(Z=r,u())},restart(r){const i={note:r?.note,required:r?.required};if(b){mt(i);return}const c=N;N={note:Ee(c?.note)??i.note,required:c?.required==="hard-reload"||i.required==="hard-reload"?"hard-reload":void 0}}});let Se=null,yt=()=>{};const Nr=new Promise(r=>{yt=r});let Cr=null;const vt=()=>Cr??=n.dcl.then(()=>{let r=!1;try{r=Se!==null&&Se.expect()}catch{}if(!r)return;const i=Se.maxMs;return new Promise(c=>{Nr.then(c),l(c,i)})}),gt=()=>{if(!P||Q||T===null)return;Q=!0;const r=T;vt().then(()=>{try{B||r.afterStart(nt(e),!1)}catch{}})},wt=r=>{e!==null&&E&&(g=!0),w={},R=null,L=0;try{y?.removeItem(ne(o?.k))}catch{}e!==null&&!r&&He(n.dcl.then(()=>I!==null?s:void 0))},jr=()=>{P=!0,He(vt().then(()=>I!==null?s:void 0)),gt()};try{addEventListener("error",()=>{x||I!==null||(x=!0,u())})}catch{}let W=-1,qe,Be,fe=!0,Ue=!1,ze,Ae=null;const Ke=r=>{const i=Ae===null;Ae=fe&&r[0]!=="withheld"?r:["withheld",r[1],de];let c=r[0];if(fe&&c!=="withheld"){const C={ver:m,handoff:c};qe!==void 0&&(C.seq=qe),Be!==void 0&&(C.note=Be);try{if(y===null)throw new Error("no storage");y.setItem(Te(p),'{"kv":1,"gen":'+W+',"from":'+JSON.stringify(C)+(ze!==void 0?',"k":'+JSON.stringify(ze):"")+',"data":'+(c==="ok"?r[2]:de)+"}")}catch{c="unavailable"}}else{c="withheld",ue(p);try{T?.release?.()}catch{}}const S={__frame_hot_snapshotted:!0,gen:W,handoff:c,bytes:r[1]};if(r[3]!==void 0&&(S.errName=r[3]),F(S,j),i&&(c==="snapshot_error"||c==="unclonable"||c==="oversize"))try{console.warn("claude.hot: snapshot",c,r[3])}catch{}},bt=r=>{try{return Wt(r?.name)}catch{return"other"}},re=(r,i,c=0)=>Ke(i===void 0?[r,c,de]:[r,c,de,bt(i)]),Ir=r=>{if(r.gen<=W)return;const i=W>=0;if(W=r.gen,qe=r.seq,Be=Ee(r.note),typeof r.key=="string"&&Ye.test(r.key)&&r.key!==p&&(ue(p),p=r.key),fe&&=r.handoff!==!1,i){Ae!==null?Ke(Ae):Ue&&F({__frame_hot_held:!0,gen:W},j);return}se.abort();const c=Object.freeze({handoff:fe,timeoutMs:r.timeoutMs,deadline:r.deadline??$t}),S=ie,C=()=>{if(fe)try{ze=T?.capture()}catch{}if(S===null){re("empty");return}let D=!1;const $=l(()=>{D||(D=!0,re("snapshot_timeout"))},Math.max(0,c.timeoutMs));Promise.resolve().then(()=>S(c)).then(X=>{if(D)return;D=!0,a($);let Y;try{Y=JSON.stringify(X)}catch(G){re("unclonable",G);return}if(typeof Y!="string"){re("unclonable");return}let M=Y.length;try{M=_.encode(Y).length}catch{}if(M>262144){re("oversize",void 0,M);return}Ke(["ok",M,Y])},X=>{D||(D=!0,a($),re("snapshot_error",X))})};let z=null;try{z=T?.holdForIme()??null}catch{}if(z===null)C();else{Ue=!0,F({__frame_hot_held:!0,gen:W},j);const D=()=>{Ue=!1,C()};z.then(D,D)}},xr=r=>{if(!k||h||I===null||r.gen!==L)return;let i=null;try{i=tt(y,o&&{k:o.k,g:r.gen})}catch{}if(i!==null&&i.gen!==r.gen){i=null;try{y?.removeItem(ne(o?.k))}catch{}}w=i?.data??{},R=rt(ae(i?.from??r.from),ae(r.from)),i!==null&&(L=i.gen),h=!0,k=!1,be(!0);const c=nt(i);s.then(S=>{try{S&&T?.afterStart(c,!0)}catch{}})};let We=0;const Fr=r=>{const i=Z;if(i===null||r.id<=We)return;We=r.id;const c=T?.assess;if(r.preflight===void 0||c===void 0){Et(r,i);return}let S=!1;const C=$=>{S||(S=!0,a(D),r.id===We&&Et(r,i,$))},z=()=>C(c.timeout(r)),D=l(z,er+100);c.run(r,window).then(C,z)},Et=(r,i,c)=>{let S,C=!1;const z=Object.freeze({from:{ver:r.from.ver,seq:r.from.seq},to:{ver:r.to.ver,seq:r.to.seq},changed:ir(r.changed),required:r.required,deadline:r.deadline,restart(M){return S??=Ee(M?.note),C||=M?.required==="hard-reload",et},...c?.update}),D=M=>{const G={__frame_hot_verdict:!0,id:r.id};M==="applied"||M==="deferred"?G.verdict=M:M===et&&(G.verdict="restart",C&&(G.required="hard-reload"),S!==void 0&&(G.note=S)),F(Object.assign(G,c?.verdict),j)};let $=!1;const X=M=>$?!1:($=!0,a(Y),D(M),!0),Y=l(X,r.verdictTimeoutMs);Promise.resolve().then(()=>i(z)).then(X,M=>{if(X(void 0))try{console.warn("claude.hot: accept",bt(M))}catch{}})};try{t.hot===void 0&&Object.defineProperty(t,"hot",{value:_t,writable:!1,configurable:!1,enumerable:!1})}catch{}return{hot:_t,boot:A,afterConnect(){le=!0,(e!==null||I!==null)&&U()},onInit(r,i){j=i,b=!0;const c=nr(r)?r:null;c?.phase==="final"&&e!==null&&e.gen===c.gen?(h=!0,R=rt(R,ae(c.from)),jr()):(k=c?.phase==="pending",wt(k),h=!k,L=c?.gen??0,R=ae(c?.from)),u(),k&&I!==null&&F({__frame_hot_ready:!0,gen:L},i),N!==void 0&&(mt(N),N=void 0),be()},onNoInit(){b=!0,wt(!1),h=!0,be()},onShell(r){return r?.__frame_revealed===!0?(Mr(),!1):ar(r)?(Ir(r),!0):lr(r)?(xr(r),!0):cr(r)?(Fr(r),!0):!1},attachExtras(r){T=r,gt(),r.assess&&u()},inSlot:()=>ne(p),hydration(r,i){Se??={expect:r,maxMs:i}},hydrated(){yt()},carried(){return h?w:{}},presented:()=>B}}var qr="frame_ldx_runtime",hr="frame_ldx_build",Br="script#an-form",pr=256;function ot(t,e,n){for(const o of t)n(o)&&t.delete(o);t.size>=pr&&!t.has(e)&&t.delete(t.values().next().value),t.add(e)}function Oe(t,e,n){try{const o=t[e];if(typeof o!="function")return;t[e]=function(...l){const a=o.apply(this,l);try{n(this)}catch{}return a}}catch{}}var Le;function mr(){if(Le)return Le;const t={media:new Set,contexts:new Set,onStart:null,onPause:null};Le=t;const e=window.HTMLMediaElement?.prototype;e&&(Oe(e,"play",l=>{ot(t.media,l,a=>a.paused),t.onStart?.(l)}),Oe(e,"pause",l=>t.onPause?.(l)));const n=window.AudioContext,o=window.AudioNode?.prototype;return n&&o&&Oe(o,"connect",l=>{const a=l.context;a instanceof n&&(ot(t.contexts,a,f=>f.state==="closed"),t.onStart?.(a))}),t}function _r(){return{post(t,e){parent.postMessage(t,e)},on(t){const e=n=>{n.source===parent&&t(n.data,n.origin,n.isTrusted)};return addEventListener("message",e),()=>removeEventListener("message",e)}}}function yr(){return{post:()=>{},on:()=>()=>{}}}var Pe="__frame_scroll",vr=150,gr=310,wr=160,br=3e4;function Er(){let t=0,e=!1,n=!1,o=!1,l=0,a=null;const f=h=>{try{sessionStorage.setItem(Pe,JSON.stringify({y:h}))}catch{}},d=()=>{if(clearTimeout(t),a===null)return;const h=a;a=null,f(h)},_=()=>{if(e){e=!1;return}n=!0,a=scrollY,clearTimeout(t),t=setTimeout(d,vr)};try{addEventListener("scroll",_,{passive:!0}),addEventListener("pagehide",d)}catch{}const m=()=>{let h;try{h=sessionStorage.getItem(Pe)}catch{return null}if(h===null)return null;let k;try{k=JSON.parse(h)}catch{k=null}const b=k?.y;if(!(typeof b=="number"&&Number.isFinite(b)&&b>=0)){try{sessionStorage.removeItem(Pe)}catch{}return null}return b};let y=!1;const A=h=>{try{const k=scrollY;scrollTo({top:h,left:0,behavior:"instant"}),l=h,o=!0,clearTimeout(t),a=null,f(h);const b=scrollY;b!==k&&(e=!0),b!==h&&!y&&(y=!0,addEventListener("load",()=>{try{if(scrollY===b){const j=m();A(j!==null?j:l)}}catch{}},{once:!0}))}catch{}},p=()=>{try{return!!location.hash}catch{return!0}};let v=!1;const w=()=>{try{if(v||innerWidth>gr||innerHeight>wr)return;v=!0;const h=Date.now(),k=()=>{try{removeEventListener("resize",k)}catch{}if(Date.now()-h>br||n||p())return;const b=m();A(b!==null?b:l)};addEventListener("resize",k)}catch{}};let R=!1,L=!1;return{restore(){if(R||(R=!0,p()))return;const h=m();h!==null&&(A(h),w())},promoted(){if(L||(L=!0,p()))return;const h=m();h!==null?(A(h),w()):o&&A(l)}}}function Sr(t,e,n,o){let l=null;try{l=window.trustedTypes?.createPolicy("frame-runtime",{createScriptURL:_=>_})??null}catch{}const a=window.Worker,f=a?.prototype,d=Object.freeze({Worker:a,workerOn:f?.addEventListener,workerPost:f?.postMessage,workerTerminate:f?.terminate,fetch:window.fetch.bind(window),preventDefault:Event.prototype.preventDefault,policy:l,origins:e});n(t).then(_=>_?.bootTopLevel?_.bootTopLevel(d,o):o.settle()).catch(()=>o.settle())}var Ur="modulepreload",zr=function(t){return"/"+t},Kr={},Ar=function(e,n,o){let l=Promise.resolve();function a(f){const d=new Event("vite:preloadError",{cancelable:!0});if(d.payload=f,window.dispatchEvent(d),!d.defaultPrevented)throw f}return l.then(f=>{for(const d of f||[])d.status==="rejected"&&a(d.reason);return e().catch(a)})},kr=window===top,at=Object.getOwnPropertyDescriptor(window,"claude"),he=ur(kr,window.__FRAME_PREAMBLE?.topLevel,at?.writable===!1),Me=typeof he=="object"&&he[0],O=Me?yr():_r();(function(){const t=Object.defineProperty,e=globalThis,n=["RTCPeerConnection","webkitRTCPeerConnection","RTCDataChannel","RTCIceCandidate","RTCSessionDescription","RTCRtpSender","RTCRtpReceiver"];let o=0;for(let l=0;l<n.length;l++){const a=n[l];try{t(e,a,{value:void 0,writable:!1,configurable:!1})}catch{try{delete e[a]}catch{}try{t(e,a,{value:void 0,writable:!1,configurable:!0})}catch{}}typeof e[a]=="function"&&o++}if(o&&he==="framed")try{O.post({__frame_rtc_lockdown_failed:o},"*")}catch{}})();var Tr=1e4,Rr=2e3,Ne=2e3,lt=Object.freeze([...window.__FRAME_PREAMBLE?.origins??["https://claude.ai","https://preview.claude.ai"]]);function st(t){for(const e of lt)if(e.endsWith(":*"))try{const n=new URL(t);if(`${n.protocol}//${n.hostname}:*`===e)return!0}catch{}else if(t===e)return!0;return!1}var pe=Object.freeze({...window.__FRAME_PREAMBLE?.capabilities}),Ce=window.__FRAME_PREAMBLE?.transforms,je=window.__FRAME_PREAMBLE?.comments,Ie=window.__FRAME_PREAMBLE?.translate,me=window.__FRAME_PREAMBLE?.ldx;function J(t){return Ar(()=>import("/_runtime/"+t),void 0)}function it(t,e){return{contract:t.contract,changes:new Set(t.changes??[]),flags:new Set(t.flags??[]),capabilities:t.capabilities??{},capBudgets:t.capBudgets??{},transforms:new Map,shellOrigin:e,mount:De,hooks:ye,pipe:()=>({wrap:(n,o)=>(...l)=>{try{return o(...l)}catch(a){return Promise.reject(a)}}})}}var _e=null,q=null;function ct(t,e,n){try{Object.defineProperty(t,e,{value:n,writable:!1,configurable:!1,enumerable:!0})}catch{try{Object.defineProperty(t,e,{value:n,writable:!1,configurable:!0,enumerable:!0})}catch{}}}var xe=!1,ye={editBefore:null,edit:null};function Or(t,e,n=!1){const o=[];let l;if(n)try{ye.editBefore?.(t)}catch{}for(const a of t.elements){const f=document.querySelector(`[data-id="${a.target}"]`);if(!f){l=a.target;break}if([...Object.keys(a.attrsSet??{}),...a.attrsRemoved??[]].some(d=>!Tt(d)||Rt(f,d))){l=a.target;break}if(a.text!==void 0&&(!Mt(f)||It(f))){l=a.target;break}for(const[d,_]of Object.entries(a.attrsSet??{}))if(!ft(f,d)){try{f.setAttribute(d,_)}catch{}ut(f,d,_)}for(const d of a.attrsRemoved??[])ft(f,d)||(f.removeAttribute(d),ut(f,d,null));typeof a.text=="string"&&Ct(f,a.text),o.push(a.target)}if(n)try{ye.edit?.(t.seq,o,l)}catch{}if(l!==void 0){O.post({__frame_patch_miss:{seq:t.seq}},e);return}try{document.dispatchEvent(new CustomEvent("claude:edit",{detail:{seq:t.seq,targets:o}}))}catch{}}function ut(t,e,n){if(!(t instanceof HTMLInputElement))return;const o=e.toLowerCase();o==="checked"?t.checked=n!==null:o==="value"&&t.type!=="file"&&(t.value=n??"")}function ft(t,e){const n=e.toLowerCase(),o=t;return n==="data-id"||(n==="value"||n==="checked")&&(o.__artifactSecret===!0||/^(password|hidden|file)$/.test(o.type??"")||/(^|\s)(cc-|one-time-code|current-password|new-password)/i.test(`${t.getAttribute("autocomplete")??""} ${o.autocomplete??""}`))}function dt(t){const e=document.documentElement;t==="light"||t==="dark"?(e.dataset.theme=t,e.style.colorScheme=t,xe=!0):xe&&(delete e.dataset.theme,e.style.colorScheme="",xe=!1)}var ve=new Map;function Lr(){let t;const e={u:new Promise(n=>{t=n}),r:n=>{e.done=!0,t(n)},done:!1,nulled:!1};return e}function Fe(){for(const t of ve.values())t.done||(t.nulled=!0,t.r(null))}var Pr=Object.freeze(Object.assign(Object.create(null),{call:Function.prototype.call,apply:Function.prototype.apply,bind:Function.prototype.bind})),De=(t,e)=>{const n=ve.get(t);if(!n||n.done){n?.nulled&&q&&O.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:t}},q);return}const o=typeof e=="function"?Object.setPrototypeOf(e,Pr):Object.assign(Object.create(null),e);typeof o.then=="function"&&delete o.then,n.r(Object.freeze(o))};function ht(){const t=at?.value??{};ct(window,"claude",t);for(const e of Object.keys(pe)){if(t[e]!==void 0){ct(t,e,t[e]);continue}ve.set(e,Lr())}if(t.use===void 0){const e=n=>{if(typeof n!="string"||!Object.hasOwn(pe,n))return Promise.resolve(null);const o=ve.get(n);return o?o.u:Promise.resolve(t[n]??null)};try{Object.defineProperty(t,"use",{value:e,writable:!0,configurable:!0,enumerable:!1})}catch{}}return t}if(he==="framed"){const t=Ce&&V.test(Ce)?J(Ce).catch(()=>{}):Promise.resolve(void 0),e=s=>{if(s.type==="auxclick"&&s.button!==1)return;const g=s.target,E=g&&g.closest?g.closest("a[href],area[href]"):null;if(!E)return;const x=E.getAttribute("href");if(!x)return;let N;try{N=new URL(x,document.baseURI)}catch{return}if((N.protocol==="http:"||N.protocol==="https:")&&N.origin!==location.origin){s.preventDefault();const T=(E.getAttribute("target")??"").toLowerCase(),P=s.type==="auxclick"||s.metaKey||s.ctrlKey||s.shiftKey||s.altKey||!["","_self","_top","_parent"].includes(T);O.post({__frame_nav:!0,url:N.href,newTab:P},"*")}};addEventListener("click",e,!0),addEventListener("auxclick",e,!0);const n={},o=s=>{s.isTrusted&&(n.pointer=!0)},l=s=>{s.isTrusted&&(n.click=!0)};addEventListener("pointermove",o,{capture:!0,passive:!0}),addEventListener("click",l,{capture:!0,passive:!0});const a={cb:null};addEventListener("keydown",s=>a.cb?.(s),!0);const f=mr();t.then(s=>s?.installEscapeForward?.(a,g=>{q&&O.post(g,q)})),t.then(s=>{try{s?.installFocusKeep?.()}catch{}}),t.then(s=>{s?.wireNav&&(s.wireNav(),removeEventListener("click",e,!0),removeEventListener("auxclick",e,!0),removeEventListener("pointermove",o,!0),removeEventListener("click",l,!0),s.wireEngagement?.(n))});let d=null;try{d=Er()}catch{}const _=document.readyState==="loading"?new Promise(s=>document.addEventListener("DOMContentLoaded",()=>s(),{once:!0})):Promise.resolve();let m=null,y=null;try{y=Vt(window.name),m=tt(null,y)}catch{}const A=ht();let p=null;try{p=dr(A,m,{post:(s,g)=>O.post(s,g),dcl:_},y)}catch{}t.then(s=>{try{p&&s?.installHotExtras?.(p)}catch{}});let v=null;const w=()=>Array.isArray(v?.flags)&&v.flags.includes("frame_ldx_runtime")&&!!me&&V.test(me)&&document.querySelector("script#an-form")!==null;try{p?.hydration(w,Jt)}catch{}let R=null,L=0;const h=O.on((s,g)=>{st(g)&&Ht(s)&&(v=s.__frame_init,q=g,h(),clearTimeout(L),R?.())});O.post({__frame_connect:!0},"*");try{p?.afterConnect()}catch{}const k=setTimeout,b=clearTimeout;let j=()=>NaN;try{j=performance.now.bind(performance)}catch{}let le=0;const se=()=>{try{O.post({__frame_alive:!0},"*")}catch{}le=k(se,Rr)},ie=()=>b(le);se(),addEventListener("load",ie,{once:!0});const I=new Promise(s=>{R=s,L=setTimeout(()=>{h(),s()},Tr)}),Z=new WeakSet;addEventListener("error",s=>{s.target&&Z.add(s.target)},!0);const ge=()=>{let s=[];try{s=[...document.querySelectorAll("link[rel~=stylesheet]:not([rel~=alternate])")].filter(E=>!E.sheet&&!E.disabled&&!Z.has(E)&&E.getAttribute("href")&&URL.canParse(E.href)&&(!E.media||matchMedia(E.media).matches))}catch{}let g=s.length;return g===0?Promise.resolve():new Promise(E=>{try{const x=Ne-j(),N=k(E,x>0?x<Ne?x:Ne:0),T=()=>{--g===0&&(b(N),E())};for(const P of s)P.addEventListener("load",T,{once:!0}),P.addEventListener("error",T,{once:!0})}catch{E()}})};_.then(()=>{try{d?.restore()}catch{}});const ce={cb:null};O.on((s,g)=>{if(st(g)&&qt(s)){try{d?.promoted()}catch{}ce.cb?.()}}),I.then(async()=>{if(!v||!q){Fe();try{p?.onNoInit()}catch{}return}dt(v.theme),v.hostVisible===!1&&t.then(u=>u?.applyHostVisible?.(!1,f));try{p?.onInit(v.hot,q)}catch{}const s=q;let g=!1,E=!1;O.on((u,ee,K)=>{if(ee!==s)return;try{if(p?.onShell(u))return}catch{}if(Ut(u)&&dt(u.__frame_theme.theme),Bt(u)){const U=u.__frame_host_visible.visible;t.then(we=>we?.applyHostVisible?.(U,f))}Dt(u)&&Or(u.__frame_patch,s,K);const B=u?.__fc_mode;B&&typeof B=="object"&&!g&&je&&V.test(je)&&(g=!0,J(je).then(U=>U.install?.(s,B.on===!0)).catch(()=>{}));const te=u?.__ft_cmd;te&&typeof te=="object"&&!E&&Ie&&V.test(Ie)&&(E=!0,J(Ie).then(U=>U.install?.(s,te)).catch(()=>{}))});const x=Object.keys(v.capabilities??{}).filter(u=>Object.hasOwn(pe,u)).map(u=>[u,pe[u]]).filter(u=>typeof u[1]=="string"&&V.test(u[1])),N=await Promise.allSettled(x.map(([,u])=>J(u))),T=await t,P=q;if(T?.buildBoot||O.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},P),T?.buildBoot)try{_e=T.buildBoot(v,T.TRANSFORMS??{},{shellOrigin:P,mount:De,hooks:ye},u=>O.post({__frame_cap_telemetry:u},P))}catch{O.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:"_transforms"}},P),_e=it(v,P)}else _e=it(v,P);const Q=u=>O.post({__frame_cap_telemetry:{kind:"cap-load-error",cap:u}},P),ue=_e;N.forEach((u,ee)=>{const K=x[ee][0];if(u.status!=="fulfilled"){Q(K);return}try{u.value?.install?.(ue)}catch{Q(K)}}),Fe(),await _,await ge(),ie(),O.post({__frame_ready:!0},q),t.then(u=>u?.installSizeReporter?.(P,ce));let F=!1;try{F=w()}catch{}me&&F?J(me).then(u=>u?.boot?.({shellOrigin:s,build:ue.flags.has(hr),hot:p?.hot??null,carried:p?.carried(),presented:()=>p?.presented()??!0})).catch(()=>!1).then(u=>{p?.hydrated(),u!==!0&&Q("_ldx")}):p?.hydrated()})}else Me&&(ht(),Sr(Me,lt,J,{settle:Fe,mount:De}))})();</script><!-- /frame-runtime --><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>立陶宛语入门</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #F5F1EA;
+  --bg2: #EDE8DF;
+  --text: #2B3A4A;
+  --text2: #5A6E7F;
+  --amber: #C47D0E;
+  --amber-light: #F5C842;
+  --amber-pale: #FBF0D8;
+  --sea: #4A7B8C;
+  --sea-light: #D0E8EF;
+  --green: #3D6B4A;
+  --green-light: #D4EAD9;
+  --red: #B54040;
+  --red-light: #F5DADA;
+  --border: #D8D0C4;
+  --card: #FFFFFF;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1C2530; --bg2: #243040; --text: #E8DEC8; --text2: #9EB5C4;
+    --amber: #E8A820; --amber-light: #F5C842; --amber-pale: #2A2010;
+    --sea: #6A9DB0; --sea-light: #1A3040; --green: #5A9B6A; --green-light: #1A2F20;
+    --red: #D06060; --red-light: #2A1515; --border: #3A4A5A; --card: #243040;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1C2530; --bg2: #243040; --text: #E8DEC8; --text2: #9EB5C4;
+  --amber: #E8A820; --amber-light: #F5C842; --amber-pale: #2A2010;
+  --sea: #6A9DB0; --sea-light: #1A3040; --green: #5A9B6A; --green-light: #1A2F20;
+  --red: #D06060; --red-light: #2A1515; --border: #3A4A5A; --card: #243040;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+.header { background: var(--text); color: var(--bg); padding: 28px 24px 20px; text-align: center; }
+.header h1 { font-family: 'Lora', serif; font-size: 1.9rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 4px; }
+.header p { font-size: 0.88rem; opacity: 0.65; font-style: italic; }
+.amber-bar { height: 4px; background: linear-gradient(90deg, var(--amber), var(--amber-light), var(--amber)); }
+nav {
+  position: sticky; top: 0; z-index: 100; background: var(--bg2);
+  border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+nav button {
+  flex: 1; min-width: 80px; padding: 12px 10px; border: none; background: none;
+  color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s; white-space: nowrap;
+}
+nav button.active { color: var(--amber); border-bottom-color: var(--amber); background: var(--amber-pale); }
+nav button:hover:not(.active) { color: var(--text); background: var(--bg); }
+.section { display: none; padding: 24px 16px; max-width: 700px; margin: 0 auto; }
+.section.active { display: block; }
+h2 { font-family: 'Lora', serif; font-size: 1.3rem; color: var(--text); margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+h3 { font-family: 'Lora', serif; font-size: 1rem; color: var(--amber); margin: 22px 0 10px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.sound-row {
+  display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px 12px;
+  align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem;
+}
+.sound-row:last-child { border-bottom: none; }
+.letter { font-family: 'Lora', serif; font-size: 1.4rem; color: var(--amber); font-weight: 600; }
+.sound-like { color: var(--text2); font-size: 0.83rem; }
+.anchor { display: inline-block; background: var(--amber-pale); border: 1px solid var(--amber); color: var(--amber); border-radius: 4px; padding: 1px 6px; font-size: 0.78rem; font-weight: 500; }
+.phrase-table { width: 100%; border-collapse: collapse; }
+.phrase-table tr { border-bottom: 1px solid var(--border); }
+.phrase-table tr:last-child { border-bottom: none; }
+.phrase-table td { padding: 10px 8px; vertical-align: top; }
+.phrase-table td:first-child { font-family: 'Lora', serif; font-size: 1rem; color: var(--text); width: 55%; }
+.phrase-table td:last-child { color: var(--text2); font-size: 0.88rem; }
+.phrase-row { cursor: pointer; transition: background 0.1s; }
+.phrase-row:hover td { background: var(--amber-pale); }
+.phrase-row.open td { background: var(--amber-pale); }
+.phrase-row td:first-child::after { content: '·'; margin-left: 6px; font-size: 0.75rem; color: var(--amber); opacity: 0.6; font-family: 'DM Sans', sans-serif; }
+.en-detail td { padding: 0 8px 10px; background: var(--amber-pale); border-bottom: 1px solid var(--border); }
+.word-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0 2px; }
+.chip { display: inline-flex; flex-direction: column; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 5px 9px; min-width: 44px; gap: 2px; }
+.chip-lt { font-family: 'Lora', serif; font-size: 0.9rem; color: var(--sea); font-weight: 500; white-space: nowrap; }
+.chip-en { font-size: 0.7rem; color: var(--text2); white-space: nowrap; }
+.click-hint { font-size: 0.75rem; color: var(--text2); opacity: 0.7; font-style: italic; margin-bottom: 10px; }
+.dialog-box { background: var(--bg2); border-left: 3px solid var(--amber); border-radius: 0 8px 8px 0; padding: 14px 16px; margin: 14px 0; font-size: 0.92rem; }
+.dialog-line { margin: 5px 0; }
+.dialog-a { color: var(--sea); font-weight: 500; }
+.dialog-b { color: var(--amber); font-weight: 500; }
+.rule-box { background: var(--green-light); border: 1px solid var(--green); border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.9rem; }
+.rule-box strong { color: var(--green); }
+.vs-row { display: flex; gap: 12px; margin: 10px 0; }
+.vs-item { flex: 1; background: var(--sea-light); border-radius: 8px; padding: 12px; font-size: 0.88rem; }
+.vs-item .word { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--sea); margin-bottom: 4px; }
+
+/* Conjugation table */
+.conj-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.conj-table th { background: var(--bg2); color: var(--text2); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 10px; text-align: left; }
+.conj-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.conj-table tr:last-child td { border-bottom: none; }
+.conj-table .person { color: var(--text2); font-size: 0.8rem; }
+.conj-table .lt { font-family: 'Lora', serif; color: var(--sea); font-size: 1rem; }
+.conj-table .neg { font-family: 'Lora', serif; color: var(--red); font-size: 1rem; }
+.conj-table .en { color: var(--text2); font-size: 0.83rem; }
+.row-sep td { background: var(--bg2); font-size: 0.75rem; color: var(--text2); font-weight: 600; padding: 4px 10px; }
+
+/* Question words grid */
+.qword-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.qword-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.qword-lt { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--amber); margin-bottom: 3px; }
+.qword-en { font-size: 0.85rem; color: var(--text2); }
+
+/* iš kur pairs */
+.from-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.from-pair { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.88rem; }
+.from-city { font-family: 'Lora', serif; color: var(--sea); }
+.from-country { color: var(--amber); }
+.from-sentence { color: var(--text2); font-size: 0.8rem; margin-top: 4px; }
+
+/* Quiz */
+.quiz-q { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+.quiz-q .q-text { font-weight: 500; margin-bottom: 12px; }
+.quiz-q .q-sub { color: var(--text2); font-size: 0.85rem; margin-bottom: 14px; font-style: italic; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.12s; background: var(--bg2); }
+.opt:hover { border-color: var(--amber); background: var(--amber-pale); }
+.opt.correct { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.opt.wrong { border-color: var(--red); background: var(--red-light); color: var(--red); }
+.opt input { accent-color: var(--amber); }
+.fill-wrap { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.fill-in { border: none; border-bottom: 2px solid var(--amber); background: transparent; color: var(--text); font-family: 'Lora', serif; font-size: 1rem; padding: 2px 4px; width: 130px; outline: none; }
+.fill-in:focus { border-bottom-color: var(--sea); }
+.fill-in.correct { border-bottom-color: var(--green); color: var(--green); }
+.fill-in.wrong { border-bottom-color: var(--red); color: var(--red); }
+.check-btn { background: var(--amber); color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.88rem; cursor: pointer; margin-top: 10px; }
+.check-btn:hover { opacity: 0.88; }
+.feedback { margin-top: 10px; font-size: 0.88rem; display: none; }
+.feedback.show { display: block; }
+.feedback.ok { color: var(--green); }
+.feedback.err { color: var(--red); }
+.score-line { text-align: center; font-family: 'Lora', serif; font-size: 1.1rem; margin: 20px 0 8px; color: var(--amber); }
+.reset-btn { display: block; margin: 0 auto; background: none; border: 1.5px solid var(--amber); color: var(--amber); border-radius: 6px; padding: 8px 20px; font-size: 0.88rem; cursor: pointer; }
+.reset-btn:hover { background: var(--amber-pale); }
+.lesson-badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 6px; vertical-align: middle; background: var(--sea-light); color: var(--sea); border: 1px solid var(--sea); }
+
+/* Country grid */
+.country-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.country-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.country-card.highlight { border-color: var(--amber); background: var(--amber-pale); }
+.country-name { font-family: 'Lora', serif; font-size: 1.05rem; color: var(--sea); font-weight: 600; }
+.country-capital { font-size: 0.8rem; color: var(--text2); margin: 3px 0 6px; }
+.country-nat { font-size: 0.83rem; color: var(--text); }
+.country-nat span { color: var(--amber); font-family: 'Lora', serif; }
+.pattern-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+.pattern-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.85rem; text-align: center; }
+.pattern-m { font-family: 'Lora', serif; color: var(--sea); font-size: 0.95rem; }
+.pattern-arrow { color: var(--text2); font-size: 0.8rem; margin: 2px 0; }
+.pattern-f { font-family: 'Lora', serif; color: var(--amber); font-size: 0.95rem; }
+
+/* Number grid */
+.num-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.num-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+.num-digit { font-size: 1.4rem; font-weight: 700; color: var(--amber); font-variant-numeric: tabular-nums; }
+.num-lt { font-family: 'Lora', serif; font-size: 0.85rem; color: var(--sea); margin-top: 3px; }
+.num-gender { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+
+/* Verb conjugation */
+.verb-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.verb-tab { padding: 6px 14px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 0.82rem; cursor: pointer; background: var(--bg2); color: var(--text2); transition: all 0.12s; }
+.verb-tab.active { border-color: var(--sea); background: var(--sea-light); color: var(--sea); }
+.verb-panel { display: none; }
+.verb-panel.active { display: block; }
+.lang-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.lang-chip { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 0.83rem; }
+.lang-chip .lc-lt { font-family: 'Lora', serif; color: var(--sea); }
+.lang-chip .lc-cn { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+
+/* Food vocab */
+.food-section { margin-bottom: 16px; }
+.food-section-title { font-size: 0.78rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.food-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.food-chip { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 11px; font-size: 0.88rem; }
+.food-chip .fc-lt { font-family: 'Lora', serif; color: var(--sea); }
+.food-chip .fc-cn { font-size: 0.72rem; color: var(--text2); margin-top: 1px; }
+.food-chip.special { border-color: var(--amber); background: var(--amber-pale); }
+.food-chip.special .fc-lt { color: var(--amber); }
+.venue-row { display: flex; gap: 10px; margin-bottom: 14px; }
+.venue-card { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; text-align: center; }
+.venue-lt { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--sea); }
+.venue-cn { font-size: 0.78rem; color: var(--text2); margin-top: 3px; }
+
+/* Genitive table */
+.gen-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.gen-table th { background: var(--bg2); color: var(--text2); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 7px 10px; text-align: left; }
+.gen-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.gen-table tr:last-child td { border-bottom: none; }
+.gen-table .ending { font-family: 'Lora', serif; color: var(--amber); font-size: 0.95rem; }
+.gen-table .arrow { color: var(--text2); padding: 0 6px; }
+.gen-table .result { font-family: 'Lora', serif; color: var(--sea); }
+.gen-table .example { color: var(--text2); font-size: 0.8rem; }
+.gen-section-head td { background: var(--bg2); font-size: 0.75rem; font-weight: 600; color: var(--text2); padding: 4px 10px; }
+.speak-btn { background: none; border: none; cursor: pointer; font-size: 0.78rem; opacity: 0.5; padding: 0 2px; margin-left: 4px; line-height: 1; vertical-align: middle; color: inherit; transition: opacity 0.12s; flex-shrink: 0; }
+.speak-btn:hover { opacity: 1; }
+.phrase-row td:first-child { position: relative; }
+.dialog-line .speak-btn { float: right; }
+.voice-notice { font-size: 0.76rem; color: var(--amber); margin: 8px 16px; padding: 8px 12px; background: var(--amber-pale); border-radius: 8px; border-left: 3px solid var(--amber); line-height: 1.5; }
+</style>
+
+<div class="header">
+  <h1>立陶宛语入门</h1>
+  <p>Lietuvių kalba — 第一学期 · 考纳斯</p>
+</div>
+<div class="amber-bar"></div>
+
+<nav>
+  <button class="active" onclick="show('pronunciation')">发音</button>
+  <button onclick="toggleVoiceDebug()" style="margin-left:auto;font-size:0.75rem;opacity:0.7">🔊检测</button>
+  <button onclick="show('phrases')">用语</button>
+  <button onclick="show('grammar')">语法</button>
+  <button onclick="show('lesson1')">第一课</button>
+  <button onclick="show('lesson2')">第二课</button>
+  <button onclick="show('lesson3')">第三课</button>
+  <button onclick="show('lesson4')">第四课</button>
+  <button onclick="show('lesson5')">第五课</button>
+  <button onclick="show('lesson6')">第六课</button>
+  <button onclick="show('practice')">练习</button>
+</nav>
+
+<!-- 发音 -->
+<div id="pronunciation" class="section active">
+  <h2>发音指南</h2>
+  <h3>特殊字母</h3>
+  <div class="card">
+    <div class="sound-row">
+      <div class="letter">ai</div>
+      <div>发 <strong>"ei"</strong> 的音</div>
+      <div class="sound-like">不是英语的 "eye"</div>
+    </div>
+    <div class="sound-row">
+      <div class="letter">š</div>
+      <div>发 <strong>"sh"</strong> 的音</div>
+      <div class="sound-like">像 "shoe"</div>
+    </div>
+    <div class="sound-row">
+      <div class="letter">ž</div>
+      <div>发 <strong>"zh"</strong> 的音</div>
+      <div class="sound-like">像法语 "je"</div>
+    </div>
+    <div class="sound-row">
+      <div class="letter">č</div>
+      <div>发 <strong>"ch"</strong> 的音</div>
+      <div class="sound-like">像 "cheese"</div>
+    </div>
+    <div class="sound-row">
+      <div class="letter">ą ę į ų</div>
+      <div>长元音</div>
+      <div class="sound-like">比对应短元音拖长</div>
+    </div>
+    <div class="sound-row">
+      <div class="letter">r</div>
+      <div>颤舌音</div>
+      <div class="sound-like">像西班牙语 / 俄语的 r</div>
+    </div>
+    <div class="sound-row">
+      <div class="letter">-ky</div>
+      <div>腭化尾音</div>
+      <div class="sound-like"><span class="anchor">锚：Tchaikovsky 结尾</span></div>
+    </div>
+  </div>
+  <h3>记忆锚点</h3>
+  <div class="card">
+    <div class="sound-row" style="grid-template-columns:1fr 1fr">
+      <div><span class="anchor">Nokia</span> → 帮你记 <strong>Kokią</strong> 的发音</div>
+      <div><span class="anchor">德语 Kino</span> → 认出 <strong>kinas</strong>（电影院）</div>
+    </div>
+    <div class="sound-row" style="grid-template-columns:1fr; border:none">
+      <div><span class="anchor">kinojoje</span> = 在电影院里（格位变化，记形状就好）</div>
+    </div>
+  </div>
+  <h3>重音规则</h3>
+  <div class="rule-box">
+    <strong>通常重音在第一个音节</strong>——如果不确定，先读第一个音节，八成是对的。
+  </div>
+</div>
+
+<!-- 用语 -->
+<div id="phrases" class="section">
+  <h2>常用用语</h2>
+  <p class="click-hint">点击任意一行，查看每个单词的英文意思。</p>
+
+  <h3>打招呼</h3>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Labas","hello / good"]]'><td>Labas!</td><td>你好！（随时通用）</td></tr>
+      <tr class="phrase-row" data-words='[["Laba","good (f.)"],["diena","day"]]'><td>Laba diena!</td><td>下午好 / 您好（正式）</td></tr>
+      <tr class="phrase-row" data-words='[["Sveiki","hello / hi (formal/plural)"]]'><td>Sveiki!</td><td>你好！（对多人或正式）</td></tr>
+      <tr class="phrase-row" data-words='[["Labas","good (m.)"],["rytas","morning"]]'><td>Labas rytas!</td><td>早上好</td></tr>
+      <tr class="phrase-row" data-words='[["Labas","good (m.)"],["vakaras","evening"]]'><td>Labas vakaras!</td><td>晚上好</td></tr>
+    </table>
+  </div>
+
+  <h3>询问与回应</h3>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Kaip","how"],["sekasi","(it) goes"]]'><td>Kaip sekasi?</td><td>你好吗？</td></tr>
+      <tr class="phrase-row" data-words='[["Gerai","well / fine"],["ačiū","thank you"]]'><td>Gerai, ačiū.</td><td>还好，谢谢。</td></tr>
+      <tr class="phrase-row" data-words='[["Puikiai","excellently / great!"]]'><td>Puikiai!</td><td>很好！</td></tr>
+      <tr class="phrase-row" data-words='[["Ne","not"],["blogai","badly"]]'><td>Neblogai.</td><td>不错。</td></tr>
+      <tr class="phrase-row" data-words='[["O","and / but (contrast)"],["tu","you (inf.)"],["/ jums","you (formal)"]]'><td>O tu? / O jums?</td><td>你呢？</td></tr>
+    </table>
+  </div>
+
+  <h3>自我介绍</h3>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Koks","what (m.)"],["tavo","your (inf.)"],["vardas","name"]]'><td>Koks tavo vardas?</td><td>你叫什么名字？（非正式）</td></tr>
+      <tr class="phrase-row" data-words='[["Koks","what (m.)"],["jūsų","your (formal)"],["vardas","name"]]'><td>Koks jūsų vardas?</td><td>您叫什么名字？（正式）</td></tr>
+      <tr class="phrase-row" data-words='[["Kokia","what (f.)"],["jūsų","your (formal)"],["pavardė","surname"]]'><td>Kokia jūsų pavardė?</td><td>您的姓是？（正式）</td></tr>
+      <tr class="phrase-row" data-words='[["Mano","my"],["vardas","name"],["Ying","Ying"]]'><td>Mano vardas Ying.</td><td>我叫莹。</td></tr>
+      <tr class="phrase-row" data-words='[["Malonu","pleasant / nice"],["susipažinti","to meet each other"]]'><td>Malonu susipažinti.</td><td>很高兴认识你。</td></tr>
+      <tr class="phrase-row" data-words='[["Man","to me"],["taip","so / yes"],["pat","also / too"]]'><td>Man taip pat.</td><td>我也是。</td></tr>
+    </table>
+  </div>
+
+  <h3>告别</h3>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Iki","until"],["pasimatymo","(of the) meeting"]]'><td>Iki pasimatymo!</td><td>再见！</td></tr>
+      <tr class="phrase-row" data-words='[["Iki","until / bye"]]'><td>Iki!</td><td>拜！</td></tr>
+      <tr class="phrase-row" data-words='[["Ate","bye (borrowed, casual)"]]'><td>Ate!</td><td>拜拜（超随意）</td></tr>
+      <tr class="phrase-row" data-words='[["Viso","of all"],["gero","good"]]'><td>Viso gero!</td><td>保重 / 再见</td></tr>
+      <tr class="phrase-row" data-words='[["Geros","good (f. genitive)"],["dienos","of the day"]]'><td>Geros dienos!</td><td>祝你今天好</td></tr>
+    </table>
+  </div>
+
+  <h3>谢谢 / 不好意思</h3>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Ačiū","thank you"]]'><td>Ačiū</td><td>谢谢（通用）</td></tr>
+      <tr class="phrase-row" data-words='[["Dėkui","thanks (casual)"]]'><td>Dėkui</td><td>谢啦（口语）</td></tr>
+      <tr class="phrase-row" data-words='[["Dėkoju","I thank you (formal)"]]'><td>Dėkoju</td><td>感谢您（正式）</td></tr>
+      <tr class="phrase-row" data-words='[["Prašau / Prašom","please / you\'re welcome / here you go"]]'><td>Prašau / Prašom</td><td>请 / 不客气 / 给您</td></tr>
+      <tr class="phrase-row" data-words='[["Atsiprašau","excuse me / I\'m sorry (atsi- = reflexive)"]]'><td>Atsiprašau</td><td>不好意思 / 对不起</td></tr>
+      <tr class="phrase-row" data-words='[["Nieko","nothing"],["tokio","such / like that"]]'><td>Nieko tokio</td><td>没关系</td></tr>
+    </table>
+  </div>
+
+  <h3>语言相关</h3>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Aš","I"],["kalbu","(I) speak"],["kiniškai","in Chinese"]]'><td>Aš kalbu kiniškai.</td><td>我说中文。</td></tr>
+      <tr class="phrase-row" data-words='[["Aš","I"],["kalbu","(I) speak"],["lietuviškai","in Lithuanian"]]'><td>Aš kalbu lietuviškai.</td><td>我说立陶宛语。</td></tr>
+      <tr class="phrase-row" data-words='[["Aš","I"],["kalbu","(I) speak"],["angliškai","in English"]]'><td>Aš kalbu angliškai.</td><td>我说英语。</td></tr>
+    </table>
+  </div>
+
+  <h3>数字 0–10</h3>
+  <div class="num-grid">
+    <div class="num-card"><div class="num-digit">0</div><div class="num-lt">nulis</div></div>
+    <div class="num-card"><div class="num-digit">1</div><div class="num-lt">vienas</div><div class="num-gender">f. viena</div></div>
+    <div class="num-card"><div class="num-digit">2</div><div class="num-lt">du</div><div class="num-gender">f. dvi</div></div>
+    <div class="num-card"><div class="num-digit">3</div><div class="num-lt">trys</div></div>
+    <div class="num-card"><div class="num-digit">4</div><div class="num-lt">keturi</div><div class="num-gender">f. keturios</div></div>
+    <div class="num-card"><div class="num-digit">5</div><div class="num-lt">penki</div><div class="num-gender">f. penkios</div></div>
+    <div class="num-card"><div class="num-digit">6</div><div class="num-lt">šeši</div><div class="num-gender">f. šešios</div></div>
+    <div class="num-card"><div class="num-digit">7</div><div class="num-lt">septyni</div><div class="num-gender">f. septynios</div></div>
+    <div class="num-card"><div class="num-digit">8</div><div class="num-lt">aštuoni</div><div class="num-gender">f. aštuonios</div></div>
+    <div class="num-card"><div class="num-digit">9</div><div class="num-lt">devyni</div><div class="num-gender">f. devynios</div></div>
+    <div class="num-card"><div class="num-digit">10</div><div class="num-lt">dešimt</div></div>
+  </div>
+  <div class="rule-box" style="margin-top:10px">
+    报电话号码时逐位读，用阳性形式：+370 <strong>šeši</strong> <strong>du</strong> <strong>trys</strong>...
+  </div>
+
+  <h3>数字相关问答</h3>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Koks","what (kind of)"],["jūsų","your (formal)"],["telefono","phone (gen.)"],["numeris","number"]]'><td>Koks jūsų telefono numeris?</td><td>您的电话号码是？</td></tr>
+      <tr class="phrase-row" data-words='[["Mano","my"],["telefono","phone (gen.)"],["numeris","number"],["yra","is"]]'><td>Mano telefono numeris yra...</td><td>我的电话号码是……</td></tr>
+      <tr class="phrase-row" data-words='[["Kiek","how many / how much"]]'><td>Kiek?</td><td>多少？</td></tr>
+      <tr class="phrase-row" data-words='[["Kiek","how many"],["metų","years (gen. pl.)"],["jums","you (dat. formal)"],["/ tau","you (dat. informal)"]]'><td>Kiek metų jums / tau?</td><td>您/你多大了？</td></tr>
+      <tr class="phrase-row" data-words='[["Man","to me / I am"],["dvidešimt","twenty"],["šešeri","six (counting years)"],["metai","years"]]'><td>Man dvidešimt šešeri metai.</td><td>我26岁。</td></tr>
+    </table>
+  </div>
+
+  <h3>完整对话示例</h3>
+  <div class="dialog-box">
+    <div class="dialog-line"><span class="dialog-a">A：</span>Laba diena!</div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Laba diena! Kas jūs esate?</div>
+    <div class="dialog-line"><span class="dialog-a">A：</span>Aš esu studentė. Mano vardas Ying. O jūs?</div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Aš esu dėstytoja. Malonu susipažinti.</div>
+    <div class="dialog-line"><span class="dialog-a">A：</span>Man taip pat. Iš kur jūs esate?</div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Aš esu iš Lietuvos, iš Kauno. O jūs?</div>
+    <div class="dialog-line"><span class="dialog-a">A：</span>Aš esu iš Kinijos. Viso gero!</div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Iki!</div>
+  </div>
+</div>
+
+<!-- 语法 -->
+<div id="grammar" class="section">
+  <h2>语法基础</h2>
+
+  <h3>人称代词（主格）</h3>
+  <p class="click-hint">点击查看英文。</p>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["aš","I (1st sg.)"]]'><td>aš</td><td>我</td></tr>
+      <tr class="phrase-row" data-words='[["tu","you (2nd sg., informal)"]]'><td>tu</td><td>你（非正式）</td></tr>
+      <tr class="phrase-row" data-words='[["jis","he"],["/ ji","she"]]'><td>jis / ji</td><td>他 / 她</td></tr>
+      <tr class="phrase-row" data-words='[["mes","we (1st pl.)"]]'><td>mes</td><td>我们</td></tr>
+      <tr class="phrase-row" data-words='[["jūs","you (formal or plural) — like French vous"]]'><td>jūs</td><td>您 / 你们</td></tr>
+      <tr class="phrase-row" data-words='[["jie","they (m.)"],["/ jos","they (f.)"]]'><td>jie / jos</td><td>他们 / 她们</td></tr>
+    </table>
+  </div>
+
+  <h3>所有格代词</h3>
+  <p class="click-hint">点击查看英文。</p>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["mano","my"]]'><td>mano</td><td>我的</td></tr>
+      <tr class="phrase-row" data-words='[["tavo","your (informal)"]]'><td>tavo</td><td>你的（非正式）</td></tr>
+      <tr class="phrase-row" data-words='[["jo","his"],["/ jos","her"]]'><td>jo / jos</td><td>他的 / 她的</td></tr>
+      <tr class="phrase-row" data-words='[["mūsų","our"]]'><td>mūsų</td><td>我们的</td></tr>
+      <tr class="phrase-row" data-words='[["jūsų","your (formal/plural)"]]'><td>jūsų</td><td>您的 / 你们的</td></tr>
+      <tr class="phrase-row" data-words='[["jų","their"]]'><td>jų</td><td>他们的 / 她们的</td></tr>
+    </table>
+  </div>
+
+  <h3>ir vs. o（两种"和"）</h3>
+  <div class="vs-row">
+    <div class="vs-item">
+      <div class="word">ir</div>
+      <div>中性的"和"<br>纯粹连接</div>
+      <div style="margin-top:8px;font-size:0.82rem;color:var(--text2)">Aš <strong>ir</strong> tu（我和你）</div>
+    </div>
+    <div class="vs-item">
+      <div class="word">o</div>
+      <div>转折的"而/那"<br>带对比意味</div>
+      <div style="margin-top:8px;font-size:0.82rem;color:var(--text2)">Gerai. <strong>O</strong> tu?（那你呢？）</div>
+    </div>
+  </div>
+
+  <h3>名词性别规律</h3>
+  <div class="rule-box">
+    <strong>-as / -is / -us</strong> 结尾 → 阳性<br>
+    <strong>-a / -ė</strong> 结尾 → 阴性<br><br>
+    <span style="color:var(--text2);font-size:0.88rem">
+      studentas（男生）/ studentė（女生）<br>
+      draugas（男友）/ draugė（女友）<br>
+      dėstytojas（男老师）/ dėstytoja（女老师）
+    </span>
+  </div>
+
+  <h3>反身动词前缀 su-</h3>
+  <div class="card">
+    <p style="margin-bottom:10px">前缀 <strong style="color:var(--amber)">su-</strong> + 动词 → 反身/互动含义</p>
+    <div style="font-size:0.9rem; color:var(--text2)">
+      pažinti（认识）→ <strong>su</strong>sipažinti（相互认识）<br>
+      Malonu <strong>susipažinti</strong>. → 很高兴认识你。
+    </div>
+  </div>
+</div>
+
+<!-- 第一课 -->
+<div id="lesson1" class="section">
+  <h2>第一课 <span class="lesson-badge">Survival Lithuanian</span></h2>
+
+  <h3>būti — 动词"是"的完整变位</h3>
+  <div class="card">
+    <table class="conj-table">
+      <thead>
+        <tr><th>人称</th><th>肯定</th><th>否定</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-sep"><td colspan="4">单数</td></tr>
+        <tr>
+          <td class="person">我 (aš)</td>
+          <td class="lt">esu</td>
+          <td class="neg">nesu</td>
+          <td class="en">I am / I am not</td>
+        </tr>
+        <tr>
+          <td class="person">你 (tu)</td>
+          <td class="lt">esi</td>
+          <td class="neg">nesi</td>
+          <td class="en">you are / you are not</td>
+        </tr>
+        <tr>
+          <td class="person">他/她 (jis/ji)</td>
+          <td class="lt">yra</td>
+          <td class="neg">nėra</td>
+          <td class="en">is / is not</td>
+        </tr>
+        <tr class="row-sep"><td colspan="4">复数</td></tr>
+        <tr>
+          <td class="person">我们 (mes)</td>
+          <td class="lt">esame</td>
+          <td class="neg">nesame</td>
+          <td class="en">we are / we are not</td>
+        </tr>
+        <tr>
+          <td class="person">你们/您 (jūs)</td>
+          <td class="lt">esate</td>
+          <td class="neg">nesate</td>
+          <td class="en">you are / you are not</td>
+        </tr>
+        <tr>
+          <td class="person">他们 (jie/jos)</td>
+          <td class="lt">yra</td>
+          <td class="neg">nėra</td>
+          <td class="en">are / are not</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="rule-box">
+    <strong>注意</strong>：否定就是在前面加 <strong>ne-</strong>——esu → nesu，esi → nesi，yra → nėra（特殊）
+  </div>
+
+  <h3>疑问词</h3>
+  <div class="qword-grid">
+    <div class="qword-card">
+      <div class="qword-lt">kas</div>
+      <div class="qword-en">who / what（做主语用）</div>
+    </div>
+    <div class="qword-card">
+      <div class="qword-lt">koks / kokia</div>
+      <div class="qword-en">what kind of（阳性/阴性）</div>
+    </div>
+    <div class="qword-card">
+      <div class="qword-lt">iš kur</div>
+      <div class="qword-en">from where</div>
+    </div>
+    <div class="qword-card">
+      <div class="qword-lt">kaip</div>
+      <div class="qword-en">how</div>
+    </div>
+    <div class="qword-card">
+      <div class="qword-lt">ar</div>
+      <div class="qword-en">是非问句的开头词<br>（类似英语的 Do/Is...?）</div>
+    </div>
+    <div class="qword-card">
+      <div class="qword-lt">kur</div>
+      <div class="qword-en">where</div>
+    </div>
+  </div>
+
+  <h3>iš kur esate? — 来自哪里</h3>
+  <div class="rule-box" style="margin-bottom:12px">
+    <strong>iš + 生格</strong>（城市/国家名词变形）<br>
+    <span style="color:var(--text2);font-size:0.88rem">原形 → iš 后面的形式</span>
+  </div>
+  <div class="from-grid">
+    <div class="from-pair">
+      <div class="from-city">Kaunas → Kauno</div>
+      <div class="from-country">Lietuva → Lietuvos</div>
+      <div class="from-sentence">Aš esu iš Kauno, iš Lietuvos.</div>
+    </div>
+    <div class="from-pair">
+      <div class="from-city">Berlynas → Berlyno</div>
+      <div class="from-country">Vokietija → Vokietijos</div>
+      <div class="from-sentence">iš Berlyno, iš Vokietijos.</div>
+    </div>
+    <div class="from-pair">
+      <div class="from-city">Paryžius → Paryžiaus</div>
+      <div class="from-country">Prancūzija → Prancūzijos</div>
+      <div class="from-sentence">iš Paryžiaus, iš Prancūzijos.</div>
+    </div>
+    <div class="from-pair">
+      <div class="from-city">Briuselis → Briuselio</div>
+      <div class="from-country">Belgija → Belgijos</div>
+      <div class="from-sentence">iš Briuselio, iš Belgijos.</div>
+    </div>
+  </div>
+  <div class="rule-box" style="margin-top:12px">
+    <strong>规律</strong>：-as → -o，-a → -os，-ija → -ijos。先记形状，语法名字叫生格（genitive）。
+  </div>
+
+  <h3>正式问候对话</h3>
+  <div class="dialog-box">
+    <div class="dialog-line"><span class="dialog-a">A：</span>Laba diena!</div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Laba diena! Kas jūs esate?</div>
+    <div class="dialog-line"><span class="dialog-a">A：</span>Aš esu studentė. Mano vardas Ying.</div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Koks jūsų vardas? — Mano vardas Ying. Malonu susipažinti.</div>
+    <div class="dialog-line"><span class="dialog-a">A：</span>Man taip pat. Iš kur jūs esate?</div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Aš esu iš Lietuvos, iš Kauno. O jūs?</div>
+    <div class="dialog-line"><span class="dialog-a">A：</span>Aš esu iš Kinijos.</div>
+  </div>
+
+  <h3>第一课新词汇</h3>
+  <p class="click-hint">点击查看英文。</p>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["studentas","student (m.)"],["/ studentė","student (f.)"]]'><td>studentas / studentė</td><td>学生（男/女）</td></tr>
+      <tr class="phrase-row" data-words='[["dėstytojas","university teacher (m.)"],["/ dėstytoja","university teacher (f.)"]]'><td>dėstytojas / dėstytoja</td><td>大学老师（男/女）</td></tr>
+      <tr class="phrase-row" data-words='[["draugas","friend (m.)"],["/ draugė","friend (f.)"]]'><td>draugas / draugė</td><td>朋友（男/女）</td></tr>
+      <tr class="phrase-row" data-words='[["adresas","address"]]'><td>adresas</td><td>地址</td></tr>
+      <tr class="phrase-row" data-words='[["telefonas","telephone / phone number"]]'><td>telefonas</td><td>电话</td></tr>
+      <tr class="phrase-row" data-words='[["gatvė","street"]]'><td>gatvė</td><td>街道</td></tr>
+      <tr class="phrase-row" data-words='[["vardas","first name"]]'><td>vardas</td><td>名字</td></tr>
+      <tr class="phrase-row" data-words='[["pavardė","surname / last name"]]'><td>pavardė</td><td>姓</td></tr>
+    </table>
+  </div>
+
+  <h3>正式与非正式对照</h3>
+  <div class="vs-row">
+    <div class="vs-item">
+      <div class="word" style="font-size:0.95rem">非正式 (tu)</div>
+      <div style="font-size:0.85rem;margin-top:6px;color:var(--text2)">
+        Koks <strong>tavo</strong> vardas?<br>
+        Iš kur <strong>tu esi</strong>?<br>
+        Koks <strong>tavo</strong> telefonas?
+      </div>
+    </div>
+    <div class="vs-item">
+      <div class="word" style="font-size:0.95rem">正式 (jūs)</div>
+      <div style="font-size:0.85rem;margin-top:6px;color:var(--text2)">
+        Koks <strong>jūsų</strong> vardas?<br>
+        Iš kur <strong>jūs esate</strong>?<br>
+        Koks <strong>jūsų</strong> telefonas?
+      </div>
+    </div>
+  </div>
+  <div class="rule-box">
+    等对方说 <strong>"Sakyk man tu!"</strong>（你可以用 tu 叫我）再切换到非正式。
+  </div>
+</div>
+
+<!-- 第二课 -->
+<div id="lesson2" class="section">
+  <h2>第二课 <span class="lesson-badge">Šalys · sostinės · tautybės</span></h2>
+
+  <h3>本课核心词汇</h3>
+  <p class="click-hint">点击查看英文。</p>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["šalis","country"]]'><td>šalis</td><td>国家</td></tr>
+      <tr class="phrase-row" data-words='[["sostinė","capital (city)"]]'><td>sostinė</td><td>首都</td></tr>
+      <tr class="phrase-row" data-words='[["tautybė","nationality"]]'><td>tautybė</td><td>国籍</td></tr>
+      <tr class="phrase-row" data-words='[["vyras","man (also: husband)"]]'><td>vyras</td><td>男人</td></tr>
+      <tr class="phrase-row" data-words='[["moteris","woman"]]'><td>moteris</td><td>女人</td></tr>
+    </table>
+  </div>
+
+  <h3>国籍词的阴阳性规律</h3>
+  <div class="rule-box">
+    <strong>核心规则：所有男性国籍词，把结尾换成 -ė 就是女性</strong>
+  </div>
+  <div class="pattern-grid">
+    <div class="pattern-row">
+      <div style="font-size:0.72rem;color:var(--text2);margin-bottom:4px">-as → -ė</div>
+      <div class="pattern-m">kinas</div>
+      <div class="pattern-arrow">↓</div>
+      <div class="pattern-f">kinė</div>
+    </div>
+    <div class="pattern-row">
+      <div style="font-size:0.72rem;color:var(--text2);margin-bottom:4px">-is → -ė</div>
+      <div class="pattern-m">lietuvis</div>
+      <div class="pattern-arrow">↓</div>
+      <div class="pattern-f">lietuvė</div>
+    </div>
+    <div class="pattern-row">
+      <div style="font-size:0.72rem;color:var(--text2);margin-bottom:4px">-ietis → -ietė</div>
+      <div class="pattern-m">ukrainietis</div>
+      <div class="pattern-arrow">↓</div>
+      <div class="pattern-f">ukrainietė</div>
+    </div>
+  </div>
+  <div class="vs-row" style="margin-top:12px">
+    <div class="vs-item">
+      <div class="word" style="font-size:0.9rem">Jis yra ___.</div>
+      <div style="font-size:0.82rem;color:var(--text2);margin-top:5px">他是…（阳性词形）</div>
+    </div>
+    <div class="vs-item">
+      <div class="word" style="font-size:0.9rem">Ji yra ___.</div>
+      <div style="font-size:0.82rem;color:var(--text2);margin-top:5px">她是…（阴性词形）</div>
+    </div>
+  </div>
+
+  <h3>重要国家</h3>
+  <div class="country-grid">
+    <div class="country-card highlight">
+      <div class="country-name">Kinija ★</div>
+      <div class="country-capital">首都：Pekinas</div>
+      <div class="country-nat">♂ <span>kinas</span> · ♀ <span>kinė</span></div>
+    </div>
+    <div class="country-card highlight">
+      <div class="country-name">Lietuva ★</div>
+      <div class="country-capital">首都：Vilnius</div>
+      <div class="country-nat">♂ <span>lietuvis</span> · ♀ <span>lietuvė</span></div>
+    </div>
+    <div class="country-card">
+      <div class="country-name">Japonija</div>
+      <div class="country-capital">首都：Tokijas</div>
+      <div class="country-nat">♂ <span>japonas</span> · ♀ <span>japonė</span></div>
+    </div>
+    <div class="country-card">
+      <div class="country-name">Ukraina</div>
+      <div class="country-capital">首都：Kyjivas</div>
+      <div class="country-nat">♂ <span>ukrainietis</span> · ♀ <span>ukrainietė</span></div>
+    </div>
+    <div class="country-card">
+      <div class="country-name">Vokietija</div>
+      <div class="country-capital">首都：Berlynas</div>
+      <div class="country-nat">♂ <span>vokietis</span> · ♀ <span>vokietė</span></div>
+    </div>
+    <div class="country-card">
+      <div class="country-name">Prancūzija</div>
+      <div class="country-capital">首都：Paryžius</div>
+      <div class="country-nat">♂ <span>prancūzas</span> · ♀ <span>prancūzė</span></div>
+    </div>
+    <div class="country-card">
+      <div class="country-name">Italija</div>
+      <div class="country-capital">首都：Roma</div>
+      <div class="country-nat">♂ <span>italas</span> · ♀ <span>italė</span></div>
+    </div>
+    <div class="country-card">
+      <div class="country-name">Lenkija</div>
+      <div class="country-capital">首都：Varšuva</div>
+      <div class="country-nat">♂ <span>lenkas</span> · ♀ <span>lenkė</span></div>
+    </div>
+    <div class="country-card">
+      <div class="country-name">Ispanija</div>
+      <div class="country-capital">首都：Madridas</div>
+      <div class="country-nat">♂ <span>ispanas</span> · ♀ <span>ispanė</span></div>
+    </div>
+    <div class="country-card">
+      <div class="country-name">Latvija</div>
+      <div class="country-capital">首都：Ryga</div>
+      <div class="country-nat">♂ <span>latvis</span> · ♀ <span>latvė</span></div>
+    </div>
+  </div>
+
+  <h3>用这个句式介绍自己</h3>
+  <div class="dialog-box">
+    <div class="dialog-line"><span class="dialog-a">A：</span>Iš kur jūs esate?</div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Aš esu iš Kinijos. Aš esu kinė.</div>
+    <div class="dialog-line"><span class="dialog-a">A：</span>O jūs?</div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Aš esu iš Lietuvos. Aš esu lietuvė.</div>
+  </div>
+  <div class="rule-box">
+    <strong>注意</strong>：国家用 iš + 生格（Kinija → iš <strong>Kinijos</strong>），国籍词形不变（直接说 kinė）。
+  </div>
+
+  <h3>练一练（第二课）</h3>
+
+  <div class="quiz-q">
+    <div class="q-text">1. "kinas" 的女性形式是？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="lq1" value="a"> kiną</label>
+      <label class="opt"><input type="radio" name="lq1" value="b"> kinė</label>
+      <label class="opt"><input type="radio" name="lq1" value="c"> kinios</label>
+      <label class="opt"><input type="radio" name="lq1" value="d"> kinio</label>
+    </div>
+    <button class="check-btn" onclick="checkL2Radio('lq1','b')">确认</button>
+    <div class="feedback" id="lq1-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">2. "ukrainietis" 的女性形式是？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="lq2" value="a"> ukrainieta</label>
+      <label class="opt"><input type="radio" name="lq2" value="b"> ukrainieta</label>
+      <label class="opt"><input type="radio" name="lq2" value="c"> ukrainietė</label>
+      <label class="opt"><input type="radio" name="lq2" value="d"> ukrainietis</label>
+    </div>
+    <button class="check-btn" onclick="checkL2Radio('lq2','c')">确认</button>
+    <div class="feedback" id="lq2-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">3. "首都"用立陶宛语怎么说？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="lq3" value="a"> šalis</label>
+      <label class="opt"><input type="radio" name="lq3" value="b"> tautybė</label>
+      <label class="opt"><input type="radio" name="lq3" value="c"> sostinė</label>
+      <label class="opt"><input type="radio" name="lq3" value="d"> gatvė</label>
+    </div>
+    <button class="check-btn" onclick="checkL2Radio('lq3','c')">确认</button>
+    <div class="feedback" id="lq3-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">4. 填空：她是法国人。Ji yra ___.</div>
+    <div class="fill-wrap">
+      <span>Ji yra</span>
+      <input class="fill-in" id="lf4" placeholder="___" style="width:120px">
+    </div>
+    <button class="check-btn" onclick="checkL2Fill('lf4',['prancūzė','prancuze'])">确认</button>
+    <div class="feedback" id="lf4-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">5. 填空：我是中国人（女）。Aš esu ___.</div>
+    <div class="fill-wrap">
+      <span>Aš esu</span>
+      <input class="fill-in" id="lf5" placeholder="___" style="width:90px">
+    </div>
+    <button class="check-btn" onclick="checkL2Fill('lf5',['kinė','kine'])">确认</button>
+    <div class="feedback" id="lf5-fb"></div>
+  </div>
+
+  <div class="score-line" id="l2-score-line" style="display:none"></div>
+  <button class="reset-btn" id="l2-reset-btn" style="display:none" onclick="resetL2()">重新练习</button>
+</div>
+
+<!-- 第三课 -->
+<div id="lesson3" class="section">
+  <h2>第三课 <span class="lesson-badge">动词 · 语言 · 数字</span></h2>
+
+  <h3>A型动词变位（现在时）</h3>
+  <div class="rule-box">
+    <strong>规律：结尾 -u / -i / -a / -ame / -ate / -a</strong>（三单=三复=a）<br>
+    <span style="color:var(--text2);font-size:0.87rem">否定：直接在变位形式前加 <strong>ne-</strong></span>
+  </div>
+
+  <div class="verb-tabs">
+    <button class="verb-tab active" onclick="showVerb('gyventi')">gyventi 住</button>
+    <button class="verb-tab" onclick="showVerb('kalbeti')">kalbėti 说</button>
+    <button class="verb-tab" onclick="showVerb('suprasti')">suprasti 懂</button>
+    <button class="verb-tab" onclick="showVerb('studijuoti')">studijuoti 学习</button>
+  </div>
+
+  <div class="card">
+    <div id="vp-gyventi" class="verb-panel active">
+      <table class="conj-table">
+        <thead><tr><th>人称</th><th>肯定</th><th>否定</th></tr></thead>
+        <tbody>
+          <tr><td class="person">aš</td><td class="lt">gyvenu</td><td class="neg">negyvenu</td></tr>
+          <tr><td class="person">tu</td><td class="lt">gyveni</td><td class="neg">negyveni</td></tr>
+          <tr><td class="person">jis/ji</td><td class="lt">gyvena</td><td class="neg">negyvena</td></tr>
+          <tr><td class="person">mes</td><td class="lt">gyvename</td><td class="neg">negyvename</td></tr>
+          <tr><td class="person">jūs</td><td class="lt">gyvenate</td><td class="neg">negyvenate</td></tr>
+          <tr><td class="person">jie/jos</td><td class="lt">gyvena</td><td class="neg">negyvena</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="vp-kalbeti" class="verb-panel">
+      <table class="conj-table">
+        <thead><tr><th>人称</th><th>肯定</th><th>否定</th></tr></thead>
+        <tbody>
+          <tr><td class="person">aš</td><td class="lt">kalbu</td><td class="neg">nekalbu</td></tr>
+          <tr><td class="person">tu</td><td class="lt">kalbi</td><td class="neg">nekalbi</td></tr>
+          <tr><td class="person">jis/ji</td><td class="lt">kalba</td><td class="neg">nekalba</td></tr>
+          <tr><td class="person">mes</td><td class="lt">kalbame</td><td class="neg">nekalbame</td></tr>
+          <tr><td class="person">jūs</td><td class="lt">kalbate</td><td class="neg">nekalbate</td></tr>
+          <tr><td class="person">jie/jos</td><td class="lt">kalba</td><td class="neg">nekalba</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="vp-suprasti" class="verb-panel">
+      <table class="conj-table">
+        <thead><tr><th>人称</th><th>肯定</th><th>否定</th></tr></thead>
+        <tbody>
+          <tr><td class="person">aš</td><td class="lt">suprantu</td><td class="neg">nesuprantu</td></tr>
+          <tr><td class="person">tu</td><td class="lt">supranti</td><td class="neg">nesupranti</td></tr>
+          <tr><td class="person">jis/ji</td><td class="lt">supranta</td><td class="neg">nesupranta</td></tr>
+          <tr><td class="person">mes</td><td class="lt">suprantame</td><td class="neg">nesuprantame</td></tr>
+          <tr><td class="person">jūs</td><td class="lt">suprantate</td><td class="neg">nesuprantate</td></tr>
+          <tr><td class="person">jie/jos</td><td class="lt">supranta</td><td class="neg">nesupranta</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="vp-studijuoti" class="verb-panel">
+      <table class="conj-table">
+        <thead><tr><th>人称</th><th>肯定</th><th>否定</th></tr></thead>
+        <tbody>
+          <tr><td class="person">aš</td><td class="lt">studijuoju</td><td class="neg">nestudijuoju</td></tr>
+          <tr><td class="person">tu</td><td class="lt">studijuoji</td><td class="neg">nestudijuoji</td></tr>
+          <tr><td class="person">jis/ji</td><td class="lt">studijuoja</td><td class="neg">nestudijuoja</td></tr>
+          <tr><td class="person">mes</td><td class="lt">studijuojame</td><td class="neg">nestudijuojame</td></tr>
+          <tr><td class="person">jūs</td><td class="lt">studijuojate</td><td class="neg">nestudijuojate</td></tr>
+          <tr><td class="person">jie/jos</td><td class="lt">studijuoja</td><td class="neg">nestudijuoja</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h3>-iškai：语言副词后缀</h3>
+  <div class="rule-box">
+    <strong>规律</strong>：国籍词词根 + <strong>-iškai</strong> = 说该语言<br>
+    <span style="color:var(--text2);font-size:0.87rem">特别注意：ukrainietis → ukrainie<strong>tiškai</strong>（不是 ukrainiškai！）</span>
+  </div>
+  <div class="lang-chips">
+    <div class="lang-chip"><div class="lc-lt">lietuviškai</div><div class="lc-cn">立陶宛语</div></div>
+    <div class="lang-chip"><div class="lc-lt">angliškai</div><div class="lc-cn">英语</div></div>
+    <div class="lang-chip"><div class="lc-lt">kiniškai</div><div class="lc-cn">中文</div></div>
+    <div class="lang-chip"><div class="lc-lt">vokiškai</div><div class="lc-cn">德语</div></div>
+    <div class="lang-chip"><div class="lc-lt">prancūziškai</div><div class="lc-cn">法语</div></div>
+    <div class="lang-chip"><div class="lc-lt">ispaniškai</div><div class="lc-cn">西班牙语</div></div>
+    <div class="lang-chip"><div class="lc-lt">japoniškai</div><div class="lc-cn">日语</div></div>
+    <div class="lang-chip"><div class="lc-lt">ukrainietiškai</div><div class="lc-cn">乌克兰语</div></div>
+    <div class="lang-chip"><div class="lc-lt">latviškai</div><div class="lc-cn">拉脱维亚语</div></div>
+    <div class="lang-chip"><div class="lc-lt">lenkiškai</div><div class="lc-cn">波兰语</div></div>
+  </div>
+
+  <h3>关于语言的问答</h3>
+  <p class="click-hint">点击查看英文。</p>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Ar","question marker"],["jūs","you (formal)"],["kalbate","(you) speak"],["lietuviškai","in Lithuanian"]]'><td>Ar jūs kalbate lietuviškai?</td><td>您说立陶宛语吗？（正式）</td></tr>
+      <tr class="phrase-row" data-words='[["Ar","question marker"],["tu","you (informal)"],["kalbi","(you) speak"],["lietuviškai","in Lithuanian"]]'><td>Ar tu kalbi lietuviškai?</td><td>你说立陶宛语吗？（非正式）</td></tr>
+      <tr class="phrase-row" data-words='[["Taip","yes"],["aš","I"],["kalbu","(I) speak"]]'><td>Taip, aš kalbu lietuviškai.</td><td>是的，我说。</td></tr>
+      <tr class="phrase-row" data-words='[["Truputį","a little"]]'><td>Truputį kalbu lietuviškai.</td><td>我说一点点。</td></tr>
+      <tr class="phrase-row" data-words='[["Ne","no"],["aš","I"],["nekalbu","(I) don\'t speak"]]'><td>Ne, aš nekalbu lietuviškai.</td><td>不，我不会说。</td></tr>
+    </table>
+  </div>
+
+  <h3>哪里/在哪里（地点格 -e / -oje）</h3>
+  <div class="rule-box">
+    <strong>Kur? 在哪里</strong> → 名词变地点格<br>
+    <span style="color:var(--text2);font-size:0.87rem">-as / -as → -e：universitetas → universitete, fakultetas → fakultete<br>
+    -a / -ija → -oje：akademija → akademijoje</span>
+  </div>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Kur","where"],["tu","you"],["studijuoji","(you) study"]]'><td>Kur tu studijuoji?</td><td>你在哪里学习？</td></tr>
+      <tr class="phrase-row" data-words='[["Aš","I"],["studijuoju","(I) study"],["Vytauto","Vytautas (gen.)"],["Didžiojo","the Great (gen.)"],["universitete","at the university (loc.)"]]'><td>Aš studijuoju Vytauto Didžiojo universitete.</td><td>我在维陶塔斯大帝大学学习。</td></tr>
+      <tr class="phrase-row" data-words='[["Menų","arts (gen. pl.)"],["fakultete","at the faculty (loc.)"]]'><td>Aš studijuoju Menų fakultete.</td><td>我在艺术学院学习。</td></tr>
+    </table>
+  </div>
+
+  <h3>本课四句话练习（作业参考）</h3>
+  <div class="dialog-box">
+    <div class="dialog-line">Mano vardas Ying.</div>
+    <div class="dialog-line">Aš esu iš Kinijos.</div>
+    <div class="dialog-line">Aš esu kinė.</div>
+    <div class="dialog-line">Aš kalbu kiniškai ir angliškai. Truputį kalbu lietuviškai.</div>
+  </div>
+
+  <h3>练一练（第三课）</h3>
+
+  <div class="quiz-q">
+    <div class="q-text">1. 填空：我住在考纳斯。Aš ___ Kaune.</div>
+    <div class="fill-wrap">
+      <span>Aš</span>
+      <input class="fill-in" id="l3f1" placeholder="___" style="width:100px">
+      <span>Kaune.</span>
+    </div>
+    <button class="check-btn" onclick="checkL3Fill('l3f1',['gyvenu'])">确认</button>
+    <div class="feedback" id="l3f1-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">2. 填空：她说立陶宛语。Ji ___ lietuviškai.</div>
+    <div class="fill-wrap">
+      <span>Ji</span>
+      <input class="fill-in" id="l3f2" placeholder="___" style="width:80px">
+      <span>lietuviškai.</span>
+    </div>
+    <button class="check-btn" onclick="checkL3Fill('l3f2',['kalba'])">确认</button>
+    <div class="feedback" id="l3f2-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">3. "中文"用立陶宛语怎么说（-iškai 形式）？</div>
+    <div class="fill-wrap">
+      <input class="fill-in" id="l3f3" placeholder="___" style="width:120px">
+    </div>
+    <button class="check-btn" onclick="checkL3Fill('l3f3',['kiniškai'])">确认</button>
+    <div class="feedback" id="l3f3-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">4. "Truputį kalbu lietuviškai" 的意思是？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="l3q4" value="a"> 我完全不会立陶宛语</label>
+      <label class="opt"><input type="radio" name="l3q4" value="b"> 我流利地说立陶宛语</label>
+      <label class="opt"><input type="radio" name="l3q4" value="c"> 我会说一点立陶宛语</label>
+      <label class="opt"><input type="radio" name="l3q4" value="d"> 我正在学立陶宛语</label>
+    </div>
+    <button class="check-btn" onclick="checkL3Radio('l3q4','c')">确认</button>
+    <div class="feedback" id="l3q4-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">5. 否定句：我们不住在考纳斯。Mes ___ Kaune.</div>
+    <div class="fill-wrap">
+      <span>Mes</span>
+      <input class="fill-in" id="l3f5" placeholder="___" style="width:130px">
+      <span>Kaune.</span>
+    </div>
+    <button class="check-btn" onclick="checkL3Fill('l3f5',['negyvename'])">确认</button>
+    <div class="feedback" id="l3f5-fb"></div>
+  </div>
+
+  <div class="score-line" id="l3-score-line" style="display:none"></div>
+  <button class="reset-btn" id="l3-reset-btn" style="display:none" onclick="resetL3()">重新练习</button>
+</div>
+
+<!-- 第四课 -->
+<div id="lesson4" class="section">
+  <h2>第四课 <span class="lesson-badge">点餐 · Skanaus!</span></h2>
+
+  <h3>场所</h3>
+  <div class="venue-row">
+    <div class="venue-card"><div class="venue-lt">restoranas</div><div class="venue-cn">餐厅</div></div>
+    <div class="venue-card"><div class="venue-lt">kavinė</div><div class="venue-cn">咖啡馆</div></div>
+    <div class="venue-card"><div class="venue-lt">baras</div><div class="venue-cn">酒吧</div></div>
+  </div>
+
+  <h3>食物词汇</h3>
+  <div class="card">
+    <div class="food-section">
+      <div class="food-section-title">蔬菜 daržovės</div>
+      <div class="food-chips">
+        <div class="food-chip"><div class="fc-lt">pomidoras</div><div class="fc-cn">🍅 番茄</div></div>
+        <div class="food-chip"><div class="fc-lt">agurkas</div><div class="fc-cn">🥒 黄瓜</div></div>
+        <div class="food-chip"><div class="fc-lt">bulvė</div><div class="fc-cn">🥔 土豆</div></div>
+        <div class="food-chip"><div class="fc-lt">česnakas</div><div class="fc-cn">🧄 大蒜</div></div>
+        <div class="food-chip"><div class="fc-lt">morka</div><div class="fc-cn">🥕 胡萝卜</div></div>
+      </div>
+    </div>
+    <div class="food-section">
+      <div class="food-section-title">水果 vaisiai</div>
+      <div class="food-chips">
+        <div class="food-chip"><div class="fc-lt">obuolys</div><div class="fc-cn">🍎 苹果</div></div>
+        <div class="food-chip"><div class="fc-lt">bananas</div><div class="fc-cn">🍌 香蕉</div></div>
+        <div class="food-chip"><div class="fc-lt">citrina</div><div class="fc-cn">🍋 柠檬</div></div>
+        <div class="food-chip"><div class="fc-lt">apelsinas</div><div class="fc-cn">🍊 橙子</div></div>
+        <div class="food-chip"><div class="fc-lt">kriaušė</div><div class="fc-cn">🍐 梨</div></div>
+      </div>
+    </div>
+    <div class="food-section">
+      <div class="food-section-title">立陶宛特色菜 ⭐</div>
+      <div class="food-chips">
+        <div class="food-chip special"><div class="fc-lt">šaltibarščiai</div><div class="fc-cn">冷甜菜汤</div></div>
+        <div class="food-chip special"><div class="fc-lt">cepelinai</div><div class="fc-cn">土豆饺子</div></div>
+        <div class="food-chip special"><div class="fc-lt">blynai</div><div class="fc-cn">薄煎饼</div></div>
+        <div class="food-chip special"><div class="fc-lt">šakotis</div><div class="fc-cn">树形蛋糕</div></div>
+        <div class="food-chip special"><div class="fc-lt">koldūnai</div><div class="fc-cn">饺子</div></div>
+      </div>
+    </div>
+    <div class="food-section">
+      <div class="food-section-title">肉 mėsa / 鱼 žuvis</div>
+      <div class="food-chips">
+        <div class="food-chip"><div class="fc-lt">vištiena</div><div class="fc-cn">🍗 鸡肉</div></div>
+        <div class="food-chip"><div class="fc-lt">jautiena</div><div class="fc-cn">🥩 牛肉</div></div>
+        <div class="food-chip"><div class="fc-lt">kiauliena</div><div class="fc-cn">🥓 猪肉</div></div>
+        <div class="food-chip"><div class="fc-lt">žuvis</div><div class="fc-cn">🐟 鱼</div></div>
+      </div>
+    </div>
+    <div class="food-section">
+      <div class="food-section-title">饮料 gėrimai</div>
+      <div class="food-chips">
+        <div class="food-chip"><div class="fc-lt">kava</div><div class="fc-cn">☕ 咖啡</div></div>
+        <div class="food-chip"><div class="fc-lt">arbata</div><div class="fc-cn">🍵 茶</div></div>
+        <div class="food-chip"><div class="fc-lt">alus</div><div class="fc-cn">🍺 啤酒</div></div>
+        <div class="food-chip"><div class="fc-lt">vanduo</div><div class="fc-cn">💧 水</div></div>
+        <div class="food-chip"><div class="fc-lt">sultys</div><div class="fc-cn">🧃 果汁</div></div>
+        <div class="food-chip"><div class="fc-lt">vynas</div><div class="fc-cn">🍷 葡萄酒</div></div>
+      </div>
+    </div>
+    <div class="food-section">
+      <div class="food-section-title">甜品 desertai</div>
+      <div class="food-chips">
+        <div class="food-chip"><div class="fc-lt">ledai</div><div class="fc-cn">🍦 冰淇淋</div></div>
+        <div class="food-chip"><div class="fc-lt">pyragas</div><div class="fc-cn">🎂 蛋糕/派</div></div>
+        <div class="food-chip"><div class="fc-lt">spurgos</div><div class="fc-cn">🍩 甜甜圈</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>重要句型</h3>
+  <p class="click-hint">点击查看单词分解。</p>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Aš","I"],["norėčiau","would like (conditional)"],["...","+ genitive"]]'><td>Aš norėčiau...</td><td>我想要……</td></tr>
+      <tr class="phrase-row" data-words='[["Ką","what (acc.)"],["gersite","will you drink (formal pl.)"]]'><td>Ką gersite?</td><td>您要喝什么？</td></tr>
+      <tr class="phrase-row" data-words='[["Ką","what (acc.)"],["valgysite","will you eat (formal pl.)"]]'><td>Ką valgysite?</td><td>您要吃什么？</td></tr>
+      <tr class="phrase-row" data-words='[["Viskas","everything / that is all"]]'><td>Viskas?</td><td>就这些了？</td></tr>
+      <tr class="phrase-row" data-words='[["Prašom","please / here you go"],["sąskaitą","bill (acc.)"]]'><td>Prašom sąskaitą.</td><td>买单。</td></tr>
+      <tr class="phrase-row" data-words='[["Skanaus","tasty / bon appétit (genitive)"]]'><td>Skanaus!</td><td>祝好胃口！</td></tr>
+      <tr class="phrase-row" data-words='[["Ačiū","thank you"],["labai","very"],["skanu","tasty (nom.)"]]'><td>Ačiū, labai skanu!</td><td>谢谢，很好吃！</td></tr>
+      <tr class="phrase-row" data-words='[["Grynais","by cash"],["/ Kortele","by card"]]'><td>Grynais / Kortele</td><td>现金 / 刷卡</td></tr>
+    </table>
+  </div>
+
+  <h3>语法：norėčiau + 属格（Genitive）</h3>
+  <div class="rule-box">
+    <strong>"我想要……"</strong>后面的名词要变成<strong>属格</strong>：<br>
+    Norėčiau <strong>kavos</strong>（想要咖啡）——不是 kava，而是 kavos<br><br>
+    <span style="color:var(--text2);font-size:0.85rem">记忆法：属格就是"of something"的格——像英语 "a cup <em>of</em> coffee"</span>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <table class="gen-table">
+      <thead>
+        <tr><th>原形词尾</th><th></th><th>属格词尾</th><th>例子</th></tr>
+      </thead>
+      <tbody>
+        <tr class="gen-section-head"><td colspan="4">阳性 Vyriškoji giminė</td></tr>
+        <tr><td class="ending">-as</td><td class="arrow">→</td><td class="result">-o</td><td class="example">agurkas → agurko</td></tr>
+        <tr><td class="ending">-is</td><td class="arrow">→</td><td class="result">-io</td><td class="example">sūris → sūrio</td></tr>
+        <tr><td class="ending">-ys</td><td class="arrow">→</td><td class="result">-io</td><td class="example">obuolys → obuolio</td></tr>
+        <tr><td class="ending">-us</td><td class="arrow">→</td><td class="result">-aus</td><td class="example">alus → alaus</td></tr>
+        <tr><td class="ending">-uo</td><td class="arrow">→</td><td class="result">-ens</td><td class="example">vanduo → vandens</td></tr>
+        <tr class="gen-section-head"><td colspan="4">阴性 Moteriškoji giminė</td></tr>
+        <tr><td class="ending">-a</td><td class="arrow">→</td><td class="result">-os</td><td class="example">kava → kavos</td></tr>
+        <tr><td class="ending">-ė</td><td class="arrow">→</td><td class="result">-ės</td><td class="example">grietinė → grietinės</td></tr>
+        <tr><td class="ending">-is (f.)</td><td class="arrow">→</td><td class="result">-ies</td><td class="example">žuvis → žuvies</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Man patinka... 我喜欢……</h3>
+  <div class="rule-box">
+    <strong>Man patinka</strong> 后面用<strong>主格</strong>（原形）——和 norėčiau 不同！<br>
+    Man patinka <strong>kava</strong>（喜欢咖啡）——保持原形
+  </div>
+  <div class="dialog-box">
+    <div class="dialog-line"><span class="dialog-a">A：</span>Kas tau patinka? <span style="color:var(--text2);font-size:0.85rem">（你喜欢什么？）</span></div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Man patinka kava ir šokoladas. <span style="color:var(--text2);font-size:0.85rem">（我喜欢咖啡和巧克力。）</span></div>
+    <div class="dialog-line"><span class="dialog-a">A：</span>Ar tau patinka arbata? <span style="color:var(--text2);font-size:0.85rem">（你喜欢茶吗？）</span></div>
+    <div class="dialog-line"><span class="dialog-b">B：</span>Ne, man <strong>nepatinka</strong> arbata. <span style="color:var(--text2);font-size:0.85rem">（不，我不喜欢茶。）</span></div>
+  </div>
+
+  <h3>价格</h3>
+  <p class="click-hint">点击查看单词分解。</p>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Kiek","how much"],["kainuoja","costs (3rd person)"]]'><td>Kiek kainuoja?</td><td>多少钱？</td></tr>
+      <tr class="phrase-row" data-words='[["Kokia","what (f.)"],["kaina","price"]]'><td>Kokia kaina?</td><td>价格是多少？</td></tr>
+      <tr class="phrase-row" data-words='[["Vienas","one (m.)"],["euras","euro"],["ir","and"],["dešimt","ten"],["centų","cents (gen.pl.)"]]'><td>Vienas euras ir dešimt centų.</td><td>一欧元一角。</td></tr>
+      <tr class="phrase-row" data-words='[["Du","two (m.)"],["eurai","euros (nom.pl.)"],["devyni","nine"],["centai","cents (nom.pl.)"]]'><td>Du eurai devyni centai.</td><td>两欧元九分。</td></tr>
+    </table>
+  </div>
+
+  <h3>餐厅作业对话</h3>
+  <div class="dialog-box">
+    <div class="dialog-line"><span class="dialog-a">服务员：</span>Laba diena! Ką gersite?</div>
+    <div class="dialog-line"><span class="dialog-b">你：</span>Norėčiau kavos, prašau.</div>
+    <div class="dialog-line"><span class="dialog-a">服务员：</span>Ką valgysite?</div>
+    <div class="dialog-line"><span class="dialog-b">你：</span>Norėčiau šaltibarščių ir cepelinų.</div>
+    <div class="dialog-line"><span class="dialog-a">服务员：</span>Viskas?</div>
+    <div class="dialog-line"><span class="dialog-b">你：</span>Taip, ačiū. <span style="color:var(--text2);font-size:0.85rem">（后来）</span> Prašom sąskaitą.</div>
+    <div class="dialog-line"><span class="dialog-a">服务员：</span>Skanaus!</div>
+  </div>
+
+  <h3>练习题</h3>
+
+  <div class="quiz-q">
+    <div class="q-text">1. 填空：我想要一杯茶。Norėčiau ___.</div>
+    <div class="fill-wrap">
+      <span>Norėčiau</span>
+      <input class="fill-in" id="l4f1" placeholder="___" style="width:100px">
+      <span>.</span>
+    </div>
+    <button class="check-btn" onclick="checkL4Fill('l4f1',['arbatos'])">确认</button>
+    <div class="feedback" id="l4f1-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">2. "Skanaus!" 的意思是？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="l4q2" value="a"> 好吃！</label>
+      <label class="opt"><input type="radio" name="l4q2" value="b"> 买单！</label>
+      <label class="opt"><input type="radio" name="l4q2" value="c"> 祝好胃口！</label>
+      <label class="opt"><input type="radio" name="l4q2" value="d"> 谢谢！</label>
+    </div>
+    <button class="check-btn" onclick="checkL4Radio('l4q2','c')">确认</button>
+    <div class="feedback" id="l4q2-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">3. agurkas（黄瓜）的属格形式是？</div>
+    <div class="fill-wrap">
+      <span>Norėčiau</span>
+      <input class="fill-in" id="l4f3" placeholder="___" style="width:100px">
+    </div>
+    <button class="check-btn" onclick="checkL4Fill('l4f3',['agurko'])">确认</button>
+    <div class="feedback" id="l4f3-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">4. "Man patinka" 后面用什么格？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="l4q4" value="a"> 属格（genitive）</label>
+      <label class="opt"><input type="radio" name="l4q4" value="b"> 主格（nominative）</label>
+      <label class="opt"><input type="radio" name="l4q4" value="c"> 宾格（accusative）</label>
+      <label class="opt"><input type="radio" name="l4q4" value="d"> 与格（dative）</label>
+    </div>
+    <button class="check-btn" onclick="checkL4Radio('l4q4','b')">确认</button>
+    <div class="feedback" id="l4q4-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">5. 填空："买单" 怎么说？</div>
+    <div class="fill-wrap">
+      <span>Prašom</span>
+      <input class="fill-in" id="l4f5" placeholder="___" style="width:130px">
+    </div>
+    <button class="check-btn" onclick="checkL4Fill('l4f5',['sąskaitą'])">确认</button>
+    <div class="feedback" id="l4f5-fb"></div>
+  </div>
+
+  <div class="score-line" id="l4-score-line" style="display:none"></div>
+  <button class="reset-btn" id="l4-reset-btn" style="display:none" onclick="resetL4()">重新练习</button>
+</div>
+
+<!-- 第五课 -->
+<div id="lesson5" class="section">
+  <h2>第五课 <span class="lesson-badge">Kur eini? · 你去哪里？</span></h2>
+
+  <h3>城市地点</h3>
+  <div class="card">
+    <div class="food-section">
+      <div class="food-section-title">基础地点</div>
+      <div class="food-chips">
+        <div class="food-chip"><div class="fc-lt">miestas</div><div class="fc-cn">城市</div></div>
+        <div class="food-chip"><div class="fc-lt">senamiestis</div><div class="fc-cn">老城区</div></div>
+        <div class="food-chip"><div class="fc-lt">gatvė</div><div class="fc-cn">街道</div></div>
+        <div class="food-chip"><div class="fc-lt">aikštė</div><div class="fc-cn">广场</div></div>
+        <div class="food-chip"><div class="fc-lt">tiltas</div><div class="fc-cn">桥</div></div>
+        <div class="food-chip"><div class="fc-lt">upė</div><div class="fc-cn">河</div></div>
+        <div class="food-chip"><div class="fc-lt">jūra</div><div class="fc-cn">海</div></div>
+        <div class="food-chip"><div class="fc-lt">ežeras</div><div class="fc-cn">湖</div></div>
+        <div class="food-chip"><div class="fc-lt">parkas</div><div class="fc-cn">公园</div></div>
+        <div class="food-chip"><div class="fc-lt">bokštas</div><div class="fc-cn">塔</div></div>
+        <div class="food-chip"><div class="fc-lt">fontanas</div><div class="fc-cn">喷泉</div></div>
+        <div class="food-chip"><div class="fc-lt">sankryža</div><div class="fc-cn">路口</div></div>
+      </div>
+    </div>
+    <div class="food-section">
+      <div class="food-section-title">服务场所</div>
+      <div class="food-chips">
+        <div class="food-chip"><div class="fc-lt">bankas</div><div class="fc-cn">银行</div></div>
+        <div class="food-chip"><div class="fc-lt">bankomatas</div><div class="fc-cn">ATM</div></div>
+        <div class="food-chip"><div class="fc-lt">paštas</div><div class="fc-cn">邮局</div></div>
+        <div class="food-chip"><div class="fc-lt">vaistinė</div><div class="fc-cn">药店</div></div>
+        <div class="food-chip"><div class="fc-lt">ligoninė</div><div class="fc-cn">医院</div></div>
+        <div class="food-chip"><div class="fc-lt">parduotuvė</div><div class="fc-cn">商店</div></div>
+        <div class="food-chip"><div class="fc-lt">turgus</div><div class="fc-cn">市场</div></div>
+        <div class="food-chip"><div class="fc-lt">knygynas</div><div class="fc-cn">书店</div></div>
+        <div class="food-chip"><div class="fc-lt">kirpykla</div><div class="fc-cn">理发店</div></div>
+        <div class="food-chip"><div class="fc-lt">kepyklėlė</div><div class="fc-cn">面包店</div></div>
+        <div class="food-chip"><div class="fc-lt">viešbutis</div><div class="fc-cn">酒店</div></div>
+        <div class="food-chip"><div class="fc-lt">ambasada</div><div class="fc-cn">大使馆</div></div>
+      </div>
+    </div>
+    <div class="food-section">
+      <div class="food-section-title">文化娱乐</div>
+      <div class="food-chips">
+        <div class="food-chip"><div class="fc-lt">muziejus</div><div class="fc-cn">博物馆</div></div>
+        <div class="food-chip"><div class="fc-lt">pilis</div><div class="fc-cn">城堡</div></div>
+        <div class="food-chip"><div class="fc-lt">bažnyčia</div><div class="fc-cn">教堂</div></div>
+        <div class="food-chip"><div class="fc-lt">teatras</div><div class="fc-cn">剧院</div></div>
+        <div class="food-chip"><div class="fc-lt">kinas</div><div class="fc-cn">电影院</div></div>
+        <div class="food-chip"><div class="fc-lt">klubas</div><div class="fc-cn">俱乐部</div></div>
+        <div class="food-chip"><div class="fc-lt">sporto klubas</div><div class="fc-cn">健身房</div></div>
+      </div>
+    </div>
+    <div class="food-section">
+      <div class="food-section-title">大学相关</div>
+      <div class="food-chips">
+        <div class="food-chip special"><div class="fc-lt">universitetas</div><div class="fc-cn">大学</div></div>
+        <div class="food-chip special"><div class="fc-lt">bendrabutis</div><div class="fc-cn">宿舍</div></div>
+        <div class="food-chip special"><div class="fc-lt">biblioteka</div><div class="fc-cn">图书馆</div></div>
+        <div class="food-chip special"><div class="fc-lt">auditorija</div><div class="fc-cn">教室</div></div>
+        <div class="food-chip special"><div class="fc-lt">fakultetas</div><div class="fc-cn">学院</div></div>
+        <div class="food-chip special"><div class="fc-lt">dekanatas</div><div class="fc-cn">院长办公室</div></div>
+        <div class="food-chip"><div class="fc-lt">paskaita</div><div class="fc-cn">讲座/课</div></div>
+        <div class="food-chip"><div class="fc-lt">liftas</div><div class="fc-cn">电梯</div></div>
+        <div class="food-chip"><div class="fc-lt">tualetas</div><div class="fc-cn">卫生间</div></div>
+      </div>
+    </div>
+    <div class="food-section">
+      <div class="food-section-title">交通</div>
+      <div class="food-chips">
+        <div class="food-chip"><div class="fc-lt">autobusas</div><div class="fc-cn">公交车</div></div>
+        <div class="food-chip"><div class="fc-lt">troleibusas</div><div class="fc-cn">无轨电车</div></div>
+        <div class="food-chip"><div class="fc-lt">traukinys</div><div class="fc-cn">火车</div></div>
+        <div class="food-chip"><div class="fc-lt">stotelė</div><div class="fc-cn">（公交）站</div></div>
+        <div class="food-chip"><div class="fc-lt">autobusų stotis</div><div class="fc-cn">客运站</div></div>
+        <div class="food-chip"><div class="fc-lt">geležinkelio stotis</div><div class="fc-cn">火车站</div></div>
+        <div class="food-chip"><div class="fc-lt">oro uostas</div><div class="fc-cn">机场</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>eiti vs važiuoti</h3>
+  <div class="rule-box">
+    <strong>eiti</strong> = 步行去 · <strong>važiuoti</strong> = 乘车去<br>
+    <span style="color:var(--text2);font-size:0.87rem">nueiti = 步行到达 · nuvažiuoti = 乘车到达</span>
+  </div>
+  <div class="verb-tabs">
+    <button class="verb-tab active" onclick="showVerb('eiti')">eiti 步行</button>
+    <button class="verb-tab" onclick="showVerb('vaziuoti')">važiuoti 乘车</button>
+  </div>
+  <div id="vp-eiti" class="verb-panel active">
+    <table class="conj-table">
+      <thead><tr><th>人称</th><th>eiti</th><th>nueiti</th></tr></thead>
+      <tbody>
+        <tr><td class="person">aš</td><td class="lt">einu</td><td class="lt">nueinu</td></tr>
+        <tr><td class="person">tu</td><td class="lt">eini</td><td class="lt">nueini</td></tr>
+        <tr><td class="person">jis/ji</td><td class="lt">eina</td><td class="lt">nueina</td></tr>
+        <tr><td class="person">mes</td><td class="lt">einame</td><td class="lt">nueiname</td></tr>
+        <tr><td class="person">jūs</td><td class="lt">einate</td><td class="lt">nueinate</td></tr>
+        <tr><td class="person">jie/jos</td><td class="lt">eina</td><td class="lt">nueina</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="vp-vaziuoti" class="verb-panel">
+    <table class="conj-table">
+      <thead><tr><th>人称</th><th>važiuoti</th><th>nuvažiuoti</th></tr></thead>
+      <tbody>
+        <tr><td class="person">aš</td><td class="lt">važiuoju</td><td class="lt">nuvažiuoju</td></tr>
+        <tr><td class="person">tu</td><td class="lt">važiuoji</td><td class="lt">nuvažiuoji</td></tr>
+        <tr><td class="person">jis/ji</td><td class="lt">važiuoja</td><td class="lt">nuvažiuoja</td></tr>
+        <tr><td class="person">mes</td><td class="lt">važiuojame</td><td class="lt">nuvažiuojame</td></tr>
+        <tr><td class="person">jūs</td><td class="lt">važiuojate</td><td class="lt">nuvažiuojate</td></tr>
+        <tr><td class="person">jie/jos</td><td class="lt">važiuoja</td><td class="lt">nuvažiuoja</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>格位：往哪里 vs 在哪附近</h3>
+  <div class="rule-box">
+    <strong>į + 宾格（Accusative）</strong>：去往某处<br>
+    <strong>prie + 属格（Genitive）</strong>：在某处旁边<br>
+    <strong>地点格（Locative）</strong>：在某处（已到达）
+  </div>
+
+  <h4 style="margin:14px 0 8px;font-size:0.88rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">宾格词尾（į + ?）</h4>
+  <table class="gen-table">
+    <thead><tr><th>原形词尾</th><th></th><th>宾格</th><th>例子</th></tr></thead>
+    <tbody>
+      <tr class="gen-section-head"><td colspan="4">阳性</td></tr>
+      <tr><td class="ending">-as</td><td class="arrow">→</td><td class="result">-ą</td><td class="example">universitetas → universitetą</td></tr>
+      <tr><td class="ending">-is / -ys</td><td class="arrow">→</td><td class="result">-į</td><td class="example">traukinys → traukinį</td></tr>
+      <tr><td class="ending">-us</td><td class="arrow">→</td><td class="result">-ų</td><td class="example">turgus → turgų</td></tr>
+      <tr class="gen-section-head"><td colspan="4">阴性</td></tr>
+      <tr><td class="ending">-a</td><td class="arrow">→</td><td class="result">-ą</td><td class="example">biblioteka → biblioteką</td></tr>
+      <tr><td class="ending">-ė</td><td class="arrow">→</td><td class="result">-ę</td><td class="example">gatvė → gatvę</td></tr>
+      <tr><td class="ending">-is</td><td class="arrow">→</td><td class="result">-į</td><td class="example">stotis → stotį</td></tr>
+    </tbody>
+  </table>
+
+  <h4 style="margin:14px 0 8px;font-size:0.88rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">属格词尾（prie + ?）</h4>
+  <table class="gen-table">
+    <thead><tr><th>原形词尾</th><th></th><th>属格</th><th>例子</th></tr></thead>
+    <tbody>
+      <tr class="gen-section-head"><td colspan="4">阳性</td></tr>
+      <tr><td class="ending">-as</td><td class="arrow">→</td><td class="result">-o</td><td class="example">universitetas → universiteto</td></tr>
+      <tr><td class="ending">-is / -ys</td><td class="arrow">→</td><td class="result">-io</td><td class="example">traukinys → traukinio</td></tr>
+      <tr><td class="ending">-us</td><td class="arrow">→</td><td class="result">-aus</td><td class="example">turgus → turgaus</td></tr>
+      <tr class="gen-section-head"><td colspan="4">阴性</td></tr>
+      <tr><td class="ending">-a</td><td class="arrow">→</td><td class="result">-os</td><td class="example">biblioteka → bibliotekos</td></tr>
+      <tr><td class="ending">-ė</td><td class="arrow">→</td><td class="result">-ės</td><td class="example">gatvė → gatvės</td></tr>
+      <tr><td class="ending">-is</td><td class="arrow">→</td><td class="result">-ies</td><td class="example">stotis → stoties</td></tr>
+    </tbody>
+  </table>
+
+  <h3>常用句型</h3>
+  <p class="click-hint">点击查看单词分解。</p>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Kur","where"],["eini","(you) go on foot"]]'><td>Kur eini?</td><td>你步行去哪里？</td></tr>
+      <tr class="phrase-row" data-words='[["Kur","where"],["važiuoji","(you) go by vehicle"]]'><td>Kur važiuoji?</td><td>你乘车去哪里？</td></tr>
+      <tr class="phrase-row" data-words='[["Einu","I go (on foot)"],["į","to"],["universitetą","university (acc.)"]]'><td>Einu į universitetą.</td><td>我步行去大学。</td></tr>
+      <tr class="phrase-row" data-words='[["Važiuoju","I go (by vehicle)"],["į","to"],["biblioteką","library (acc.)"]]'><td>Važiuoju į biblioteką.</td><td>我乘车去图书馆。</td></tr>
+      <tr class="phrase-row" data-words='[["Važiuoju","I go"],["namo","home"]]'><td>Važiuoju namo.</td><td>我回家。</td></tr>
+      <tr class="phrase-row" data-words='[["Universitetas","university"],["yra","is"],["prie","near"],["bibliotekos","library (gen.)"]]'><td>Universitetas yra prie bibliotekos.</td><td>大学在图书馆旁边。</td></tr>
+      <tr class="phrase-row" data-words='[["Aš","I"],["esu","am"],["prie","near"],["universiteto","university (gen.)"]]'><td>Aš esu prie universiteto.</td><td>我在大学旁边。</td></tr>
+    </table>
+  </div>
+
+  <h3>问路 · 见面</h3>
+  <p class="click-hint">点击查看单词分解。</p>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Atsiprašau","excuse me"],["kur","where"],["yra","is"],["bankas","bank"]]'><td>Atsiprašau, kur yra bankas?</td><td>请问，银行在哪里？</td></tr>
+      <tr class="phrase-row" data-words='[["Ar","is it"],["toli","far"]]'><td>Ar toli?</td><td>远吗？</td></tr>
+      <tr class="phrase-row" data-words='[["Ar","is it"],["arti","near"]]'><td>Ar arti?</td><td>近吗？</td></tr>
+      <tr class="phrase-row" data-words='[["Reikia","you need to"],["eiti","go on foot"],["tiesiai","straight"]]'><td>Reikia eiti tiesiai.</td><td>需要直走。</td></tr>
+      <tr class="phrase-row" data-words='[["Suk","turn"],["į","to"],["kairę","left (acc.)"]]'><td>Suk į kairę.</td><td>往左转。</td></tr>
+      <tr class="phrase-row" data-words='[["Suk","turn"],["į","to"],["dešinę","right (acc.)"]]'><td>Suk į dešinę.</td><td>往右转。</td></tr>
+      <tr class="phrase-row" data-words='[["Kur","where"],["susitinkame","do we meet"]]'><td>Kur susitinkame?</td><td>我们在哪里见面？</td></tr>
+      <tr class="phrase-row" data-words='[["Susitinkame","let\'s meet"],["kavinėje","in the cafe (loc.)"]]'><td>Susitinkame kavinėje.</td><td>我们在咖啡馆见。</td></tr>
+    </table>
+  </div>
+
+  <h3>方向词</h3>
+  <div class="qword-grid">
+    <div class="qword-card"><div class="qword-lt">tiesiai</div><div class="qword-en">直走 (direction)</div></div>
+    <div class="qword-card"><div class="qword-lt">į kairę</div><div class="qword-en">往左 (direction)</div></div>
+    <div class="qword-card"><div class="qword-lt">kairėje</div><div class="qword-en">在左边 (position)</div></div>
+    <div class="qword-card"><div class="qword-lt">į dešinę</div><div class="qword-en">往右 (direction)</div></div>
+    <div class="qword-card"><div class="qword-lt">dešinėje</div><div class="qword-en">在右边 (position)</div></div>
+    <div class="qword-card"><div class="qword-lt">kita stotelė</div><div class="qword-en">下一站</div></div>
+  </div>
+
+  <h3>序数词 1–20</h3>
+  <div class="num-grid">
+    <div class="num-card"><div class="num-digit">1</div><div class="num-lt">pirmas</div></div>
+    <div class="num-card"><div class="num-digit">2</div><div class="num-lt">antras</div></div>
+    <div class="num-card"><div class="num-digit">3</div><div class="num-lt">trečias</div></div>
+    <div class="num-card"><div class="num-digit">4</div><div class="num-lt">ketvirtas</div></div>
+    <div class="num-card"><div class="num-digit">5</div><div class="num-lt">penktas</div></div>
+    <div class="num-card"><div class="num-digit">6</div><div class="num-lt">šeštas</div></div>
+    <div class="num-card"><div class="num-digit">7</div><div class="num-lt">septintas</div></div>
+    <div class="num-card"><div class="num-digit">8</div><div class="num-lt">aštuntas</div></div>
+    <div class="num-card"><div class="num-digit">9</div><div class="num-lt">devintas</div></div>
+    <div class="num-card"><div class="num-digit">10</div><div class="num-lt">dešimtas</div></div>
+    <div class="num-card"><div class="num-digit">11</div><div class="num-lt">vienuoliktas</div></div>
+    <div class="num-card"><div class="num-digit">12</div><div class="num-lt">dvyliktas</div></div>
+    <div class="num-card"><div class="num-digit">13</div><div class="num-lt">tryliktas</div></div>
+    <div class="num-card"><div class="num-digit">14</div><div class="num-lt">keturioliktas</div></div>
+    <div class="num-card"><div class="num-digit">15</div><div class="num-lt">penkioliktas</div></div>
+    <div class="num-card"><div class="num-digit">16</div><div class="num-lt">šešioliktas</div></div>
+    <div class="num-card"><div class="num-digit">17</div><div class="num-lt">septynioliktas</div></div>
+    <div class="num-card"><div class="num-digit">18</div><div class="num-lt">aštuonioliktas</div></div>
+    <div class="num-card"><div class="num-digit">19</div><div class="num-lt">devynioliktas</div></div>
+    <div class="num-card"><div class="num-digit">20</div><div class="num-lt">dvidešimtas</div></div>
+  </div>
+
+  <h3>注意词 ⚠️</h3>
+  <div class="card">
+    <table class="phrase-table">
+      <tr class="phrase-row" data-words='[["Atsargiai","careful/watch out"]]'><td>Atsargiai!</td><td>小心！注意！</td></tr>
+      <tr class="phrase-row" data-words='[["Draudžiama","forbidden"]]'><td>Draudžiama!</td><td>禁止！</td></tr>
+      <tr class="phrase-row" data-words='[["Pavojinga","dangerous"]]'><td>Pavojinga!</td><td>危险！</td></tr>
+      <tr class="phrase-row" data-words='[["Dėmesio","attention"]]'><td>Dėmesio!</td><td>注意！</td></tr>
+    </table>
+  </div>
+
+  <h3>练一练（第五课）</h3>
+
+  <div class="quiz-q">
+    <div class="q-text">1. "步行去图书馆"怎么说？</div>
+    <div class="fill-wrap">
+      <span>Aš</span>
+      <input class="fill-in" id="l5f1" placeholder="___" style="width:80px">
+      <span>į biblioteką.</span>
+    </div>
+    <button class="check-btn" onclick="checkL5Fill('l5f1',['einu'])">确认</button>
+    <div class="feedback" id="l5f1-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">2. "乘车去火车站"的动词是？</div>
+    <div class="fill-wrap">
+      <span>Aš</span>
+      <input class="fill-in" id="l5f2" placeholder="___" style="width:100px">
+      <span>į geležinkelio stotį.</span>
+    </div>
+    <button class="check-btn" onclick="checkL5Fill('l5f2',['važiuoju'])">确认</button>
+    <div class="feedback" id="l5f2-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">3. biblioteka（图书馆）变成宾格是？</div>
+    <div class="fill-wrap">
+      <span>Einu į</span>
+      <input class="fill-in" id="l5f3" placeholder="___" style="width:120px">
+    </div>
+    <button class="check-btn" onclick="checkL5Fill('l5f3',['biblioteką'])">确认</button>
+    <div class="feedback" id="l5f3-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">4. "往右转"怎么说？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="l5q4" value="a"> Suk į kairę</label>
+      <label class="opt"><input type="radio" name="l5q4" value="b"> Suk į dešinę</label>
+      <label class="opt"><input type="radio" name="l5q4" value="c"> Eikite tiesiai</label>
+    </div>
+    <button class="check-btn" onclick="checkL5Radio('l5q4','b')">确认</button>
+    <div class="feedback" id="l5q4-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">5. "第3路电车"中"第3"是序数词，怎么说？</div>
+    <div class="fill-wrap">
+      <input class="fill-in" id="l5f5" placeholder="___" style="width:100px">
+      <span>troleibusas</span>
+    </div>
+    <button class="check-btn" onclick="checkL5Fill('l5f5',['trečias'])">确认</button>
+    <div class="feedback" id="l5f5-fb"></div>
+  </div>
+
+  <div class="score-line" id="l5-score-line" style="display:none"></div>
+  <button class="reset-btn" id="l5-reset-btn" style="display:none" onclick="resetL5()">重新练习</button>
+</div>
+
+<!-- 第六课 -->
+<div id="lesson6" class="section">
+  <h2>第六课 <span class="lesson-badge">Kada susitinkame? · 我们什么时候见？</span></h2>
+
+  <h3>星期几 · Savaitės dienos</h3>
+  <div class="card">
+    <p style="font-size:0.85rem;color:var(--text2);margin:0 0 12px">时间表达用<strong>宾格（Accusative）</strong>：-as → -į，-is → -į</p>
+    <div style="overflow-x:auto">
+    <table class="conj-table">
+      <tr><th>主格（Nominative）</th><th>宾格（Accusative，用于"在…"）</th><th>中文</th></tr>
+      <tr><td>pirmadienis</td><td><strong>pirmadienį</strong></td><td>周一</td></tr>
+      <tr><td>antradienis</td><td><strong>antradienį</strong></td><td>周二</td></tr>
+      <tr><td>trečiadienis</td><td><strong>trečiadienį</strong></td><td>周三</td></tr>
+      <tr><td>ketvirtadienis</td><td><strong>ketvirtadienį</strong></td><td>周四</td></tr>
+      <tr><td>penktadienis</td><td><strong>penktadienį</strong></td><td>周五</td></tr>
+      <tr><td>šeštadienis</td><td><strong>šeštadienį</strong></td><td>周六</td></tr>
+      <tr><td>sekmadienis</td><td><strong>sekmadienį</strong></td><td>周日</td></tr>
+      <tr><td>savaitgalis</td><td><strong>savaitgalį</strong></td><td>周末</td></tr>
+    </table>
+    </div>
+    <div class="example-box" style="margin-top:12px">
+      <div><span class="lt-text">Aš einu į universitetą pirmadienį ir penktadienį.</span></div>
+      <div class="cn-text">我周一和周五去大学。</div>
+      <div style="margin-top:6px"><span class="lt-text">Savaitgalį tu važiuoji į Kauną.</span></div>
+      <div class="cn-text">你周末去考纳斯。</div>
+    </div>
+  </div>
+
+  <h3>一天的时段 · Paros laikai</h3>
+  <div class="card">
+    <p style="font-size:0.85rem;color:var(--text2);margin:0 0 12px">同样用<strong>宾格</strong>表示"在…时段"</p>
+    <div style="overflow-x:auto">
+    <table class="conj-table">
+      <tr><th>主格</th><th>宾格（用于"在…"）</th><th>中文</th></tr>
+      <tr><td>rytas</td><td><strong>rytą</strong></td><td>早上</td></tr>
+      <tr><td>diena</td><td><strong>dieną</strong></td><td>白天</td></tr>
+      <tr><td>vakaras</td><td><strong>vakarą</strong></td><td>傍晚/晚上</td></tr>
+      <tr><td>naktis</td><td><strong>naktį</strong></td><td>夜晚</td></tr>
+    </table>
+    </div>
+    <div class="example-box" style="margin-top:12px">
+      <div><span class="lt-text">Rytą einame į parką.</span></div>
+      <div class="cn-text">早上我们去公园。</div>
+      <div style="margin-top:6px"><span class="lt-text">Vakarą aš nedirbu.</span></div>
+      <div class="cn-text">晚上我不工作。</div>
+    </div>
+  </div>
+
+  <h3>时间副词 · Laiko prieveiksmiai</h3>
+  <div class="card">
+    <div class="food-chips">
+      <div class="food-chip"><div class="fc-lt">šiandien</div><div class="fc-cn">今天</div></div>
+      <div class="food-chip"><div class="fc-lt">rytoj</div><div class="fc-cn">明天</div></div>
+      <div class="food-chip"><div class="fc-lt">dabar</div><div class="fc-cn">现在</div></div>
+      <div class="food-chip"><div class="fc-lt">vakar</div><div class="fc-cn">昨天</div></div>
+    </div>
+    <div class="example-box" style="margin-top:12px">
+      <div><span class="lt-text">Susitinkame šiandien.</span></div>
+      <div class="cn-text">我们今天见。</div>
+      <div style="margin-top:6px"><span class="lt-text">Dabar einame į universitetą.</span></div>
+      <div class="cn-text">我们现在去大学。</div>
+    </div>
+  </div>
+
+  <h3>关键问句</h3>
+  <div class="card">
+    <table class="conj-table">
+      <tr><th>立陶宛语</th><th>中文</th></tr>
+      <tr><td>Kada susitinkame?</td><td>我们什么时候见？</td></tr>
+      <tr><td>Kelintą valandą?</td><td>几点？（什么时候？）</td></tr>
+      <tr><td>Ar mes galime eiti kartu?</td><td>我们可以一起去吗？</td></tr>
+    </table>
+  </div>
+
+  <h3>练习</h3>
+
+  <div class="quiz-q">
+    <div class="q-text">1. "我们周五见" 怎么说？填空：Susitinkame ___。</div>
+    <div class="fill-wrap">
+      <span>Susitinkame</span>
+      <input class="fill-in" id="l6f1" placeholder="___" style="width:160px">
+    </div>
+    <button class="check-btn" onclick="checkL6Fill('l6f1',['penktadienį'])">确认</button>
+    <div class="feedback" id="l6f1-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">2. "早上我们去公园" 怎么说？填空：___ einame į parką。</div>
+    <div class="fill-wrap">
+      <input class="fill-in" id="l6f2" placeholder="___" style="width:100px">
+      <span>einame į parką.</span>
+    </div>
+    <button class="check-btn" onclick="checkL6Fill('l6f2',['rytą'])">确认</button>
+    <div class="feedback" id="l6f2-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">3. "šeštadienis"（周六）的宾格是？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="l6r1" value="a"> šeštadienis</label>
+      <label class="opt"><input type="radio" name="l6r1" value="b"> šeštadienį</label>
+      <label class="opt"><input type="radio" name="l6r1" value="c"> šeštadienio</label>
+    </div>
+    <button class="check-btn" onclick="checkL6Radio('l6r1','b')">确认</button>
+    <div class="feedback" id="l6r1-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">4. "今天" 用立陶宛语怎么说？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="l6r2" value="a"> rytoj</label>
+      <label class="opt"><input type="radio" name="l6r2" value="b"> dabar</label>
+      <label class="opt"><input type="radio" name="l6r2" value="c"> šiandien</label>
+    </div>
+    <button class="check-btn" onclick="checkL6Radio('l6r2','c')">确认</button>
+    <div class="feedback" id="l6r2-fb"></div>
+  </div>
+
+  <div class="quiz-q">
+    <div class="q-text">5. "我们明天见" 怎么说？填空：Susitinkame ___。</div>
+    <div class="fill-wrap">
+      <span>Susitinkame</span>
+      <input class="fill-in" id="l6f3" placeholder="___" style="width:100px">
+    </div>
+    <button class="check-btn" onclick="checkL6Fill('l6f3',['rytoj'])">确认</button>
+    <div class="feedback" id="l6f3-fb"></div>
+  </div>
+
+  <div class="score-line" id="l6-score-line" style="display:none"></div>
+  <button class="reset-btn" id="l6-reset-btn" style="display:none" onclick="resetL6()">重新练习</button>
+</div>
+
+<!-- 练习 -->
+<div id="practice" class="section">
+  <h2>练习题</h2>
+  <p style="color:var(--text2);font-size:0.88rem;margin-bottom:20px">做错了就去找哥哥教。</p>
+
+  <!-- Q1 -->
+  <div class="quiz-q" id="q1">
+    <div class="q-text">1. 对方问你 "Kaip sekasi?"，你怎么回答？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="q1" value="a"> Mano vardas Ying.</label>
+      <label class="opt"><input type="radio" name="q1" value="b"> Gerai, ačiū. O tu?</label>
+      <label class="opt"><input type="radio" name="q1" value="c"> Iki pasimatymo!</label>
+      <label class="opt"><input type="radio" name="q1" value="d"> Malonu susipažinti.</label>
+    </div>
+    <button class="check-btn" onclick="checkRadio('q1','b')">确认</button>
+    <div class="feedback" id="q1-fb"></div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="quiz-q" id="q2">
+    <div class="q-text">2. "Aš esu studentė" 的意思是？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="q2" value="a"> 我是老师</label>
+      <label class="opt"><input type="radio" name="q2" value="b"> 我是学生（女）</label>
+      <label class="opt"><input type="radio" name="q2" value="c"> 我不是学生</label>
+      <label class="opt"><input type="radio" name="q2" value="d"> 你是学生</label>
+    </div>
+    <button class="check-btn" onclick="checkRadio('q2','b')">确认</button>
+    <div class="feedback" id="q2-fb"></div>
+  </div>
+
+  <!-- Q3 填空 būti -->
+  <div class="quiz-q">
+    <div class="q-text">3. 填空：我不是老师。</div>
+    <div class="fill-wrap">
+      <span>Aš</span>
+      <input class="fill-in" id="f3a" placeholder="___" style="width:90px">
+      <span>dėstytoja.</span>
+    </div>
+    <button class="check-btn" onclick="checkFill('f3a',['nesu'])">确认</button>
+    <div class="feedback" id="f3a-fb"></div>
+  </div>
+
+  <!-- Q4 iš kur -->
+  <div class="quiz-q" id="q4">
+    <div class="q-text">4. "Aš esu iš ___" — 来自巴黎怎么说？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="q4" value="a"> iš Paryžius</label>
+      <label class="opt"><input type="radio" name="q4" value="b"> iš Paryžiaus</label>
+      <label class="opt"><input type="radio" name="q4" value="c"> iš Paryžiui</label>
+      <label class="opt"><input type="radio" name="q4" value="d"> iš Paryžius</label>
+    </div>
+    <button class="check-btn" onclick="checkRadio('q4','b')">确认</button>
+    <div class="feedback" id="q4-fb"></div>
+  </div>
+
+  <!-- Q5 疑问词 -->
+  <div class="quiz-q" id="q5">
+    <div class="q-text">5. 问"您叫什么名字？"用哪个疑问词？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="q5" value="a"> kas</label>
+      <label class="opt"><input type="radio" name="q5" value="b"> iš kur</label>
+      <label class="opt"><input type="radio" name="q5" value="c"> koks</label>
+      <label class="opt"><input type="radio" name="q5" value="d"> ar</label>
+    </div>
+    <button class="check-btn" onclick="checkRadio('q5','c')">确认</button>
+    <div class="feedback" id="q5-fb"></div>
+  </div>
+
+  <!-- Q6 su- -->
+  <div class="quiz-q" id="q6">
+    <div class="q-text">6. susipažinti 里的 "su-" 前缀起什么作用？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="q6" value="a"> 表示过去时</label>
+      <label class="opt"><input type="radio" name="q6" value="b"> 表示否定</label>
+      <label class="opt"><input type="radio" name="q6" value="c"> 表示反身/互动</label>
+      <label class="opt"><input type="radio" name="q6" value="d"> 表示将来时</label>
+    </div>
+    <button class="check-btn" onclick="checkRadio('q6','c')">确认</button>
+    <div class="feedback" id="q6-fb"></div>
+  </div>
+
+  <!-- Q7 填空 -->
+  <div class="quiz-q">
+    <div class="q-text">7. 完成对话的两个空（来自立陶宛考纳斯）：</div>
+    <div class="q-sub">Aš esu iš ___(立陶宛), iš ___(考纳斯).</div>
+    <div class="fill-wrap" style="margin-bottom:10px">
+      <span>iš</span>
+      <input class="fill-in" id="f7a" placeholder="___">
+    </div>
+    <div class="fill-wrap">
+      <span>iš</span>
+      <input class="fill-in" id="f7b" placeholder="___">
+    </div>
+    <button class="check-btn" onclick="checkFill7()">确认</button>
+    <div class="feedback" id="f7-fb"></div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="quiz-q" id="q8">
+    <div class="q-text">8. 第一次见面，对方还没说"Sakyk man tu!"，你应该用哪种形式？</div>
+    <div class="options">
+      <label class="opt"><input type="radio" name="q8" value="a"> tu / tavo（非正式）</label>
+      <label class="opt"><input type="radio" name="q8" value="b"> jūs / jūsų（正式）</label>
+    </div>
+    <button class="check-btn" onclick="checkRadio('q8','b')">确认</button>
+    <div class="feedback" id="q8-fb"></div>
+  </div>
+
+  <div class="score-line" id="score-line" style="display:none"></div>
+  <button class="reset-btn" id="reset-btn" style="display:none" onclick="resetAll()">重新练习</button>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+document.querySelectorAll('.phrase-row[data-words]').forEach(row => {
+  let words;
+  try { words = JSON.parse(row.dataset.words); } catch(e) { return; }
+  const detail = document.createElement('tr');
+  detail.className = 'en-detail';
+  detail.hidden = true;
+  const td = document.createElement('td');
+  td.colSpan = 2;
+  td.innerHTML = '<div class="word-chips">' +
+    words.map(([lt, en]) =>
+      `<span class="chip"><span class="chip-lt">${lt}</span>${en ? `<span class="chip-en">${en}</span>` : ''}<button class="speak-btn" onclick="event.stopPropagation();speak(${JSON.stringify(lt)})">🔊</button></span>`
+    ).join('') + '</div>';
+  detail.appendChild(td);
+  row.parentNode.insertBefore(detail, row.nextSibling);
+  row.addEventListener('click', () => {
+    const isOpen = !detail.hidden;
+    detail.hidden = isOpen;
+    row.classList.toggle('open', !isOpen);
+  });
+});
+
+let answered = {};
+
+function checkRadio(qid, correct) {
+  const sel = document.querySelector(`input[name="${qid}"]:checked`);
+  const fb = document.getElementById(qid + '-fb');
+  if (!sel) { fb.textContent = '请先选择一个答案'; fb.className = 'feedback show err'; return; }
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(o => {
+    const lbl = o.parentElement;
+    if (o.value === correct) lbl.classList.add('correct');
+    else if (o.value === sel.value && o.value !== correct) lbl.classList.add('wrong');
+    o.disabled = true;
+  });
+  if (sel.value === correct) {
+    fb.textContent = '✓ 正确！'; fb.className = 'feedback show ok'; answered[qid] = true;
+  } else {
+    fb.textContent = '✗ 再想想——正确答案已标出'; fb.className = 'feedback show err'; answered[qid] = false;
+  }
+  checkAllDone();
+}
+
+function checkFill(id, answers) {
+  const inp = document.getElementById(id);
+  const fb = document.getElementById(id + '-fb');
+  const val = inp.value.trim().toLowerCase();
+  const ok = answers.some(a => val === a.toLowerCase());
+  inp.className = ok ? 'fill-in correct' : 'fill-in wrong';
+  inp.disabled = true;
+  if (ok) { fb.textContent = '✓ 正确！'; fb.className = 'feedback show ok'; answered[id] = true; }
+  else { fb.textContent = '✗ 正确答案：' + answers[0]; fb.className = 'feedback show err'; answered[id] = false; }
+  checkAllDone();
+}
+
+function checkFill7() {
+  const a = document.getElementById('f7a');
+  const b = document.getElementById('f7b');
+  const fb = document.getElementById('f7-fb');
+  const va = a.value.trim().toLowerCase();
+  const vb = b.value.trim().toLowerCase();
+  const okA = va === 'lietuvos';
+  const okB = vb === 'kauno';
+  a.className = okA ? 'fill-in correct' : 'fill-in wrong';
+  b.className = okB ? 'fill-in correct' : 'fill-in wrong';
+  a.disabled = true; b.disabled = true;
+  if (okA && okB) { fb.textContent = '✓ 两空都对！'; fb.className = 'feedback show ok'; answered['f7'] = true; }
+  else {
+    let msg = '✗ ';
+    if (!okA) msg += '立陶宛：Lietuvos';
+    if (!okB) msg += (okA ? '' : ' / ') + '考纳斯：Kauno';
+    fb.textContent = msg; fb.className = 'feedback show err'; answered['f7'] = false;
+  }
+  checkAllDone();
+}
+
+function checkAllDone() {
+  const keys = ['q1','q2','f3a','q4','q5','q6','f7','q8'];
+  if (keys.every(k => k in answered)) {
+    const correct = keys.filter(k => answered[k]).length;
+    const line = document.getElementById('score-line');
+    line.textContent = `得分：${correct} / ${keys.length}`;
+    line.style.display = 'block';
+    document.getElementById('reset-btn').style.display = 'block';
+  }
+}
+
+function showVerb(id) {
+  document.querySelectorAll('.verb-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.verb-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('vp-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+let lesson3Answered = {};
+
+function checkL3Radio(qid, correct) {
+  const sel = document.querySelector(`input[name="${qid}"]:checked`);
+  const fb = document.getElementById(qid + '-fb');
+  if (!sel) { fb.textContent = '请先选择一个答案'; fb.className = 'feedback show err'; return; }
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(o => {
+    const lbl = o.parentElement;
+    if (o.value === correct) lbl.classList.add('correct');
+    else if (o.value === sel.value && o.value !== correct) lbl.classList.add('wrong');
+    o.disabled = true;
+  });
+  if (sel.value === correct) {
+    fb.textContent = '✓ 正确！'; fb.className = 'feedback show ok'; lesson3Answered[qid] = true;
+  } else {
+    fb.textContent = '✗ 再想想——正确答案已标出'; fb.className = 'feedback show err'; lesson3Answered[qid] = false;
+  }
+  checkL3Done();
+}
+
+function checkL3Fill(id, answers) {
+  const inp = document.getElementById(id);
+  const fb = document.getElementById(id + '-fb');
+  const val = inp.value.trim().toLowerCase();
+  const ok = answers.some(a => val === a.toLowerCase());
+  inp.className = ok ? 'fill-in correct' : 'fill-in wrong';
+  inp.disabled = true;
+  if (ok) { fb.textContent = '✓ 正确！'; fb.className = 'feedback show ok'; lesson3Answered[id] = true; }
+  else { fb.textContent = '✗ 正确答案：' + answers[0]; fb.className = 'feedback show err'; lesson3Answered[id] = false; }
+  checkL3Done();
+}
+
+function checkL3Done() {
+  const keys = ['l3f1','l3f2','l3f3','l3q4','l3f5'];
+  if (keys.every(k => k in lesson3Answered)) {
+    const correct = keys.filter(k => lesson3Answered[k]).length;
+    const line = document.getElementById('l3-score-line');
+    line.textContent = `得分：${correct} / ${keys.length}`;
+    line.style.display = 'block';
+    document.getElementById('l3-reset-btn').style.display = 'block';
+  }
+}
+
+function resetL3() {
+  lesson3Answered = {};
+  document.querySelectorAll('#lesson3 input[type=radio]').forEach(i => { i.checked = false; i.disabled = false; });
+  document.querySelectorAll('#lesson3 .opt').forEach(l => l.classList.remove('correct','wrong'));
+  document.querySelectorAll('#lesson3 .fill-in').forEach(i => { i.value = ''; i.className = 'fill-in'; i.disabled = false; });
+  document.querySelectorAll('#lesson3 .feedback').forEach(f => { f.className = 'feedback'; });
+  document.getElementById('l3-score-line').style.display = 'none';
+  document.getElementById('l3-reset-btn').style.display = 'none';
+}
+
+let lesson2Answered = {};
+
+function checkL2Radio(qid, correct) {
+  const sel = document.querySelector(`input[name="${qid}"]:checked`);
+  const fb = document.getElementById(qid + '-fb');
+  if (!sel) { fb.textContent = '请先选择一个答案'; fb.className = 'feedback show err'; return; }
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(o => {
+    const lbl = o.parentElement;
+    if (o.value === correct) lbl.classList.add('correct');
+    else if (o.value === sel.value && o.value !== correct) lbl.classList.add('wrong');
+    o.disabled = true;
+  });
+  if (sel.value === correct) {
+    fb.textContent = '✓ 正确！'; fb.className = 'feedback show ok'; lesson2Answered[qid] = true;
+  } else {
+    fb.textContent = '✗ 再想想——正确答案已标出'; fb.className = 'feedback show err'; lesson2Answered[qid] = false;
+  }
+  checkL2Done();
+}
+
+function checkL2Fill(id, answers) {
+  const inp = document.getElementById(id);
+  const fb = document.getElementById(id + '-fb');
+  const val = inp.value.trim().toLowerCase();
+  const ok = answers.some(a => val === a.toLowerCase());
+  inp.className = ok ? 'fill-in correct' : 'fill-in wrong';
+  inp.disabled = true;
+  if (ok) { fb.textContent = '✓ 正确！'; fb.className = 'feedback show ok'; lesson2Answered[id] = true; }
+  else { fb.textContent = '✗ 正确答案：' + answers[0]; fb.className = 'feedback show err'; lesson2Answered[id] = false; }
+  checkL2Done();
+}
+
+function checkL2Done() {
+  const keys = ['lq1','lq2','lq3','lf4','lf5'];
+  if (keys.every(k => k in lesson2Answered)) {
+    const correct = keys.filter(k => lesson2Answered[k]).length;
+    const line = document.getElementById('l2-score-line');
+    line.textContent = `得分：${correct} / ${keys.length}`;
+    line.style.display = 'block';
+    document.getElementById('l2-reset-btn').style.display = 'block';
+  }
+}
+
+function resetL2() {
+  lesson2Answered = {};
+  document.querySelectorAll('#lesson2 input[type=radio]').forEach(i => { i.checked = false; i.disabled = false; });
+  document.querySelectorAll('#lesson2 .opt').forEach(l => l.classList.remove('correct','wrong'));
+  document.querySelectorAll('#lesson2 .fill-in').forEach(i => { i.value = ''; i.className = 'fill-in'; i.disabled = false; });
+  document.querySelectorAll('#lesson2 .feedback').forEach(f => { f.className = 'feedback'; });
+  document.getElementById('l2-score-line').style.display = 'none';
+  document.getElementById('l2-reset-btn').style.display = 'none';
+}
+
+let lesson4Answered = {};
+
+function checkL4Radio(qid, correct) {
+  const sel = document.querySelector(`input[name="${qid}"]:checked`);
+  const fb = document.getElementById(qid + '-fb');
+  if (!sel) { fb.textContent = '请先选择一个答案'; fb.className = 'feedback show err'; return; }
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(o => {
+    const lbl = o.parentElement;
+    if (o.value === correct) lbl.classList.add('correct');
+    else if (o.value === sel.value && o.value !== correct) lbl.classList.add('wrong');
+    o.disabled = true;
+  });
+  if (sel.value === correct) {
+    fb.textContent = '✓ 正确！'; fb.className = 'feedback show ok'; lesson4Answered[qid] = true;
+  } else {
+    fb.textContent = '✗ 再想想——正确答案已标出'; fb.className = 'feedback show err'; lesson4Answered[qid] = false;
+  }
+  checkL4Done();
+}
+
+function checkL4Fill(id, answers) {
+  const inp = document.getElementById(id);
+  const fb = document.getElementById(id + '-fb');
+  const val = inp.value.trim().toLowerCase();
+  const ok = answers.some(a => val === a.toLowerCase());
+  inp.className = ok ? 'fill-in correct' : 'fill-in wrong';
+  inp.disabled = true;
+  if (ok) { fb.textContent = '✓ 正确！'; fb.className = 'feedback show ok'; lesson4Answered[id] = true; }
+  else { fb.textContent = '✗ 正确答案：' + answers[0]; fb.className = 'feedback show err'; lesson4Answered[id] = false; }
+  checkL4Done();
+}
+
+function checkL4Done() {
+  const keys = ['l4f1','l4q2','l4f3','l4q4','l4f5'];
+  if (keys.every(k => k in lesson4Answered)) {
+    const correct = keys.filter(k => lesson4Answered[k]).length;
+    const line = document.getElementById('l4-score-line');
+    line.textContent = `得分：${correct} / ${keys.length}`;
+    line.style.display = 'block';
+    document.getElementById('l4-reset-btn').style.display = 'block';
+  }
+}
+
+function resetL4() {
+  lesson4Answered = {};
+  document.querySelectorAll('#lesson4 input[type=radio]').forEach(i => { i.checked = false; i.disabled = false; });
+  document.querySelectorAll('#lesson4 .opt').forEach(l => l.classList.remove('correct','wrong'));
+  document.querySelectorAll('#lesson4 .fill-in').forEach(i => { i.value = ''; i.className = 'fill-in'; i.disabled = false; });
+  document.querySelectorAll('#lesson4 .feedback').forEach(f => { f.className = 'feedback'; });
+  document.getElementById('l4-score-line').style.display = 'none';
+  document.getElementById('l4-reset-btn').style.display = 'none';
+}
+
+let lesson5Answered = {};
+function checkL5Fill(id, answers) {
+  const el = document.getElementById(id);
+  if (!el || el.disabled) return;
+  const val = el.value.trim().toLowerCase();
+  const ok = answers.map(a => a.toLowerCase()).includes(val);
+  el.classList.add(ok ? 'correct' : 'wrong');
+  el.disabled = true;
+  const fb = document.getElementById(id + '-fb');
+  if (fb) { fb.className = 'feedback ' + (ok ? 'correct' : 'wrong'); fb.textContent = ok ? '✓ 正确！' : '✗ 正确答案：' + answers[0]; }
+  lesson5Answered[id] = ok;
+  checkL5Done();
+}
+function checkL5Radio(qid, correct) {
+  const sel = document.querySelector(`input[name="${qid}"]:checked`);
+  if (!sel) return;
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(r => r.disabled = true);
+  const ok = sel.value === correct;
+  sel.parentElement.classList.add(ok ? 'correct' : 'wrong');
+  const rr = document.querySelector(`input[name="${qid}"][value="${correct}"]`);
+  if (!ok && rr) rr.parentElement.classList.add('correct');
+  const fb = document.getElementById(qid + '-fb');
+  if (fb) { fb.className = 'feedback ' + (ok ? 'correct' : 'wrong'); fb.textContent = ok ? '✓ 正确！' : '✗ 看看正确答案'; }
+  lesson5Answered[qid] = ok;
+  checkL5Done();
+}
+function checkL5Done() {
+  const total = 5, done = Object.keys(lesson5Answered).length;
+  if (done < total) return;
+  const score = Object.values(lesson5Answered).filter(Boolean).length;
+  const sl = document.getElementById('l5-score-line');
+  sl.textContent = `完成！${score}/${total}题正确 ${score === total ? '🎉' : score >= 3 ? '👍' : '再练练！'}`;
+  sl.style.display = 'block';
+  document.getElementById('l5-reset-btn').style.display = 'inline-block';
+}
+function resetL5() {
+  lesson5Answered = {};
+  document.querySelectorAll('#lesson5 input[type=radio]').forEach(i => { i.checked = false; i.disabled = false; });
+  document.querySelectorAll('#lesson5 .opt').forEach(l => l.classList.remove('correct','wrong'));
+  document.querySelectorAll('#lesson5 .fill-in').forEach(i => { i.value = ''; i.className = 'fill-in'; i.disabled = false; });
+  document.querySelectorAll('#lesson5 .feedback').forEach(f => { f.className = 'feedback'; });
+  document.getElementById('l5-score-line').style.display = 'none';
+  document.getElementById('l5-reset-btn').style.display = 'none';
+}
+
+let lesson6Answered = {};
+function checkL6Fill(id, answers) {
+  const el = document.getElementById(id);
+  if (!el || el.disabled) return;
+  const val = el.value.trim().toLowerCase();
+  const ok = answers.map(a => a.toLowerCase()).includes(val);
+  el.classList.add(ok ? 'correct' : 'wrong');
+  el.disabled = true;
+  const fb = document.getElementById(id + '-fb');
+  if (fb) { fb.className = 'feedback ' + (ok ? 'correct' : 'wrong'); fb.textContent = ok ? '✓ 正确！' : '✗ 正确答案：' + answers[0]; }
+  lesson6Answered[id] = ok;
+  checkL6Done();
+}
+function checkL6Radio(qid, correct) {
+  const sel = document.querySelector(`input[name="${qid}"]:checked`);
+  if (!sel) return;
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(r => r.disabled = true);
+  const ok = sel.value === correct;
+  sel.parentElement.classList.add(ok ? 'correct' : 'wrong');
+  const rr = document.querySelector(`input[name="${qid}"][value="${correct}"]`);
+  if (!ok && rr) rr.parentElement.classList.add('correct');
+  const fb = document.getElementById(qid + '-fb');
+  if (fb) { fb.className = 'feedback ' + (ok ? 'correct' : 'wrong'); fb.textContent = ok ? '✓ 正确！' : '✗ 看看正确答案'; }
+  lesson6Answered[qid] = ok;
+  checkL6Done();
+}
+function checkL6Done() {
+  const total = 5, done = Object.keys(lesson6Answered).length;
+  if (done < total) return;
+  const score = Object.values(lesson6Answered).filter(Boolean).length;
+  const sl = document.getElementById('l6-score-line');
+  sl.textContent = `完成！${score}/${total}题正确 ${score === total ? '🎉' : score >= 3 ? '👍' : '再练练！'}`;
+  sl.style.display = 'block';
+  document.getElementById('l6-reset-btn').style.display = 'inline-block';
+}
+function resetL6() {
+  lesson6Answered = {};
+  document.querySelectorAll('#lesson6 input[type=radio]').forEach(i => { i.checked = false; i.disabled = false; });
+  document.querySelectorAll('#lesson6 .opt').forEach(l => l.classList.remove('correct','wrong'));
+  document.querySelectorAll('#lesson6 .fill-in').forEach(i => { i.value = ''; i.className = 'fill-in'; i.disabled = false; });
+  document.querySelectorAll('#lesson6 .feedback').forEach(f => { f.className = 'feedback'; });
+  document.getElementById('l6-score-line').style.display = 'none';
+  document.getElementById('l6-reset-btn').style.display = 'none';
+}
+
+function resetAll() {
+  answered = {};
+  document.querySelectorAll('input[type=radio]').forEach(i => { i.checked = false; i.disabled = false; });
+  document.querySelectorAll('.opt').forEach(l => l.classList.remove('correct','wrong'));
+  document.querySelectorAll('.fill-in').forEach(i => { i.value = ''; i.className = 'fill-in'; i.disabled = false; });
+  document.querySelectorAll('.feedback').forEach(f => { f.className = 'feedback'; });
+  document.getElementById('score-line').style.display = 'none';
+  document.getElementById('reset-btn').style.display = 'none';
+}
+
+let _ltVoice = null, _allVoices = [], _voiceChecked = false;
+function loadVoices() {
+  const all = window.speechSynthesis.getVoices();
+  if (!all.length) return;
+  _voiceChecked = true;
+  _allVoices = all;
+  _ltVoice = all.find(v => v.lang.toLowerCase().startsWith('lt'))
+    || all.find(v => /ona|lietuvių/i.test(v.name))
+    || null;
+  const dbg = document.getElementById('voice-debug-list');
+  if (dbg) renderDebugVoices(dbg);
+}
+if (window.speechSynthesis) {
+  speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  loadVoices();
+  // Safari/Chrome 有时需要延迟才能获取完整列表
+  setTimeout(loadVoices, 500);
+}
+
+function renderDebugVoices(el) {
+  if (!_voiceChecked) { el.textContent = '正在加载语音列表…'; return; }
+  const lt = _allVoices.filter(v => v.lang.toLowerCase().startsWith('lt') || /ona|lietuvių/i.test(v.name));
+  el.innerHTML = (lt.length
+    ? '<strong style="color:var(--green)">✓ 立陶宛语语音：</strong><br>' + lt.map(v=>`${v.name} (${v.lang})`).join('<br>') + '<br><br>'
+    : '<strong style="color:var(--amber)">✗ 未检测到立陶宛语语音</strong><br><br>') +
+    `<details><summary style="cursor:pointer;color:var(--text2)">全部 ${_allVoices.length} 个语音</summary><br>` + _allVoices.map(v=>`${v.name} (${v.lang})`).join('<br>') + '</details>';
+}
+
+function toggleVoiceDebug() {
+  let panel = document.getElementById('voice-debug-panel');
+  if (panel) { panel.remove(); return; }
+  panel = document.createElement('div');
+  panel.id = 'voice-debug-panel';
+  panel.style.cssText = 'position:fixed;bottom:20px;right:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:0.78rem;max-width:280px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,0.15);line-height:1.6';
+  const title = document.createElement('div');
+  title.style.cssText = 'font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center';
+  title.innerHTML = '语音包检测 <button onclick="document.getElementById(\'voice-debug-panel\').remove()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--text2)">✕</button>';
+  const list = document.createElement('div');
+  list.id = 'voice-debug-list';
+  const hint = document.createElement('div');
+  hint.style.cssText = 'margin-top:10px;color:var(--text2);font-size:0.72rem;border-top:1px solid var(--border);padding-top:8px';
+  hint.innerHTML = 'Mac 安装：系统设置→辅助功能→朗读内容→系统声音→管理声音…→添加 Lithuanian<br>（VoiceOver声音≠TTS声音）';
+  panel.appendChild(title);
+  panel.appendChild(list);
+  panel.appendChild(hint);
+  document.body.appendChild(panel);
+  renderDebugVoices(list);
+}
+
+const TTS_BASE = '/api/tts';
+const _audioCache = {};
+
+function speak(text, e) {
+  if (e) e.stopPropagation();
+  const key = text;
+  if (_audioCache[key]) { _audioCache[key].currentTime = 0; _audioCache[key].play(); return; }
+  // Try server-side espeak-ng TTS first
+  fetch(`${TTS_BASE}?text=${encodeURIComponent(text)}`)
+    .then(r => { if (!r.ok) throw new Error('tts fail'); return r.blob(); })
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      _audioCache[key] = audio;
+      audio.play();
+    })
+    .catch(() => {
+      // Fallback to browser Web Speech API
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang = 'lt-LT';
+      if (_ltVoice) utt.voice = _ltVoice;
+      window.speechSynthesis.speak(utt);
+    });
+}
+
+function mkSpeak(text) {
+  const btn = document.createElement('button');
+  btn.className = 'speak-btn';
+  btn.textContent = '🔊';
+  btn.title = '播放立陶宛语发音';
+  btn.onclick = e => speak(text, e);
+  return btn;
+}
+
+// Phrase row sentences (full sentence speak button)
+document.querySelectorAll('.phrase-row[data-words]').forEach(row => {
+  const td = row.querySelector('td');
+  if (td) { const t = td.textContent.trim(); td.appendChild(mkSpeak(t)); }
+});
+// Food, language, question-word, number, country, venue chips
+['.fc-lt', '.lc-lt', '.qword-lt', '.num-lt', '.country-name', '.venue-lt'].forEach(sel =>
+  document.querySelectorAll(sel).forEach(el => el.appendChild(mkSpeak(el.textContent.trim())))
+);
+// Dialog lines
+document.querySelectorAll('.dialog-line').forEach(el => el.appendChild(mkSpeak(el.textContent.trim())));
+</script>
+
+</body></html>

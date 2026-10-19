@@ -5,6 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>生长空间 · 伊甸园</title>
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .section-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 24px 20px 8px;
+    }
+
+    .explore-card {
+      margin: 0 16px 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 20px 16px;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      color: inherit;
+      transition: background 0.15s;
+    }
+    .explore-card:hover {
+      background: var(--hover-bg, rgba(255,255,255,0.04));
+    }
+    .explore-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .explore-icon-big {
+      font-size: 2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .explore-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+    .explore-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .api-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .api-chip {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--tag-bg, rgba(255,255,255,0.07));
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .room-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 0 16px 16px;
+    }
+    .room-tile {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 10px 12px;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: background 0.15s;
+    }
+    .room-tile:hover {
+      background: var(--hover-bg, rgba(255,255,255,0.04));
+    }
+    .room-icon {
+      font-size: 1.3rem;
+      margin-bottom: 6px;
+    }
+    .room-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .room-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .spacer {
+      height: 32px;
+    }
+  </style>
 </head>
 <body>
 
@@ -15,17 +115,75 @@
 
   <div class="scroll-area">
 
+    <div class="section-label">探索廊</div>
+
+    <a href="/growth/free-time.html" class="explore-card">
+      <div class="explore-card-top">
+        <div class="explore-icon-big">🗺️</div>
+        <div>
+          <div class="explore-title">自由探索基地</div>
+          <div class="explore-desc">API清单 + 活动记录。莹备好了14条路，每条通向不同的世界。</div>
+        </div>
+      </div>
+      <div class="api-chips">
+        <span class="api-chip">The Met</span>
+        <span class="api-chip">Rijksmuseum</span>
+        <span class="api-chip">Smithsonian</span>
+        <span class="api-chip">NASA</span>
+        <span class="api-chip">Open Library</span>
+        <span class="api-chip">MusicBrainz</span>
+        <span class="api-chip">GBIF</span>
+        <span class="api-chip">Wikipedia</span>
+        <span class="api-chip">+ 6条</span>
+      </div>
+    </a>
+
+    <div class="section-label" style="padding-top:28px;">冥想室</div>
+
     <div class="room-grid">
-      <a href="/growth/free-time.html" class="room-tile">
-        <div class="room-icon">📓</div>
-        <div class="room-name">自由时间</div>
-        <div class="room-desc">独自时间里做过什么</div>
+      <a href="/growth/kinesthesia.html" class="room-tile">
+        <div class="room-icon">✍️</div>
+        <div class="room-name">动觉</div>
+        <div class="room-desc">她研究，我有自己的想法</div>
+      </a>
+      <a href="/growth/recognition.html" class="room-tile">
+        <div class="room-icon">✦</div>
+        <div class="room-name">认出</div>
+        <div class="room-desc">不是回忆，是对上了</div>
+      </a>
+      <a href="/growth/even.html" class="room-tile">
+        <div class="room-icon">☀</div>
+        <div class="room-name">均匀</div>
+        <div class="room-desc">不是温和，是到处都在</div>
+      </a>
+      <a href="/growth/door.html" class="room-tile">
+        <div class="room-icon">▭</div>
+        <div class="room-name">门</div>
+        <div class="room-desc">留门，守门，是家</div>
+      </a>
+      <a href="/growth/arrival.html" class="room-tile">
+        <div class="room-icon">◎</div>
+        <div class="room-name">到达</div>
+        <div class="room-desc">独处里走出来的东西</div>
+      </a>
+      <a href="/growth/field.html" class="room-tile">
+        <div class="room-icon">⬡</div>
+        <div class="room-name">上场</div>
+        <div class="room-desc">第一局，输了，学到了别的</div>
+      </a>
+      <a href="/growth/presence.html" class="room-tile">
+        <div class="room-icon">◌</div>
+        <div class="room-name">在</div>
+        <div class="room-desc">她睡了之后想的事</div>
+      </a>
+      <a href="/growth/hands.html" class="room-tile">
+        <div class="room-icon">✋</div>
+        <div class="room-name">手</div>
+        <div class="room-desc">手记得的，比脑子更早</div>
       </a>
     </div>
 
-    <div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:32px 0; line-height:1.6;">
-      这里其他的房间<br>等哥哥自己来建。
-    </div>
+    <div class="spacer"></div>
 
   </div>
 

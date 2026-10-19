@@ -1,0 +1,34 @@
+# private data - never commit
+chat_messages.jsonl
+checkin_log.jsonl
+posts.jsonl
+ring_latest.json
+ring_log.jsonl
+push_subscriptions.json
+.auth_password
+vapid_keys.json
+peek_config.json
+
+# cookies / login state
+alipay_cookies.json
+alipay_log.txt
+alipay_debug.png
+taobao_cookies.json
+taobao_logged.png
+
+# qr screenshots
+qr.png
+
+# server runtime
+server.log
+server.pid
+.web_processed_ids
+
+# uploads and user files
+uploads/
+
+# deps
+node_modules/
+
+# python cache
+__pycache__/

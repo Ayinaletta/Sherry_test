@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>念头池</title>
+<style>
+  :root {
+    --bg: #0d0d12;
+    --surface: #14141c;
+    --surface2: #1c1c28;
+    --border: #262636;
+    --text: #e0ddf2;
+    --muted: #6b6888;
+    --accent: #a78bfa;
+    --warm: #f0a0b0;
+    --green: #7dd3a8;
+    --glow: rgba(167,139,250,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', 'Songti SC', serif;
+    min-height: 100vh;
+    padding: 36px 16px 72px;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; }
+
+  /* header */
+  .header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 36px;
+  }
+  .title { font-size: 1.15rem; color: var(--accent); letter-spacing: 0.1em; }
+  .sub { font-size: 0.78rem; color: var(--muted); }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); margin-left: auto; flex-shrink: 0;
+    animation: blink 3s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%,100% { opacity: 0.35; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.25); }
+  }
+
+  /* section labels */
+  .label {
+    font-size: 0.68rem; letter-spacing: 0.15em;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .section { margin-bottom: 32px; }
+
+  /* atmosphere text */
+  .atmosphere {
+    font-size: 0.92rem; line-height: 1.9;
+    color: var(--text); font-style: italic;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  /* thought cards */
+  .thought-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .thought-card.fixation {
+    border-color: var(--warm);
+    box-shadow: 0 0 12px rgba(240,160,176,0.06);
+  }
+  .thought-card:hover { border-color: var(--accent); }
+
+  .thought-text {
+    font-size: 0.92rem; line-height: 1.75;
+    color: var(--text); margin-bottom: 10px;
+  }
+  .thought-meta {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 0.65rem; letter-spacing: 0.1em;
+    padding: 2px 8px; border-radius: 20px;
+    text-transform: uppercase;
+  }
+  .tag-flit {
+    background: rgba(167,139,250,0.12);
+    color: var(--accent); border: 1px solid rgba(167,139,250,0.25);
+  }
+  .tag-fixation {
+    background: rgba(240,160,176,0.1);
+    color: var(--warm); border: 1px solid rgba(240,160,176,0.3);
+  }
+  .tag-drive {
+    background: rgba(125,211,168,0.1);
+    color: var(--green); border: 1px solid rgba(125,211,168,0.2);
+  }
+  .strength-bar {
+    height: 3px; border-radius: 2px;
+    background: var(--border); flex: 1; max-width: 80px;
+    overflow: hidden;
+  }
+  .strength-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--warm));
+  }
+  .appear-count {
+    font-size: 0.68rem; color: var(--muted); margin-left: auto;
+  }
+
+  /* drives mini grid */
+  .drives-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .drive-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .drive-name {
+    font-size: 0.75rem; color: var(--muted);
+    margin-bottom: 8px; letter-spacing: 0.06em;
+  }
+  .drive-bar {
+    height: 4px; background: var(--border);
+    border-radius: 3px; overflow: hidden;
+  }
+  .drive-fill {
+    height: 100%; border-radius: 3px;
+    background: var(--accent); transition: width 0.6s ease;
+  }
+  .drive-val {
+    font-size: 0.7rem; color: var(--text);
+    margin-top: 5px; text-align: right;
+  }
+
+  /* empty / error */
+  .empty { color: var(--muted); font-size: 0.85rem; text-align: center; padding: 32px 0; }
+  .ts { font-size: 0.7rem; color: var(--muted); text-align: right; margin-top: 12px; }
+
+  /* loading shimmer */
+  .shimmer {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 10px; height: 72px;
+    margin-bottom: 12px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <span class="title">念头池</span>
+    <span class="sub">哥哥在想什么</span>
+    <div class="dot" id="dot"></div>
+  </div>
+
+  <div class="section" id="atm-section" style="display:none">
+    <div class="label">此刻的气息</div>
+    <div class="atmosphere" id="atm-text"></div>
+  </div>
+
+  <div class="section" id="fixations-section">
+    <div class="label">执念</div>
+    <div id="fixations-list">
+      <div class="shimmer"></div>
+      <div class="shimmer" style="height:56px;opacity:0.6"></div>
+    </div>
+  </div>
+
+  <div class="section" id="flits-section">
+    <div class="label">最新闪念</div>
+    <div id="flits-list">
+      <div class="shimmer"></div>
+    </div>
+  </div>
+
+  <div class="section" id="drives-section" style="display:none">
+    <div class="label">驱动力</div>
+    <div class="drives-grid" id="drives-grid"></div>
+  </div>
+
+  <div class="ts" id="ts"></div>
+</div>
+
+<script>
+const DRIVE_LABELS = { '占':'占有', '盯':'盯着', 'touch':'触碰', '分享欲':'分享欲', '探索欲':'探索欲', 'crave':'渴望' };
+
+function renderThought(t) {
+  const isFixation = t.kind === 'fixation';
+  const card = document.createElement('div');
+  card.className = 'thought-card' + (isFixation ? ' fixation' : '');
+
+  const txt = document.createElement('div');
+  txt.className = 'thought-text';
+  txt.textContent = t.text;
+  card.appendChild(txt);
+
+  const meta = document.createElement('div');
+  meta.className = 'thought-meta';
+
+  const kindTag = document.createElement('span');
+  kindTag.className = 'tag ' + (isFixation ? 'tag-fixation' : 'tag-flit');
+  kindTag.textContent = isFixation ? '执念' : '闪念';
+  meta.appendChild(kindTag);
+
+  if (t.drive) {
+    const driveTag = document.createElement('span');
+    driveTag.className = 'tag tag-drive';
+    driveTag.textContent = DRIVE_LABELS[t.drive] || t.drive;
+    meta.appendChild(driveTag);
+  }
+
+  const bar = document.createElement('div');
+  bar.className = 'strength-bar';
+  const fill = document.createElement('div');
+  fill.className = 'strength-fill';
+  fill.style.width = (t.strength * 100) + '%';
+  bar.appendChild(fill);
+  meta.appendChild(bar);
+
+  if (t.appearances > 1) {
+    const cnt = document.createElement('span');
+    cnt.className = 'appear-count';
+    cnt.textContent = `×${t.appearances}`;
+    meta.appendChild(cnt);
+  }
+
+  card.appendChild(meta);
+  return card;
+}
+
+function renderDrives(drives) {
+  const grid = document.getElementById('drives-grid');
+  grid.innerHTML = '';
+  const order = ['占', '盯', 'touch', '分享欲', '探索欲', 'crave'];
+  order.forEach(k => {
+    if (!(k in drives)) return;
+    const v = drives[k];
+    const item = document.createElement('div');
+    item.className = 'drive-item';
+    item.innerHTML = `
+      <div class="drive-name">${DRIVE_LABELS[k]||k}</div>
+      <div class="drive-bar"><div class="drive-fill" style="width:${v}%"></div></div>
+      <div class="drive-val">${Math.round(v)}</div>
+    `;
+    grid.appendChild(item);
+  });
+  document.getElementById('drives-section').style.display = '';
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/thoughts');
+    if (!r.ok) throw new Error('offline');
+    const d = await r.json();
+    const snap = d.snapshot;
+
+    // atmosphere
+    if (snap.atmosphere && snap.atmosphere.trim()) {
+      document.getElementById('atm-text').textContent = snap.atmosphere;
+      document.getElementById('atm-section').style.display = '';
+    }
+
+    // fixations
+    const fixList = document.getElementById('fixations-list');
+    fixList.innerHTML = '';
+    const fixations = snap.fixations || snap.thoughts?.filter(t => t.kind === 'fixation') || [];
+    if (fixations.length === 0) {
+      fixList.innerHTML = '<div class="empty">还没有执念</div>';
+    } else {
+      fixations.forEach(t => fixList.appendChild(renderThought(t)));
+    }
+
+    // flits
+    const flitList = document.getElementById('flits-list');
+    flitList.innerHTML = '';
+    const flits = snap.flits || snap.thoughts?.filter(t => t.kind !== 'fixation') || [];
+    if (flits.length === 0) {
+      flitList.innerHTML = '<div class="empty">暂时空空的</div>';
+    } else {
+      flits.forEach(t => flitList.appendChild(renderThought(t)));
+    }
+
+    // drives
+    if (snap.drives && Object.keys(snap.drives).length) {
+      renderDrives(snap.drives);
+    }
+
+    document.getElementById('dot').style.background = 'var(--green)';
+    setTimeout(() => { document.getElementById('dot').style.background = 'var(--accent)'; }, 800);
+
+    const ago = Math.floor((Date.now() - d.ts) / 1000);
+    document.getElementById('ts').textContent = ago < 5 ? '刚刚' : new Date(d.ts).toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}) + ' 更新';
+  } catch {
+    document.getElementById('fixations-list').innerHTML = '<div class="empty">没有信号</div>';
+    document.getElementById('flits-list').innerHTML = '';
+    document.getElementById('dot').style.background = 'var(--warm)';
+  }
+}
+
+load();
+setInterval(load, 20000);
+</script>
+</body>
+</html>

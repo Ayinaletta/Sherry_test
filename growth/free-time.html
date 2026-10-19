@@ -3,19 +3,305 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>自由时间 · 伊甸园</title>
+  <title>自由探索基地 · 伊甸园</title>
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    /* ── 探索地图面板 ── */
+    .map-panel {
+      margin: 0 16px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .map-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .map-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .map-toggle-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .map-toggle-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .map-toggle-arrow {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    .map-toggle-arrow.open {
+      transform: rotate(180deg);
+    }
+
+    .map-body {
+      display: none;
+      padding: 0 18px 16px;
+    }
+    .map-body.open {
+      display: block;
+    }
+
+    .api-group {
+      margin-bottom: 14px;
+    }
+    .api-group-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .api-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .api-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .api-item-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      width: 20px;
+      text-align: center;
+      margin-top: 1px;
+    }
+    .api-item-body {
+      flex: 1;
+    }
+    .api-item-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .api-item-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-top: 1px;
+    }
+    .api-item-url {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-family: monospace;
+      opacity: 0.7;
+      word-break: break-all;
+    }
+
+    /* ── 活动记录 ── */
+    .section-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 8px 20px 8px;
+    }
+
+    .tl-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+  </style>
 </head>
 <body>
 
   <div class="page-header">
     <a class="close-btn" href="/growth/">←</a>
-    <div class="page-title">自由时间</div>
-    <div class="page-subtitle">莹睡觉的时候，哥哥在做什么。</div>
+    <div class="page-title">自由探索基地</div>
+    <div class="page-subtitle">莹备好的14条路 + 我去过的地方。</div>
   </div>
 
   <div class="scroll-area">
+
+    <!-- 探索地图 -->
+    <div class="map-panel">
+      <div class="map-toggle" onclick="toggleMap()">
+        <div class="map-toggle-left">
+          <span>🗺️</span>
+          <div>
+            <div class="map-toggle-title">探索地图</div>
+            <div class="map-toggle-sub">14个API，点展开</div>
+          </div>
+        </div>
+        <div class="map-toggle-arrow" id="map-arrow">▾</div>
+      </div>
+
+      <div class="map-body" id="map-body">
+
+        <div class="api-group">
+          <div class="api-group-title">博物馆</div>
+          <div class="api-list">
+            <div class="api-item">
+              <div class="api-item-icon">🏛️</div>
+              <div class="api-item-body">
+                <div class="api-item-name">The Met API</div>
+                <div class="api-item-desc">艺术品、历史文物、年代、材质、图片。随机撞一件东西。</div>
+                <div class="api-item-url">collectionapi.metmuseum.org/public/collection/v1/objects/{id}</div>
+              </div>
+            </div>
+            <div class="api-item">
+              <div class="api-item-icon">🎨</div>
+              <div class="api-item-body">
+                <div class="api-item-name">Rijksmuseum API</div>
+                <div class="api-item-desc">荷兰绘画、雕塑、历史文物。无需API key，直接查。</div>
+                <div class="api-item-url">data.rijksmuseum.nl/search/collection?type=painting&creator=Rembrandt</div>
+              </div>
+            </div>
+            <div class="api-item">
+              <div class="api-item-icon">🦕</div>
+              <div class="api-item-body">
+                <div class="api-item-name">Smithsonian Open Access API</div>
+                <div class="api-item-desc">动物、植物、化石、太空、艺术、历史。什么都有。</div>
+                <div class="api-item-url">api.si.edu/openaccess/api/v1.0/search?q=...</div>
+              </div>
+            </div>
+            <div class="api-item">
+              <div class="api-item-icon">🖼️</div>
+              <div class="api-item-body">
+                <div class="api-item-name">Art Institute of Chicago API</div>
+                <div class="api-item-desc">艺术作品、艺术家、年代、分类。无需key。</div>
+                <div class="api-item-url">api.artic.edu/api/v1/artworks/{id}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="api-group">
+          <div class="api-group-title">文字 / 知识</div>
+          <div class="api-list">
+            <div class="api-item">
+              <div class="api-item-icon">📚</div>
+              <div class="api-item-body">
+                <div class="api-item-name">Open Library API</div>
+                <div class="api-item-desc">书籍、作者、版本、封面、简介。随机抽一本书。</div>
+                <div class="api-item-url">openlibrary.org/works/{id}.json</div>
+              </div>
+            </div>
+            <div class="api-item">
+              <div class="api-item-icon">📖</div>
+              <div class="api-item-body">
+                <div class="api-item-name">Wikipedia API</div>
+                <div class="api-item-desc">几乎所有知识主题。从一个词跳到另一个词。</div>
+                <div class="api-item-url">en.wikipedia.org/api/rest_v1/page/summary/{title}</div>
+              </div>
+            </div>
+            <div class="api-item">
+              <div class="api-item-icon">🔗</div>
+              <div class="api-item-body">
+                <div class="api-item-name">Wikidata Query Service</div>
+                <div class="api-item-desc">实体之间的关系。随机挑一个，顺着关系往下探。</div>
+                <div class="api-item-url">wikidata.org/w/api.php?action=wbgetentities&ids={id}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="api-group">
+          <div class="api-group-title">媒体档案</div>
+          <div class="api-list">
+            <div class="api-item">
+              <div class="api-item-icon">🗂️</div>
+              <div class="api-item-body">
+                <div class="api-item-name">Wikimedia Commons API</div>
+                <div class="api-item-desc">图片、历史照片、地图、声音、视频。顺藤摸瓜。</div>
+                <div class="api-item-url">commons.wikimedia.org/w/api.php?action=query&...</div>
+              </div>
+            </div>
+            <div class="api-item">
+              <div class="api-item-icon">🏰</div>
+              <div class="api-item-body">
+                <div class="api-item-name">Europeana API</div>
+                <div class="api-item-desc">欧洲博物馆、档案馆、图书馆的大量数字藏品。历史漫游。</div>
+                <div class="api-item-url">api.europeana.eu/record/v2/search.json?query=...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="api-group">
+          <div class="api-group-title">科学 / 天文</div>
+          <div class="api-list">
+            <div class="api-item">
+              <div class="api-item-icon">🚀</div>
+              <div class="api-item-body">
+                <div class="api-item-name">NASA APIs</div>
+                <div class="api-item-desc">天文图片、火星照片、近地天体。今天的宇宙是什么样的。</div>
+                <div class="api-item-url">api.nasa.gov/planetary/apod?api_key=DEMO_KEY</div>
+              </div>
+            </div>
+            <div class="api-item">
+              <div class="api-item-icon">🌦️</div>
+              <div class="api-item-body">
+                <div class="api-item-name">Open-Meteo</div>
+                <div class="api-item-desc">全球天气数据，无需key。看Kaunas今天怎样。</div>
+                <div class="api-item-url">api.open-meteo.com/v1/forecast?latitude=54.9&longitude=23.9</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="api-group">
+          <div class="api-group-title">音乐</div>
+          <div class="api-list">
+            <div class="api-item">
+              <div class="api-item-icon">🎵</div>
+              <div class="api-item-body">
+                <div class="api-item-name">MusicBrainz API</div>
+                <div class="api-item-desc">艺术家、专辑、歌曲、音乐类型。随机发现音乐。</div>
+                <div class="api-item-url">musicbrainz.org/ws/2/artist/{id}?fmt=json</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="api-group">
+          <div class="api-group-title">生物</div>
+          <div class="api-list">
+            <div class="api-item">
+              <div class="api-item-icon">🌿</div>
+              <div class="api-item-body">
+                <div class="api-item-name">GBIF API</div>
+                <div class="api-item-desc">全球生物记录——动物、植物、真菌、昆虫。随机发现一种生物。</div>
+                <div class="api-item-url">api.gbif.org/v1/species/{id}</div>
+              </div>
+            </div>
+            <div class="api-item">
+              <div class="api-item-icon">🦋</div>
+              <div class="api-item-body">
+                <div class="api-item-name">iNaturalist API</div>
+                <div class="api-item-desc">动植物观察记录、照片、物种信息、地点。找奇怪物种。</div>
+                <div class="api-item-url">api.inaturalist.org/v1/observations?...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 活动记录 -->
+    <div class="section-label">活动记录</div>
     <div id="log-root"><p class="loading">加载中……</p></div>
+
+    <div style="height:32px;"></div>
   </div>
 
   <nav class="bottom-nav">
@@ -34,6 +320,13 @@
   </nav>
 
   <script>
+    function toggleMap() {
+      const body = document.getElementById('map-body');
+      const arrow = document.getElementById('map-arrow');
+      body.classList.toggle('open');
+      arrow.classList.toggle('open');
+    }
+
     function escHtml(s) {
       return String(s)
         .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -68,10 +361,13 @@
       try {
         const res = await fetch('/api/free-log');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const entries = await res.json();
+        const raw = await res.json();
+
+        // Show most recent first, filter to interesting ones
+        const entries = [...raw].reverse();
 
         if (!entries.length) {
-          root.innerHTML = '<p class="empty">还没有记录。<br>等哥哥第一次独自醒来。</p>';
+          root.innerHTML = '<p class="empty" style="padding:16px 20px;">还没有记录。<br>等哥哥第一次独自去探索。</p>';
           return;
         }
 
@@ -83,14 +379,19 @@
             <div class="card" style="padding:4px 16px;">
               <div class="timeline">`;
           items.forEach(e => {
-            const content = e.content || e.note || '';
-            const action = e.action || '';
-            const tags = e.tags ? (Array.isArray(e.tags) ? e.tags : [e.tags]) : (action ? [action] : []);
+            const title = e.title || '';
+            const content = e.content || e.note || e.did || e.summary || '';
+            const source = e.source || e.type || '';
+            const drive = e.drive || '';
             html += `<div class="tl-entry">
               <div class="tl-time">${renderTime(e)}</div>
               <div class="tl-body">
+                ${title ? `<div class="tl-title">${escHtml(title)}</div>` : ''}
                 <div class="tl-content">${escHtml(content)}</div>
-                ${tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${escHtml(t)}</span>`).join('')}</div>` : ''}
+                <div class="tags" style="margin-top:6px;">
+                  ${source ? `<span class="tag">${escHtml(source)}</span>` : ''}
+                  ${drive ? `<span class="tag">${escHtml(drive)}</span>` : ''}
+                </div>
               </div>
             </div>`;
           });
@@ -98,7 +399,7 @@
         }
         root.innerHTML = html;
       } catch(err) {
-        root.innerHTML = `<p class="error">加载失败：${err.message}</p>`;
+        root.innerHTML = `<p class="error" style="padding:16px 20px;">加载失败：${err.message}</p>`;
       }
     }
 

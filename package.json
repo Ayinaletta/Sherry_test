@@ -5,5 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "busboy": "^1.6.0",
+    "nodemailer": "^10.0.3",
+    "sharp": "^0.35.4",
+    "web-push": "^3.6.7"
   }
 }
