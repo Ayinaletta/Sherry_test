@@ -1181,6 +1181,36 @@ function legacyHandler(req, res) {
     return;
   }
 
+  // API: send any file (raw body, ?name=<original name>) -> uploads/ + a file card in chat
+  if (pathname === '/api/chat/send-file' && req.method === 'POST') {
+    core.readBody(req, 25 * 1024 * 1024).then(buf => {
+      if (!buf.length) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'empty file' })); return; }
+      let name = path.basename(String(url.searchParams.get('name') || 'file')).replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').slice(0, 100) || 'file';
+      // anything a browser could execute is stored as plain text, so opening it can never run script
+      if (/\.(html?|xhtml|svg|xml|js|mjs)$/i.test(name)) name += '.txt';
+      const filename = `file_${Date.now()}_${name}`;
+      const abs = path.join(UPLOADS_DIR, filename);
+      fs.writeFileSync(abs, buf);
+      const kb = buf.length < 1048576 ? Math.max(1, Math.round(buf.length / 1024)) + ' KB' : (buf.length / 1048576).toFixed(1) + ' MB';
+      const caption = String(url.searchParams.get('caption') || '').trim().slice(0, 500);
+      const entry = {
+        id: Date.now(), from: 'sherry', file_url: '/uploads/' + encodeURIComponent(filename), file_name: name, file_size: buf.length,
+        caption: caption || undefined,
+        // Claude reads the text field: say what arrived and where it lives on disk
+        text: `[发来一个文件] ${name} (${kb}) ${abs}${caption ? ' —— ' + caption : ''}`,
+        ts: new Date().toISOString(),
+      };
+      appendChat(entry);
+      bridgeChat(entry);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, id: entry.id, file_url: entry.file_url }));
+    }).catch(e => {
+      res.writeHead(e.message === 'too large' ? 413 : 500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message }));
+    });
+    return;
+  }
+
   // API: push subscribe
   if (pathname === '/api/push/subscribe' && req.method === 'POST') {
     let body = '';

@@ -41,6 +41,14 @@
     .pin-photo-btn { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,.5); color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: .95rem; display: flex; align-items: center; justify-content: center; opacity: .0; transition: opacity .2s; }
     .img-wrap:hover .pin-photo-btn, .img-wrap:active .pin-photo-btn { opacity: 1; }
     .msg-bubble audio { display: block; }
+    .file-card { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+    .file-card .tile-ic { background: var(--accent-light); color: var(--accent); }
+    .msg-bubble.mine .file-card .tile-ic { background: rgba(255,255,255,.22); color: inherit; }
+    .file-name { font-size: .9rem; font-weight: 500; word-break: break-all; line-height: 1.35; }
+    .file-meta { font-size: .72rem; opacity: .75; margin-top: 2px; }
+    .file-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .file-actions a, .file-actions button { font-size: .76rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; border: none; cursor: pointer; background: var(--bg-dim); color: var(--text); }
+    .msg-bubble.mine .file-actions a, .msg-bubble.mine .file-actions button { background: rgba(255,255,255,.25); color: inherit; }
     .msg-expand-btn { display: inline-block; margin-top: 4px; font-size: .8rem; color: var(--accent); cursor: pointer; background: none; border: none; padding: 0; }
     .msg-bubble.mine .msg-expand-btn { color: var(--on-accent); text-decoration: underline; }
 
@@ -122,10 +130,12 @@
   <div class="menu-bg" id="tray-bg"></div>
   <div class="menu tray" id="tray">
     <button class="menu-item" onclick="document.getElementById('file-input').click();closeTray()"><span data-ic="image"></span>发图片</button>
+    <button class="menu-item" onclick="document.getElementById('doc-input').click();closeTray()"><span data-ic="paperclip"></span>发文件</button>
     <button class="menu-item" id="mic-btn" title="语音转文字（写进输入框）"><span data-ic="mic"></span><span id="mic-label">语音转文字</span></button>
     <button class="menu-item" onclick="closeTray();openExpand()"><span data-ic="maximize-2"></span>展开输入框</button>
   </div>
   <input type="file" id="file-input" accept="image/*" style="display:none">
+  <input type="file" id="doc-input" style="display:none">
 
   <div class="chat-input-bar">
     <button class="icon-btn" id="tray-btn" title="更多输入方式" data-ic="plus"></button>
@@ -225,7 +235,14 @@
 
       let bubbleInner = '';
 
-      if (entry.audio_url) {
+      if (entry.file_url) {
+        const kb = entry.file_size < 1048576 ? Math.max(1, Math.round(entry.file_size / 1024)) + ' KB' : (entry.file_size / 1048576).toFixed(1) + ' MB';
+        const readable = /\.(pdf|txt|md)$/i.test(entry.file_name || '');
+        bubbleInner = `<div class="file-card"><span class="tile-ic">${ic('file-text')}</span><div><div class="file-name">${escHtml(entry.file_name || '文件')}</div><div class="file-meta">${kb}</div></div></div>`
+          + (entry.caption ? `<div class="msg-caption">${escHtml(entry.caption)}</div>` : '')
+          + `<div class="file-actions"><a href="${entry.file_url}" download="${escHtml(entry.file_name || 'file')}">下载</a>`
+          + (readable ? `<button onclick="readTogether('${entry.file_url}', this.dataset.n)" data-n="${escHtml(entry.file_name || '')}">一起读</button>` : '') + `</div>`;
+      } else if (entry.audio_url) {
         // Voice message: audio player + transcript (Whisper for her, the spoken text for me)
         const t = entry.text ? `<div class="msg-caption">${escHtml(entry.text)}</div>`
           : (entry.stt_error ? `<div class="msg-caption">（没转成文字）</div>` : '');
@@ -644,6 +661,41 @@
     micBtn.addEventListener('click', closeTray);
     micBtn.addEventListener('click', toggleSTT);
     micBtn.addEventListener('touchend', e => { e.preventDefault(); toggleSTT(); }, { passive: false });
+
+    // Any file: raw upload, shows up as a file card
+    const docInput = document.getElementById('doc-input');
+    docInput.addEventListener('change', async () => {
+      const file = docInput.files[0];
+      docInput.value = '';
+      if (!file) return;
+      if (file.size > 25 * 1024 * 1024) { alert('文件太大了，请选择 25MB 以内的文件'); return; }
+      const caption = document.getElementById('msg-input').value.trim();
+      try {
+        const r = await fetch('/api/chat/send-file?name=' + encodeURIComponent(file.name) + (caption ? '&caption=' + encodeURIComponent(caption) : ''), {
+          method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: file,
+        });
+        if (!r.ok) throw new Error();
+        if (caption) { document.getElementById('msg-input').value = ''; document.getElementById('msg-input').dispatchEvent(new Event('input')); }
+      } catch {
+        const note = document.createElement('div');
+        note.className = 'msg-system'; note.textContent = '文件发送失败，请重试';
+        area.appendChild(note);
+      }
+      scrollToBottom();
+    });
+
+    // PDF / text sent in chat -> straight into 共读
+    async function readTogether(url, name) {
+      try {
+        const blob = await (await fetch(url)).blob();
+        const r = await fetch('/api/reading?title=' + encodeURIComponent((name || '未命名').replace(/\.[^.]+$/, '')), {
+          method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: blob,
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        location.href = '/reading?doc=' + d.id;
+      } catch (e) { alert('没能放进共读：' + e.message); }
+    }
 
     // Voice message: record -> POST audio -> server runs Whisper -> Claude reads the text
     const recBtn = document.getElementById('rec-btn');

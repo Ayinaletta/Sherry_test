@@ -289,7 +289,7 @@ a.row:active, .row.tappable:active { background: var(--bg-dim); }
 .menu-bg { position: fixed; inset: 0; z-index: 140; display: none; }
 .menu-bg.open { display: block; }
 .menu {
-  position: absolute; z-index: 141; right: 8px; top: calc(var(--bar-height) + var(--safe-top) + 4px); min-width: 210px;
+  position: fixed; z-index: 141; right: 8px; top: calc(var(--bar-height) + var(--safe-top) + 4px); min-width: 210px;
   background: var(--bg-card); border-radius: 16px; padding: 6px; display: none;
   box-shadow: 0 12px 40px rgba(40, 25, 10, .22); border: 1px solid var(--border);
 }
