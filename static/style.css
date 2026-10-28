@@ -343,3 +343,17 @@ a.row:active, .row.tappable:active { background: var(--bg-dim); }
 .chat-send:disabled { opacity: .5; }
 .chat-send.quiet { background: var(--bg-dim); color: var(--text-muted); }
 .model-tag { font-size: 0.72rem; color: var(--text-muted); background: var(--tag-bg); border-radius: var(--radius-pill); padding: 3px 8px; white-space: nowrap; }
+
+/* ── Wide windows (Mac / iPad): keep the app a centred column instead of stretching ── */
+@media (min-width: 760px) {
+  .appbar, .page-header, .scroll-area, .chat-area, .wrap-narrow { max-width: 720px; margin-left: auto; margin-right: auto; }
+  .appbar, .page-header { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .tabbar, .bottom-nav, .chat-input-bar {
+    left: 50%; right: auto; width: 720px; transform: translateX(-50%);
+    border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  }
+  .menu { right: max(8px, calc(50% - 352px)); }
+  .tray { right: auto; left: max(10px, calc(50% - 350px)); }
+  .appbar, .page-header, .scroll-area, .chat-area, .wrap-narrow, .list { background-clip: padding-box; }
+  .scroll-area, .chat-area, .wrap-narrow { background: var(--bg); min-height: calc(100vh - var(--bar-height)); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+}

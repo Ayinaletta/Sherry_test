@@ -1,6 +1,8 @@
 // Shared UI glue: icon helper, tab bar, theme-color. Loaded synchronously in <head>.
 (function () {
-  const SPRITE = '/static/icons.svg';
+  // icons.svg carries the same ?v= as this script so a new sprite is never served from an old cache
+  const SV = (document.currentScript && /[?&]v=([\w]+)/.exec(document.currentScript.src) || [])[1];
+  const SPRITE = '/static/icons.svg' + (SV ? '?v=' + SV : '');
   // ic('house') -> inline <svg><use/></svg>; class goes on the svg (e.g. 'lg', 'spin')
   window.ic = (name, cls) => `<svg class="ic${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="${SPRITE}#i-${name}"/></svg>`;
   // swap the icon inside an element (state changes like bell -> bell-off)

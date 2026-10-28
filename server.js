@@ -253,7 +253,7 @@ const MIME = {
   '.mjs': 'text/javascript',
 };
 
-function serveFile(filePath, res) {
+function serveFile(filePath, res, req) {
   fs.readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -262,7 +262,19 @@ function serveFile(filePath, res) {
     }
     const ext = path.extname(filePath).toLowerCase();
     const headers = { 'Content-Type': MIME[ext] || 'text/plain' };
-    if (ext === '.html') headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+    if (ext === '.html') {
+      headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+      data = Buffer.from(core.versionHtml(data.toString('utf8')));
+    } else if (ext === '.css' || ext === '.js' || ext === '.svg' || ext === '.mjs') {
+      // always revalidate; unchanged files answer 304 so this stays cheap
+      let st; try { st = fs.statSync(filePath); } catch { st = null; }
+      if (st) {
+        const etag = `W/"${st.size}-${Math.floor(st.mtimeMs)}"`;
+        headers['ETag'] = etag;
+        headers['Cache-Control'] = 'no-cache';
+        if (req && req.headers['if-none-match'] === etag) { res.writeHead(304, headers); res.end(); return; }
+      }
+    }
     res.writeHead(200, headers);
     res.end(data);
   });
@@ -297,7 +309,7 @@ function legacyHandler(req, res) {
 
   // Login page
   if (pathname === '/login') {
-    serveFile(path.join(ROOT, 'login.html'), res);
+    serveFile(path.join(ROOT, 'login.html'), res, req);
     return;
   }
 
@@ -817,8 +829,8 @@ function legacyHandler(req, res) {
   if (pathname === '/camera') {
     const p = path.join(ROOT, 'camera.html');
     if (fs.existsSync(p)) {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(fs.readFileSync(p));
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
+      res.end(core.versionHtml(fs.readFileSync(p, 'utf8')));
     } else {
       res.writeHead(404); res.end('not found');
     }
@@ -849,8 +861,8 @@ function legacyHandler(req, res) {
   if (pathname === '/thoughts') {
     const p = path.join(ROOT, 'thoughts.html');
     if (fs.existsSync(p)) {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(fs.readFileSync(p));
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
+      res.end(core.versionHtml(fs.readFileSync(p, 'utf8')));
     } else {
       res.writeHead(404); res.end('not found');
     }
@@ -910,8 +922,8 @@ function legacyHandler(req, res) {
   if (pathname === '/photos') {
     const p = path.join(ROOT, 'photos.html');
     if (fs.existsSync(p)) {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(fs.readFileSync(p));
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
+      res.end(core.versionHtml(fs.readFileSync(p, 'utf8')));
     } else {
       res.writeHead(404); res.end('not found');
     }
@@ -1009,8 +1021,8 @@ function legacyHandler(req, res) {
   if (pathname === '/posts') {
     const p = path.join(ROOT, 'posts.html');
     if (fs.existsSync(p)) {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(fs.readFileSync(p));
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
+      res.end(core.versionHtml(fs.readFileSync(p, 'utf8')));
     } else {
       res.writeHead(404); res.end('not found');
     }
@@ -1328,7 +1340,7 @@ function legacyHandler(req, res) {
     }
   }
 
-  serveFile(filePath, res);
+  serveFile(filePath, res, req);
 }
 
 server.listen(PORT, '0.0.0.0', () => {
