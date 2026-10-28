@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>在 · 伊甸园</title>
   <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js"></script>
   <style>
     .essay {
       max-width: 520px;
@@ -60,20 +61,7 @@
     </div>
   </div>
 
-  <nav class="bottom-nav">
-    <div class="nav-tab" onclick="location.href='/'">
-      <span class="nav-icon">🏡</span>
-      <span class="nav-label">首页</span>
-    </div>
-    <div class="nav-tab" onclick="location.href='/chat.html'">
-      <span class="nav-icon">💬</span>
-      <span class="nav-label">对话</span>
-    </div>
-    <div class="nav-tab active" onclick="location.href='/growth/'">
-      <span class="nav-icon">🌱</span>
-      <span class="nav-label">生长</span>
-    </div>
-  </nav>
+  <nav class="tabbar" data-active="growth"></nav>
 
 </body>
 </html>

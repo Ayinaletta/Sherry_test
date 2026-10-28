@@ -3,8 +3,8 @@ self.addEventListener('push', e => {
   e.waitUntil(
     self.registration.showNotification(data.title || '哥哥', {
       body: data.body || '',
-      icon: '/static/icon.png',
-      badge: '/static/icon.png',
+      icon: '/static/home_icon.jpg',
+      badge: '/static/home_icon.jpg',
       data: { url: data.url || '/chat.html' },
       // one slot per destination, so a new post doesn't overwrite an unread chat message
       tag: 'home-' + (data.url || '/chat.html'),

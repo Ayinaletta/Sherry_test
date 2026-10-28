@@ -2,80 +2,32 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#F5F1EA">
   <title>进门</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #f5f0ea;
-      font-family: -apple-system, 'PingFang SC', sans-serif;
-      padding: 24px;
-    }
-    .card {
-      background: #fff;
-      border-radius: 20px;
-      padding: 40px 32px;
-      max-width: 320px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-    }
-    .icon { font-size: 48px; margin-bottom: 16px; }
-    h1 {
-      font-size: 18px;
-      color: #3d2b1f;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    p {
-      font-size: 13px;
-      color: #9e8b7e;
-      margin-bottom: 28px;
-      line-height: 1.5;
-    }
-    input[type="password"] {
-      width: 100%;
-      padding: 14px 16px;
-      border: 1.5px solid #e8e0d8;
-      border-radius: 12px;
-      font-size: 16px;
-      outline: none;
-      margin-bottom: 16px;
-      transition: border-color 0.2s;
-      background: #faf8f5;
-      color: #3d2b1f;
-      letter-spacing: 2px;
-    }
-    input[type="password"]:focus { border-color: #c9a98a; }
-    button {
-      width: 100%;
-      padding: 14px;
-      background: #c9a98a;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    button:hover { background: #b8956f; }
-    .error {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #c0392b;
-      min-height: 20px;
-    }
+    :root { --bg:#F5F1EA; --card:#fff; --text:#2A241D; --muted:#7F776C; --line:rgba(70,50,30,.14); --accent:#BC6C3E; --accent-dim:#A2562B; --accent-light:#F4E3D5; --danger:#C4483E; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#161310; --card:#221E1A; --text:#EEE8DF; --muted:#A39B90; --line:rgba(255,235,210,.12); --accent:#D9935F; --accent-dim:#E8A77A; --accent-light:#3A281B; } }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { min-height: 100dvh; display: flex; align-items: center; justify-content: center; background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; padding: 24px; }
+    .card { background: var(--card); border-radius: 28px; padding: 40px 28px 32px; max-width: 340px; width: 100%; text-align: center;
+      box-shadow: 0 1px 2px rgba(70,45,20,.05), 0 16px 48px rgba(70,45,20,.1); }
+    .mark { width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 18px; display: flex; align-items: center; justify-content: center;
+      background: var(--accent-light); color: var(--accent); font-family: 'Noto Serif SC','Songti SC',Georgia,serif; font-size: 30px; font-weight: 600; }
+    h1 { font-size: 19px; font-weight: 600; margin-bottom: 6px; }
+    p { font-size: 13px; color: var(--muted); margin-bottom: 26px; line-height: 1.5; }
+    input[type="password"] { width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; font-size: 16px; outline: none;
+      margin-bottom: 14px; background: transparent; color: var(--text); letter-spacing: 2px; transition: border-color .2s, box-shadow .2s; }
+    input[type="password"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    button { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 999px; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform .1s; }
+    button:active { transform: scale(.98); }
+    .error { margin-top: 12px; font-size: 13px; color: var(--danger); min-height: 20px; }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="icon">🏠</div>
+    <div class="mark">伊</div>
     <h1>哥哥的家</h1>
     <p>小莹才能进来</p>
     <input type="password" id="pw" placeholder="密码" autofocus />

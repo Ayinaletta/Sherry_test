@@ -549,7 +549,7 @@ function legacyHandler(req, res) {
           const filename = `peek_${Date.now()}.${compressed.ext}`;
           fs.writeFileSync(path.join(UPLOADS_DIR, filename), compressed.buf);
           const image_url = `/uploads/${filename}`;
-          const entry = { id: Date.now(), from: 'sherry', image_url, caption: '📱 偷看截图', ts: new Date().toISOString() };
+          const entry = { id: Date.now(), from: 'sherry', image_url, caption: '偷看截图', ts: new Date().toISOString() };
           fs.appendFileSync(CHAT_LOG, JSON.stringify(entry) + '\n');
           broadcastChat(entry);
           res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -576,7 +576,7 @@ function legacyHandler(req, res) {
           if (saved) return;
           saved = true;
           const image_url = `/uploads/${filename}`;
-          const entry = { id: Date.now(), from: 'sherry', image_url, caption: '📱 偷看截图', ts: new Date().toISOString() };
+          const entry = { id: Date.now(), from: 'sherry', image_url, caption: '偷看截图', ts: new Date().toISOString() };
           fs.appendFileSync(CHAT_LOG, JSON.stringify(entry) + '\n');
           broadcastChat(entry);
           res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -784,7 +784,7 @@ function legacyHandler(req, res) {
       fs.writeFileSync(path.join(UPLOADS_DIR, filename), compressed.buf);
       fs.writeFileSync(SNAP_LATEST, compressed.buf);
       const image_url = `/uploads/${filename}`;
-      const entry = { id: Date.now(), from: 'sherry', image_url, caption: '📸 快照', ts: new Date().toISOString() };
+      const entry = { id: Date.now(), from: 'sherry', image_url, caption: '快照', ts: new Date().toISOString() };
       fs.appendFileSync(CHAT_LOG, JSON.stringify(entry) + '\n');
       broadcastChat(entry);
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -804,7 +804,7 @@ function legacyHandler(req, res) {
       fs.writeFileSync(path.join(UPLOADS_DIR, filename), compressed.buf);
       fs.writeFileSync(SNAP_LATEST, compressed.buf);
       const image_url = `/uploads/${filename}`;
-      const entry = { id: Date.now(), from: 'sherry', image_url, caption: '📷 莹的', ts: new Date().toISOString() };
+      const entry = { id: Date.now(), from: 'sherry', image_url, caption: '莹的', ts: new Date().toISOString() };
       fs.appendFileSync(CHAT_LOG, JSON.stringify(entry) + '\n');
       broadcastChat(entry);
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1206,7 +1206,7 @@ function legacyHandler(req, res) {
       const entry = {
         id: Date.now(),
         from: 'claude',
-        text: '✅ /compact 已发送，稍等压缩中…',
+        text: '/compact 已发送，稍等压缩中…',
         ts: new Date().toISOString(),
       };
       try { fs.appendFileSync(CHAT_LOG, JSON.stringify(entry) + '\n'); } catch {}
@@ -1269,7 +1269,7 @@ function legacyHandler(req, res) {
       fs.writeFileSync(path.join(UPLOADS_DIR, filename), compressed.buf);
       fs.writeFileSync(SNAP_LATEST, compressed.buf);
       const image_url = `/uploads/${filename}`;
-      const entry = { id: Date.now(), from: 'sherry', image_url, caption: '📸 快照', ts: new Date().toISOString() };
+      const entry = { id: Date.now(), from: 'sherry', image_url, caption: '快照', ts: new Date().toISOString() };
       fs.appendFileSync(CHAT_LOG, JSON.stringify(entry) + '\n');
       broadcastChat(entry);
       res.writeHead(200, { 'Content-Type': 'application/json' });

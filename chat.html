@@ -10,318 +10,93 @@
   <meta name="apple-mobile-web-app-title" content="新家">
   <link rel="apple-touch-icon" href="/static/home_icon.jpg">
   <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js"></script>
   <style>
     body { padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 64px); }
 
-    .chat-header {
-      padding: 16px 20px 12px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .chat-header-name { font-weight: 600; font-size: 1rem; }
-    .chat-header-sub { font-size: 0.75rem; color: var(--text-muted); }
-    .status-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--text-soft);
-      display: inline-block;
-      margin-left: 6px;
-      vertical-align: middle;
-      transition: background 0.3s;
-    }
-    .status-dot.live { background: #6bc98e; }
+    .toy-status { padding: 5px 16px; font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; min-height: 26px; border-bottom: 1px solid var(--border); }
+    .toy-status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-soft); flex-shrink: 0; transition: background .4s; }
+    .toy-status-dot.fresh { background: var(--accent); }
 
-    .toy-status {
-      padding: 5px 20px;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      min-height: 24px;
-    }
-    .toy-status-dot {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--text-soft);
-      flex-shrink: 0;
-      transition: background 0.4s;
-    }
-    .toy-status-dot.fresh { background: #f0a050; }
+    .msg-row .msg-ts { text-align: left; }
+    .msg-row.mine .msg-ts { text-align: right; }
 
-    .chat-area {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      min-height: 50vh;
-    }
-
-    .msg-ts {
-      font-size: 0.7rem;
-      color: var(--text-soft);
-      margin-top: 2px;
-    }
-    .msg-row .msg-ts { text-align: left; padding-left: 2px; }
-    .msg-row.mine .msg-ts { text-align: right; padding-right: 2px; }
-
-    .search-bar {
-      display: none;
-      padding: 8px 16px 10px;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 57px;
-      z-index: 9;
-      position: relative;
-    }
+    .search-bar { display: none; padding: 8px 14px 10px; background: var(--bg); border-bottom: 1px solid var(--border); position: relative; }
     .search-bar.open { display: block; }
-    .search-input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 7px 12px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--surface);
-      color: var(--text);
-      font-size: 16px;
-      outline: none;
-    }
-    .search-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 1.1rem;
-      padding: 4px 6px;
-      line-height: 1;
-    }
+    .search-input { width: 100%; padding: 9px 14px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-card); color: var(--text); font-size: 16px; outline: none; }
+    .search-input:focus { border-color: var(--accent); }
+    #search-nav { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); display: none; align-items: center; gap: 2px; font-size: .78rem; color: var(--text-muted); }
+    #search-nav button { background: none; border: none; cursor: pointer; padding: 4px 6px; color: var(--text-muted); font-size: 1rem; }
     .msg-row.search-hidden { display: none; }
-    .msg-highlight mark, mark {
-      background: #ffe066;
-      border-radius: 2px;
-      color: inherit;
-    }
-    .msg-row.search-current .msg-bubble {
-      outline: 2px solid var(--accent);
-      border-radius: 12px;
-    }
+    .msg-highlight mark, mark { background: #ffe066; border-radius: 2px; color: #2A241D; }
+    .msg-row.search-current .msg-bubble { outline: 2px solid var(--accent); }
+
     /* 内心 thought blocks */
-    .thought-block {
-      background: rgba(0,0,0,0.04);
-      border-left: 2px solid #bbb;
-      border-radius: 4px;
-      padding: 4px 8px;
-      margin: 4px 0;
-    }
-    .thought-label {
-      font-size: 0.72em;
-      color: #999;
-      font-weight: 500;
-      display: block;
-      margin-bottom: 2px;
-    }
-    .thought-content {
-      font-size: 0.88em;
-      color: #666;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    @media (prefers-color-scheme: dark) {
-      .thought-block { background: rgba(255,255,255,0.07); border-left-color: #555; }
-      .thought-label { color: #888; }
-      .thought-content { color: #aaa; }
-    }
-    /* Image messages */
-    .msg-image {
-      max-width: 240px;
-      max-height: 320px;
-      border-radius: 12px;
-      display: block;
-      cursor: pointer;
-      object-fit: cover;
-    }
-    .msg-caption {
-      font-size: 0.85rem;
-      margin-top: 4px;
-      color: inherit;
-      opacity: 0.9;
-    }
-    .pin-photo-btn {
-      position: absolute; bottom: 6px; right: 6px;
-      background: rgba(0,0,0,0.5); border: none; border-radius: 50%;
-      width: 28px; height: 28px; cursor: pointer; font-size: 0.85rem;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.2s;
-    }
-    .img-wrap:hover .pin-photo-btn { opacity: 1; }
-    /* Long message expand/collapse */
-    .msg-expand-btn {
-      display: inline-block;
-      margin-top: 4px;
-      font-size: 0.8rem;
-      color: var(--accent);
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 0;
-    }
-    /* Photo button */
-    .chat-photo-btn {
-      width: 36px; height: 36px;
-      background: var(--bg-card);
-      border: none;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      font-size: 1.1rem;
-    }
-    /* Voice buttons */
-    .voice-ctrl-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.15rem;
-      padding: 4px 5px;
-      line-height: 1;
-      opacity: 0.45;
-      transition: opacity 0.2s;
-      border-radius: 6px;
-    }
-    .voice-ctrl-btn.active { opacity: 1; }
-    .mic-btn {
-      width: 36px; height: 36px;
-      background: var(--bg-card);
-      border: none;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      font-size: 1.1rem;
-      transition: background 0.15s;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    .mic-btn.recording { background: #ff5555; }
-    .msg-notice { margin: 8px 16px; padding: 2px 0; }
-    /* Date separator */
-    .date-sep {
-      text-align: center;
-      font-size: 0.72rem;
-      color: var(--text-soft);
-      padding: 4px 0;
-      position: relative;
-    }
-    .date-sep::before, .date-sep::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 28%;
-      height: 1px;
-      background: var(--border);
-    }
-    .date-sep::before { left: 0; }
-    .date-sep::after { right: 0; }
+    .thought-block { background: var(--bg-dim); border-left: 2px solid var(--text-soft); border-radius: 6px; padding: 5px 9px; margin: 4px 0; }
+    .thought-label { font-size: .72em; color: var(--text-muted); font-weight: 500; display: block; margin-bottom: 2px; }
+    .thought-content { font-size: .88em; color: var(--text-muted); white-space: pre-wrap; word-break: break-word; }
 
-    /* Expand textarea overlay */
-    .expand-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 998;
-      flex-direction: column;
-      padding: 16px;
-      gap: 10px;
-    }
+    .msg-image { max-width: 240px; max-height: 320px; border-radius: 14px; display: block; cursor: pointer; object-fit: cover; }
+    .msg-caption { font-size: .85rem; margin-top: 4px; color: inherit; opacity: .9; }
+    .pin-photo-btn { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,.5); color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: .95rem; display: flex; align-items: center; justify-content: center; opacity: .0; transition: opacity .2s; }
+    .img-wrap:hover .pin-photo-btn, .img-wrap:active .pin-photo-btn { opacity: 1; }
+    .msg-bubble audio { display: block; }
+    .msg-expand-btn { display: inline-block; margin-top: 4px; font-size: .8rem; color: var(--accent); cursor: pointer; background: none; border: none; padding: 0; }
+    .msg-bubble.mine .msg-expand-btn { color: var(--on-accent); text-decoration: underline; }
+
+    /* notices from the house (new post, new annotation, ...) */
+    .msg-notice { text-align: center; }
+    .msg-notice a, .msg-notice span.pill { display: inline-flex; align-items: center; gap: 6px; max-width: 92%; font-size: .74rem; line-height: 1.4; color: var(--text-muted); background: var(--bg-dim); padding: 5px 12px; border-radius: var(--radius-pill); }
+
+    .date-sep { text-align: center; font-size: .72rem; color: var(--text-soft); padding: 2px 0; }
+
+    /* input bar extras */
+    .chat-send.rec { background: var(--accent-light); color: var(--accent); }
+    .chat-send.rec.recording { background: var(--danger); color: #fff; animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(196,72,62,.45); } 50% { box-shadow: 0 0 0 9px rgba(196,72,62,0); } }
+    .tray { top: auto; right: auto; left: 10px; bottom: calc(var(--nav-height) + var(--safe-bottom) + 62px); }
+    .menu-item.recording { color: var(--danger); }
+    .menu-item.recording .ic { color: var(--danger); }
+
+    /* expand textarea overlay */
+    .expand-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 998; flex-direction: column; padding: calc(var(--safe-top) + 14px) 16px calc(var(--safe-bottom) + 14px); gap: 10px; }
     .expand-overlay.open { display: flex; }
-    .expand-overlay textarea {
-      flex: 1;
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      font-size: 16px;
-      font-family: inherit;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      color: var(--text);
-      resize: none;
-      outline: none;
-      line-height: 1.5;
-    }
-    .expand-overlay-bar {
-      display: flex;
-      gap: 10px;
-    }
-    .expand-send-btn {
-      flex: 1;
-      padding: 10px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .expand-cancel-btn {
-      padding: 10px 16px;
-      background: var(--bg-card);
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      color: var(--text-muted);
-    }
+    .expand-overlay textarea { flex: 1; width: 100%; padding: 14px; font-size: 16px; font-family: inherit; border: 1px solid var(--border); border-radius: 16px; background: var(--bg-card); color: var(--text); resize: none; outline: none; line-height: 1.6; }
+    .expand-overlay-bar { display: flex; gap: 10px; }
+    .expand-overlay-bar .btn { flex: 1; padding: 12px; }
 
-    /* Image lightbox */
-    .img-lightbox {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 999;
-      align-items: center;
-      justify-content: center;
-    }
+    .img-lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 999; align-items: center; justify-content: center; }
     .img-lightbox.open { display: flex; }
-    .img-lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 8px; }
+    .img-lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 10px; }
   </style>
 </head>
 <body>
 
-  <div class="chat-header">
-    <a href="/" style="color:var(--text-muted); font-size:1.2rem;">←</a>
-    <div style="flex:1">
-      <div class="chat-header-name">昀 <span class="status-dot" id="status-dot"></span></div>
-      <div class="chat-header-sub" id="status-text">连接中…</div>
+  <header class="appbar">
+    <a class="icon-btn" href="/" title="返回" data-ic="chevron-left"></a>
+    <span class="avatar him sm" style="margin-left:2px">昀</span>
+    <div class="appbar-main">
+      <div class="appbar-title">昀</div>
+      <div class="appbar-sub"><span class="status-dot" id="status-dot"></span><span id="status-text">连接中…</span></div>
     </div>
-    <button class="search-btn" id="search-toggle" title="搜索">🔍</button>
-    <button class="search-btn" id="export-btn" title="导出对话" onclick="exportChat()" style="font-size:1.1rem;">📋</button>
-    <button class="voice-ctrl-btn" id="voice-toggle" title="朗读哥哥的话（开/关）" onclick="toggleVoice()">🔇</button>
-    <button class="voice-ctrl-btn" id="lt-toggle" title="立陶宛语模式" onclick="toggleLT()">🇱🇹</button>
-    <button class="search-btn" id="push-btn" title="开启通知" style="font-size:1.2rem;" onclick="handlePushBtn()">🔔</button>
-    <a href="/thoughts" target="_blank" class="search-btn" title="哥哥的念头池" style="font-size:1.1rem;text-decoration:none;">💭</a>
-    <a href="/photos" target="_blank" class="search-btn" title="哥哥的照片池" style="font-size:1.1rem;text-decoration:none;">🖼</a>
-    <a href="/camera" class="search-btn" title="拍照" style="font-size:1.1rem;text-decoration:none;">📸</a>
+    <button class="icon-btn" id="search-toggle" title="搜索" data-ic="search"></button>
+    <button class="icon-btn" id="menu-toggle" title="更多" data-ic="ellipsis"></button>
+  </header>
+  <div class="menu-bg" id="menu-bg"></div>
+  <div class="menu" id="menu">
+    <button class="menu-item" id="voice-toggle" onclick="toggleVoice()"></button>
+    <button class="menu-item" id="push-btn" onclick="handlePushBtn()"></button>
+    <button class="menu-item" id="export-btn" onclick="exportChat()"><span data-ic="download"></span>导出对话</button>
+    <a class="menu-item" href="/thoughts"><span data-ic="sparkles"></span>念头池</a>
+    <a class="menu-item" href="/photos"><span data-ic="image"></span>照片池</a>
+    <a class="menu-item" href="/camera"><span data-ic="camera"></span>拍照</a>
   </div>
   <div class="search-bar" id="search-bar">
-    <input class="search-input" id="search-input" placeholder="搜索对话…" autocomplete="off" style="padding-right:90px">
-    <div id="search-nav" style="position:absolute;right:24px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;font-size:0.78rem;color:var(--text-muted);display:none">
+    <input class="search-input" id="search-input" placeholder="搜索对话…" autocomplete="off" style="padding-right:96px">
+    <div id="search-nav">
       <span id="search-count"></span>
-      <button onclick="searchNav(-1)" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:2px 4px;color:var(--text-muted)">↑</button>
-      <button onclick="searchNav(1)" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:2px 4px;color:var(--text-muted)">↓</button>
+      <button onclick="searchNav(-1)" data-ic="chevron-left" data-ic-class="" style="transform:rotate(90deg)"></button>
+      <button onclick="searchNav(1)" data-ic="chevron-right" style="transform:rotate(90deg)"></button>
     </div>
   </div>
 
@@ -339,38 +114,27 @@
   <div class="expand-overlay" id="expand-overlay">
     <textarea id="expand-input" placeholder="在这里写长文本…"></textarea>
     <div class="expand-overlay-bar">
-      <button class="expand-cancel-btn" onclick="closeExpand()">取消</button>
-      <button class="expand-send-btn" onclick="sendFromExpand()">发送</button>
+      <button class="btn ghost" onclick="closeExpand()">取消</button>
+      <button class="btn" onclick="sendFromExpand()">发送</button>
     </div>
   </div>
+
+  <div class="menu-bg" id="tray-bg"></div>
+  <div class="menu tray" id="tray">
+    <button class="menu-item" onclick="document.getElementById('file-input').click();closeTray()"><span data-ic="image"></span>发图片</button>
+    <button class="menu-item" id="mic-btn" title="语音转文字（写进输入框）"><span data-ic="mic"></span><span id="mic-label">语音转文字</span></button>
+    <button class="menu-item" onclick="closeTray();openExpand()"><span data-ic="maximize-2"></span>展开输入框</button>
+  </div>
+  <input type="file" id="file-input" accept="image/*" style="display:none">
 
   <div class="chat-input-bar">
-    <span class="model-tag">Sonnet 4.6</span>
-    <button class="chat-photo-btn" title="发图片" onclick="document.getElementById('file-input').click()">📷</button>
-    <input type="file" id="file-input" accept="image/*" style="display:none">
-    <button class="mic-btn" id="mic-btn" title="语音转文字（输入框）">🎤</button>
-    <button class="mic-btn" id="rec-btn" title="发语音消息（再点一次发送）">🎙️</button>
+    <button class="icon-btn" id="tray-btn" title="更多输入方式" data-ic="plus"></button>
     <textarea class="chat-input" id="msg-input" placeholder="跟哥哥说点什么…" rows="1"></textarea>
-    <button class="chat-send" style="font-size:1rem;width:32px;background:var(--bg-card);border-radius:8px;color:var(--text-muted);" title="展开输入框" onclick="openExpand()">⛶</button>
-    <button class="chat-send" id="send-btn" onclick="handleSend()">
-      <svg viewBox="0 0 24 24"><path d="M2 21l21-9-21-9v7l15 2-15 2z"/></svg>
-    </button>
+    <button class="chat-send rec" id="rec-btn" title="发语音消息（再点一次发送）" data-ic="mic"></button>
+    <button class="chat-send" id="send-btn" onclick="handleSend()" style="display:none" data-ic="arrow-up"></button>
   </div>
 
-  <nav class="bottom-nav">
-    <div class="nav-tab" onclick="location.href='/'">
-      <span class="nav-icon">🏡</span>
-      <span class="nav-label">首页</span>
-    </div>
-    <div class="nav-tab active" onclick="location.href='/chat.html'">
-      <span class="nav-icon">💬</span>
-      <span class="nav-label">对话</span>
-    </div>
-    <div class="nav-tab" onclick="location.href='/growth/'">
-      <span class="nav-icon">🌱</span>
-      <span class="nav-label">生长</span>
-    </div>
-  </nav>
+  <nav class="tabbar" data-active="chat"></nav>
 
   <script>
     const area = document.getElementById('chat-area');
@@ -445,12 +209,12 @@
         const el = document.createElement('div');
         el.className = entry.kind === 'notice' ? 'msg-system msg-notice' : 'msg-system-warn';
         el.dataset.id = entry.id;
-        if (entry.link) {
-          const a = document.createElement('a');
-          a.href = entry.link; a.textContent = entry.text ?? '';
-          a.style.cssText = 'color:inherit;text-decoration:underline dotted';
-          el.appendChild(a);
-        } else el.textContent = entry.text ?? '';
+        const tag = entry.link ? 'a' : 'span';
+        const pill = document.createElement(tag);
+        if (entry.link) pill.href = entry.link; else pill.className = 'pill';
+        pill.innerHTML = ic('sparkles', 'sm') + '<span></span>';
+        pill.lastChild.textContent = entry.text ?? '';
+        el.appendChild(pill);
         return el;
       }
 
@@ -469,7 +233,7 @@
       } else if (entry.image_url) {
         // Image message
         const cap = entry.caption ? `<div class="msg-caption">${escHtml(entry.caption)}</div>` : '';
-        const pinBtn = `<button class="pin-photo-btn" onclick="pinPhoto('${entry.image_url}')" title="收藏到照片池">📌</button>`;
+        const pinBtn = `<button class="pin-photo-btn" onclick="pinPhoto('${entry.image_url}', this)" title="收藏到照片池">${ic('pin', 'sm')}</button>`;
         bubbleInner = `<div class="img-wrap" style="position:relative;display:inline-block">
           <img class="msg-image" src="${entry.image_url}" alt="图片"
             onclick="document.getElementById('lightbox-img').src=this.src;document.getElementById('lightbox').classList.add('open')">
@@ -573,9 +337,16 @@
 
     // Auto-resize textarea
     const inputEl = document.getElementById('msg-input');
+    // empty box -> mic (voice message); text -> send arrow
+    function syncSendMic() {
+      const has = inputEl.value.trim().length > 0;
+      document.getElementById('send-btn').style.display = has ? '' : 'none';
+      document.getElementById('rec-btn').style.display = has ? 'none' : '';
+    }
     inputEl.addEventListener('input', () => {
       inputEl.style.height = 'auto';
       inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+      syncSendMic();
     });
 
     // Send
@@ -585,6 +356,7 @@
       if (!text) return;
       input.value = '';
       input.style.height = 'auto';
+      syncSendMic();
       document.getElementById('send-btn').disabled = true;
 
       // /compact command
@@ -692,6 +464,19 @@
 
     // Push notifications
     const pushBtn = document.getElementById('push-btn');
+    // menu rows: icon + label, optional "on" state
+    function setMenu(btn, icon, label, on) { btn.innerHTML = ic(icon) + '<span>' + label + '</span>'; btn.classList.toggle('on', !!on); }
+    setMenu(pushBtn, 'bell-off', '开启通知', false);
+    setMenu(document.getElementById('voice-toggle'), 'volume-x', '朗读哥哥的话：关', false);
+    const menu = document.getElementById('menu'), menuBg = document.getElementById('menu-bg');
+    const tray = document.getElementById('tray'), trayBg = document.getElementById('tray-bg');
+    const toggleMenu = open => { menu.classList.toggle('open', open); menuBg.classList.toggle('open', open); };
+    document.getElementById('menu-toggle').onclick = () => toggleMenu(!menu.classList.contains('open'));
+    menuBg.onclick = () => toggleMenu(false);
+    menu.addEventListener('click', e => { if (e.target.closest('.menu-item') && !e.target.closest('#voice-toggle')) toggleMenu(false); });
+    function closeTray() { tray.classList.remove('open'); trayBg.classList.remove('open'); }
+    document.getElementById('tray-btn').onclick = () => { const o = !tray.classList.contains('open'); tray.classList.toggle('open', o); trayBg.classList.toggle('open', o); };
+    trayBg.onclick = closeTray;
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
@@ -712,15 +497,14 @@
       try {
         const existing = await reg.pushManager.getSubscription();
         if (existing) {
-          pushBtn.textContent = '🔕';
-          pushBtn.title = '通知已开启';
+          setMenu(pushBtn, 'bell', '通知已开启', true);
         }
       } catch {}
     }
 
     async function handlePushBtn() {
       if (!isStandalone && isIOS) {
-        alert('两步操作：\n\n① 还没加主屏幕的话：点 Safari 底部分享按钮 □↑ → 选"添加到主屏幕"\n\n② 已经加了的话：关掉 Safari，从主屏幕找到新图标点开，再按 🔔\n\n（必须从主屏幕图标打开，不能在 Safari 里）');
+        alert('两步操作：\n\n① 还没加主屏幕的话：点 Safari 底部分享按钮 □↑ → 选"添加到主屏幕"\n\n② 已经加了的话：关掉 Safari，从主屏幕找到新图标点开，再点右上角「⋯」里的「开启通知」\n\n（必须从主屏幕图标打开，不能在 Safari 里）');
         return;
       }
       const reg = await getPushReg();
@@ -731,8 +515,7 @@
       try {
         const existing = await reg.pushManager.getSubscription();
         if (existing) {
-          pushBtn.textContent = '🔕';
-          pushBtn.title = '通知已开启';
+          setMenu(pushBtn, 'bell', '通知已开启', true);
           return;
         }
         const perm = await Notification.requestPermission();
@@ -751,8 +534,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(sub),
         });
-        pushBtn.textContent = '🔕';
-        pushBtn.title = '通知已开启';
+        setMenu(pushBtn, 'bell', '通知已开启', true);
         alert('通知已开启！哥哥发消息时手机会响～');
       } catch (e) {
         alert('开启通知失败：' + e.message);
@@ -761,43 +543,8 @@
 
     checkPushState();
 
-    // === Snap (camera) ===
-    async function triggerSnap() {
-      const btn = document.getElementById('snap-btn');
-      btn.textContent = '⏳';
-      btn.disabled = true;
-      try {
-        const r = await fetch('/api/snap?secret=peek2024', { method: 'POST' });
-        const d = await r.json();
-        if (!r.ok || d.clients === 0) {
-          btn.textContent = '😴';
-          setTimeout(() => { btn.textContent = '📸'; btn.disabled = false; }, 2000);
-          return;
-        }
-        // Wait for Mac daemon to capture + upload
-        await new Promise(res => setTimeout(res, 3000));
-        const ts = Date.now();
-        const imgUrl = `/uploads/snap_latest.jpg?t=${ts}`;
-        const img = document.createElement('img');
-        img.src = imgUrl;
-        img.style.cssText = 'max-width:260px;border-radius:10px;margin:4px 0;cursor:pointer;display:block;';
-        img.onclick = () => window.open(imgUrl, '_blank');
-        img.onerror = () => img.remove();
-        const wrap = document.createElement('div');
-        wrap.style.cssText = 'display:flex;justify-content:flex-start;padding:2px 16px;';
-        wrap.appendChild(img);
-        document.getElementById('messages').appendChild(wrap);
-        wrap.scrollIntoView({ behavior: 'smooth' });
-        btn.textContent = '✅';
-      } catch {
-        btn.textContent = '❌';
-      }
-      setTimeout(() => { btn.textContent = '📸'; btn.disabled = false; }, 3000);
-    }
-
     // === Voice: TTS + STT ===
     let voiceEnabled = false;
-    let ltMode = false;
     const synth = window.speechSynthesis;
     let voices = [];
 
@@ -816,36 +563,22 @@
       if (!synth) return;
       synth.cancel();
       const utt = new SpeechSynthesisUtterance(text);
-      if (ltMode) {
-        utt.lang = 'lt-LT';
-        const v = pickVoice('lt');
-        if (v) utt.voice = v;
-      } else {
-        utt.lang = 'zh-CN';
-        const v = pickVoice('zh');
-        if (v) utt.voice = v;
-        utt.rate = 0.92;
-      }
+      utt.lang = 'zh-CN';
+      const v = pickVoice('zh');
+      if (v) utt.voice = v;
+      utt.rate = 0.92;
       synth.speak(utt);
     }
 
     function toggleVoice() {
       voiceEnabled = !voiceEnabled;
       const btn = document.getElementById('voice-toggle');
-      btn.textContent = voiceEnabled ? '🔊' : '🔇';
-      btn.classList.toggle('active', voiceEnabled);
+      setMenu(btn, voiceEnabled ? 'volume-2' : 'volume-x', voiceEnabled ? '朗读哥哥的话：开' : '朗读哥哥的话：关', voiceEnabled);
       if (voiceEnabled && synth) {
         // warm up synth (iOS requires user-interaction first)
         const warm = new SpeechSynthesisUtterance('');
         synth.speak(warm);
       }
-    }
-
-    function toggleLT() {
-      ltMode = !ltMode;
-      const btn = document.getElementById('lt-toggle');
-      btn.classList.toggle('active', ltMode);
-      if (ltMode && voiceEnabled && synth) speak('Labas');
     }
 
     // STT — toggle mode: tap to start, tap again to stop
@@ -867,7 +600,7 @@
       recognition = new SR();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = ltMode ? 'lt-LT' : 'zh-CN';
+      recognition.lang = 'zh-CN';
       let finalText = '';
       recognition.onresult = (e) => {
         let interim = '';
@@ -881,15 +614,15 @@
       };
       recognition.onerror = () => {
         sttActive = false;
-        document.getElementById('mic-btn').classList.remove('recording');
+        document.getElementById('mic-btn').classList.remove('recording'); document.getElementById('mic-label').textContent = '语音转文字';
         recognition = null;
       };
       recognition.onend = () => {
         if (sttActive) {
           // auto-restart if stopped unexpectedly (browser timeout)
-          try { recognition.start(); } catch { sttActive = false; document.getElementById('mic-btn').classList.remove('recording'); recognition = null; }
+          try { recognition.start(); } catch { sttActive = false; document.getElementById('mic-btn').classList.remove('recording'); document.getElementById('mic-label').textContent = '语音转文字'; recognition = null; }
         } else {
-          document.getElementById('mic-btn').classList.remove('recording');
+          document.getElementById('mic-btn').classList.remove('recording'); document.getElementById('mic-label').textContent = '语音转文字';
           // clean up interim brackets from input
           const inp = document.getElementById('msg-input');
           inp.value = inp.value.replace(/\s*\[.*?\]$/,'').trim();
@@ -898,7 +631,7 @@
         }
       };
       sttActive = true;
-      document.getElementById('mic-btn').classList.add('recording');
+      document.getElementById('mic-btn').classList.add('recording'); document.getElementById('mic-label').textContent = '听写中，点这里停止';
       try { recognition.start(); } catch { sttActive = false; recognition = null; }
     }
 
@@ -908,6 +641,7 @@
     }
 
     const micBtn = document.getElementById('mic-btn');
+    micBtn.addEventListener('click', closeTray);
     micBtn.addEventListener('click', toggleSTT);
     micBtn.addEventListener('touchend', e => { e.preventDefault(); toggleSTT(); }, { passive: false });
 
@@ -997,7 +731,7 @@
     }
 
     // Export chat
-    async function pinPhoto(imageUrl) {
+    async function pinPhoto(imageUrl, btn) {
       try {
         const r = await fetch('/api/pin-photo', {
           method: 'POST',
@@ -1005,8 +739,7 @@
           body: JSON.stringify({ image_url: imageUrl })
         });
         if (r.ok) {
-          const btn = event.target.closest('.pin-photo-btn');
-          if (btn) { btn.textContent = '✅'; setTimeout(() => { btn.textContent = '📌'; }, 1500); }
+          if (btn) { setIc(btn, 'check', 'sm'); setTimeout(() => { setIc(btn, 'pin', 'sm'); }, 1500); }
         }
       } catch {}
     }

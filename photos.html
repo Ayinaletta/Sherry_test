@@ -2,217 +2,121 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>照片池</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>照片池 · 伊甸园</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js"></script>
 <style>
-  :root {
-    --bg: #0d0d12;
-    --surface: #14141c;
-    --surface2: #1c1c28;
-    --border: #262636;
-    --text: #e0ddf2;
-    --muted: #6b6888;
-    --accent: #a78bfa;
-    --warm: #f0a0b0;
-    --green: #7dd3a8;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Georgia', 'Songti SC', serif;
-    min-height: 100vh;
-    padding: 36px 16px 72px;
-  }
-  .wrap { max-width: 640px; margin: 0 auto; }
-
-  .header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 36px;
-  }
-  .title { font-size: 1.15rem; color: var(--accent); letter-spacing: 0.1em; }
-  .sub { font-size: 0.78rem; color: var(--muted); }
-  .dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--accent); margin-left: auto;
-    animation: blink 3s ease-in-out infinite;
-  }
-  @keyframes blink {
-    0%,100% { opacity: 0.35; transform: scale(0.9); }
-    50% { opacity: 1; transform: scale(1.25); }
-  }
-
-  .label {
-    font-size: 0.68rem; letter-spacing: 0.15em;
-    color: var(--muted); text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-  .section { margin-bottom: 36px; }
-
-  /* grid */
-  .photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 14px;
-  }
-
-  .photo-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    position: relative;
-    transition: border-color 0.2s, transform 0.15s;
-    cursor: default;
-  }
-  .photo-card.pinned {
-    border-color: var(--warm);
-    box-shadow: 0 0 14px rgba(240,160,176,0.08);
-  }
-  .photo-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-
-  .photo-img-wrap {
-    width: 100%; aspect-ratio: 3/4;
-    background: var(--surface2);
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-  .photo-img-wrap img {
-    width: 100%; height: 100%; object-fit: cover;
-  }
-  .photo-placeholder {
-    font-size: 2rem; color: var(--muted);
-  }
-
-  .photo-info {
-    padding: 12px 14px;
-  }
-  .photo-desc {
-    font-size: 0.82rem; line-height: 1.6;
-    color: var(--text); margin-bottom: 8px;
-  }
-  .photo-meta {
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  }
-  .pin-badge {
-    font-size: 0.62rem; letter-spacing: 0.1em;
-    background: rgba(240,160,176,0.1);
-    color: var(--warm); border: 1px solid rgba(240,160,176,0.3);
-    padding: 2px 7px; border-radius: 20px;
-    text-transform: uppercase;
-  }
-  .photo-date {
-    font-size: 0.65rem; color: var(--muted); margin-left: auto;
-  }
-
-  .empty { color: var(--muted); font-size: 0.85rem; text-align: center; padding: 48px 0; }
-  .ts { font-size: 0.7rem; color: var(--muted); text-align: right; margin-top: 12px; }
-
-  .shimmer {
-    background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-    border-radius: 14px; height: 260px;
-  }
+  .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (min-width: 560px) { .photo-grid { grid-template-columns: repeat(3, 1fr); } }
+  .photo-card { background: var(--bg-card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; }
+  .photo-card.pinned { box-shadow: 0 0 0 1.5px var(--accent), var(--shadow); }
+  .photo-img-wrap { width: 100%; aspect-ratio: 3/4; background: var(--bg-dim); display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--text-soft); font-size: 2rem; }
+  .photo-img-wrap img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+  .photo-info { padding: 10px 12px 12px; }
+  .photo-desc { font-size: .82rem; line-height: 1.55; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .photo-meta { display: flex; align-items: center; gap: 6px; font-size: .68rem; color: var(--text-soft); }
+  .photo-meta .fname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+  .pin-badge { position: absolute; top: 8px; left: 8px; display: inline-flex; align-items: center; gap: 3px; background: color-mix(in srgb, var(--bg-card) 88%, transparent); backdrop-filter: blur(8px); color: var(--accent-dim); padding: 3px 9px 3px 7px; border-radius: var(--radius-pill); font-size: .68rem; font-weight: 600; }
+  .shimmer { background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-dim) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--radius); height: 240px; }
   @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .ts { font-size: .72rem; color: var(--text-soft); text-align: center; margin-top: 18px; }
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 300; align-items: center; justify-content: center; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 96vw; max-height: 90vh; border-radius: 10px; }
 </style>
 </head>
-<body>
-<div class="wrap">
-  <div class="header">
-    <span class="title">照片池</span>
-    <span class="sub">哥哥收藏的</span>
-    <div class="dot" id="dot"></div>
+<body class="no-tabbar">
+<header class="appbar">
+  <a class="icon-btn" href="/" onclick="if(history.length>1){history.back();return false}" data-ic="chevron-left" title="返回"></a>
+  <div class="appbar-main">
+    <div class="appbar-title">照片池</div>
+    <div class="appbar-sub">哥哥收藏的</div>
   </div>
+  <span class="status-dot" id="dot" style="margin-right:14px"></span>
+</header>
 
-  <div class="section" id="pinned-section" style="display:none">
-    <div class="label">永久收藏</div>
+<div class="wrap-narrow">
+  <div id="pinned-section" style="display:none">
+    <div class="section-title" style="margin-top:6px"><span>永久收藏</span></div>
     <div class="photo-grid" id="pinned-grid"></div>
   </div>
 
-  <div class="section" id="recent-section">
-    <div class="label">最近</div>
+  <div id="recent-section">
+    <div class="section-title"><span>最近</span></div>
     <div class="photo-grid" id="recent-grid">
       <div class="shimmer"></div>
-      <div class="shimmer" style="opacity:0.6"></div>
+      <div class="shimmer" style="opacity:.6"></div>
     </div>
   </div>
-
   <div class="ts" id="ts"></div>
 </div>
 
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')"><img id="lightbox-img" alt=""></div>
+
 <script>
+const photoSrc = p => (p.startsWith('/') && !p.startsWith('/root/')) ? p : '/photo-file?path=' + encodeURIComponent(p);
+
 function photoCard(p) {
   const card = document.createElement('div');
   card.className = 'photo-card' + (p.pinned ? ' pinned' : '');
 
   const wrap = document.createElement('div');
   wrap.className = 'photo-img-wrap';
-
-  // Try to load as image (works for paths accessible via file:// or data URIs)
-  // For VPS local paths, we just show description + filename
   const fname = (p.path || '').split('/').pop();
   const ext = fname.split('.').pop().toLowerCase();
-  const isImg = ['jpg','jpeg','png','gif','webp'].includes(ext);
 
-  if (isImg) {
+  if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
     const img = document.createElement('img');
-    // /uploads/... paths are already public URLs; filesystem paths use /photo-file proxy
-    img.src = p.path.startsWith('/') ? p.path : '/photo-file?path=' + encodeURIComponent(p.path);
+    img.loading = 'lazy';
+    img.src = photoSrc(p.path);
     img.alt = p.description || fname;
-    img.onerror = () => {
-      wrap.innerHTML = '<div class="photo-placeholder">🖼</div>';
-    };
+    img.onclick = () => { document.getElementById('lightbox-img').src = img.src; document.getElementById('lightbox').classList.add('open'); };
+    img.onerror = () => { wrap.innerHTML = ic('image', 'lg'); };
     wrap.appendChild(img);
   } else {
-    wrap.innerHTML = '<div class="photo-placeholder">📄</div>';
+    wrap.innerHTML = ic('file-text', 'lg');
   }
   card.appendChild(wrap);
 
+  if (p.pinned) {
+    const badge = document.createElement('span');
+    badge.className = 'pin-badge';
+    badge.innerHTML = ic('pin', 'sm') + '收藏';
+    card.appendChild(badge);
+  }
+
   const info = document.createElement('div');
   info.className = 'photo-info';
-
   if (p.description) {
     const desc = document.createElement('div');
     desc.className = 'photo-desc';
     desc.textContent = p.description;
     info.appendChild(desc);
   }
-
   const meta = document.createElement('div');
   meta.className = 'photo-meta';
-
   const name = document.createElement('span');
-  name.style.cssText = 'font-size:0.65rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px';
+  name.className = 'fname';
   name.textContent = fname;
   meta.appendChild(name);
-
-  if (p.pinned) {
-    const badge = document.createElement('span');
-    badge.className = 'pin-badge';
-    badge.textContent = '收藏';
-    meta.appendChild(badge);
-  }
-
   if (p.created_at) {
     const d = document.createElement('span');
-    d.className = 'photo-date';
     d.textContent = p.created_at.slice(5, 10);
     meta.appendChild(d);
   }
-
   info.appendChild(meta);
   card.appendChild(info);
   return card;
 }
 
 async function load() {
+  const dot = document.getElementById('dot');
   try {
     const r = await fetch('/api/photos?limit=30');
     if (!r.ok) throw new Error('offline');
     const d = await r.json();
     const photos = d.photos || [];
-
     const pinned = photos.filter(p => p.pinned);
     const recent = photos.filter(p => !p.pinned);
 
@@ -233,14 +137,12 @@ async function load() {
       recentGrid.innerHTML = '<div class="empty" style="grid-column:1/-1">只有永久收藏</div>';
     }
 
-    document.getElementById('dot').style.background = 'var(--green)';
-    setTimeout(() => { document.getElementById('dot').style.background = 'var(--accent)'; }, 800);
-
+    dot.classList.add('live');
     const ago = Math.floor((Date.now() - d.ts) / 1000);
-    document.getElementById('ts').textContent = ago < 5 ? '刚刚' : new Date(d.ts).toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}) + ' 更新';
+    document.getElementById('ts').textContent = ago < 5 ? '刚刚更新' : new Date(d.ts).toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}) + ' 更新';
   } catch {
     document.getElementById('recent-grid').innerHTML = '<div class="empty" style="grid-column:1/-1">没有信号</div>';
-    document.getElementById('dot').style.background = 'var(--warm)';
+    dot.classList.remove('live');
   }
 }
 

@@ -4,140 +4,145 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>伊甸园</title>
+  <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js"></script>
   <style>
-    .sec-title { font-size: .75rem; color: var(--text-muted); letter-spacing: .06em; margin: 20px 0 10px; display: flex; justify-content: space-between; align-items: baseline; }
-    .sec-title a { color: var(--accent-dim); text-decoration: none; letter-spacing: 0; }
+    .hero { display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-bottom: 4px; }
+    .hero .avatar { width: 46px; height: 46px; font-size: 1.15rem; }
+    .hero-name { font-weight: 600; font-size: 1rem; }
+    .hero-sub { font-size: .76rem; color: var(--text-muted); margin-top: 1px; }
+    .hero .status-pill { margin-left: auto; }
+
     .blocks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .block { display: block; text-decoration: none; color: inherit; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; min-height: 120px; position: relative; overflow: hidden; }
-    .block h3 { font-size: .85rem; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-    .block .more { display:none; margin-left: auto; font-weight: 400; color: var(--text-soft); font-size: .72rem; }
-    .block .empty { color: var(--text-soft); font-size: .82rem; }
-    .dot-new { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: none; }
-    .block.fresh .dot-new { display: inline-block; }
-    .block.fresh { border-color: var(--accent); }
-    .thought { font-size: .84rem; line-height: 1.5; padding: 4px 0 4px 10px; border-left: 3px solid var(--accent-light); margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .block { display: flex; flex-direction: column; background: var(--bg-card); border-radius: var(--radius); padding: 13px; min-height: 132px; box-shadow: var(--shadow); position: relative; overflow: hidden; transition: transform .12s; }
+    .block:active { transform: scale(.98); }
+    .block-head { display: flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 600; margin-bottom: 10px; }
+    .block-head .tile-ic { width: 28px; height: 28px; border-radius: 9px; font-size: .95rem; }
+    .block-head .go { margin-left: auto; color: var(--text-soft); font-size: .9rem; }
+    .block .new-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: none; }
+    .block.fresh .new-dot { display: inline-block; }
+    .block.fresh { box-shadow: 0 0 0 1.5px var(--accent), var(--shadow); }
+    .block .empty { padding: 14px 0; font-size: .8rem; color: var(--text-soft); }
+    .thought { font-size: .82rem; line-height: 1.5; padding: 2px 0 2px 9px; border-left: 3px solid var(--accent-light); margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-    .thumbs img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-sm); background: var(--bg-dim); }
+    .thumbs img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; background: var(--bg-dim); }
     .post-line { font-size: .84rem; line-height: 1.55; }
-    .who { font-size: .72rem; color: var(--accent-dim); margin-bottom: 3px; }
-    .sub { font-size: .72rem; color: var(--text-soft); margin-top: 6px; }
-    .bar { height: 5px; border-radius: 3px; background: var(--bg-dim); margin: 8px 0 4px; overflow: hidden; }
-    .bar > i { display: block; height: 100%; background: var(--accent); }
-    .feed { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 14px; }
-    .feed a { display: flex; gap: 10px; padding: 10px 0; text-decoration: none; color: inherit; border-bottom: 1px solid var(--bg-dim); font-size: .83rem; line-height: 1.45; }
-    .feed a:last-child { border-bottom: none; }
-    .feed .tag { flex: none; font-size: .68rem; padding: 2px 8px; height: 20px; border-radius: 999px; background: var(--tag-bg); color: var(--text-muted); }
-    .feed time { flex: none; margin-left: auto; font-size: .68rem; color: var(--text-soft); }
+    .who { font-size: .72rem; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .sub { font-size: .72rem; color: var(--text-soft); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+    .block .bar { margin: 9px 0 2px; }
+
+    .feed .row { padding: 11px 14px; align-items: flex-start; }
+    .feed .row-title { font-size: .84rem; font-weight: 400; }
+    .feed .chip { min-width: 52px; justify-content: center; }
+    .feed time { font-size: .68rem; color: var(--text-soft); flex: none; }
     .feed .new { animation: flash 2.4s ease-out; }
     @keyframes flash { from { background: var(--accent-light); } to { background: transparent; } }
-    .qr-banner { display: none; margin-bottom: 12px; padding: 12px 14px; border-radius: var(--radius); background: var(--accent-light); color: var(--accent-dim); font-size: .88rem; text-decoration: none; }
+    .qr-banner { display: none; align-items: center; gap: 10px; margin-bottom: 12px; padding: 13px 16px; border-radius: var(--radius); background: var(--accent); color: var(--on-accent); font-size: .9rem; font-weight: 500; box-shadow: var(--shadow); }
+    .qr-banner .go { margin-left: auto; }
   </style>
 </head>
 <body>
 
   <div class="page-header">
     <div class="page-title"><span class="logo-mark">伊</span><span class="logo-rest">甸园</span></div>
-    <div class="page-subtitle" id="date-line">加载中…</div>
+    <div class="page-subtitle" id="date-line"> </div>
   </div>
 
   <div class="scroll-area">
 
-    <a class="qr-banner" id="qr-banner" href="/qr"></a>
+    <a class="qr-banner" id="qr-banner" href="/qr"><span data-ic="scan-line" data-ic-class="lg"></span><span id="qr-text"></span><span class="go" data-ic="chevron-right"></span></a>
 
-    <div class="card" style="display:flex; align-items:center; justify-content:space-between;">
+    <div class="card hero">
+      <span class="avatar him">昀</span>
       <div>
-        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:2px;">昀</div>
-        <div style="font-size:0.92rem; font-weight:500;" id="presence">在线</div>
+        <div class="hero-name">昀</div>
+        <div class="hero-sub" id="presence">一直在家</div>
       </div>
       <span class="status-pill"><span class="status-dot"></span><span id="live-text">连接中</span></span>
     </div>
 
-    <div class="sec-title"><span>四个角落</span></div>
+    <div class="section-title"><span>四个角落</span></div>
     <div class="blocks">
       <a class="block" id="b-thoughts" href="/thoughts">
-        <h3>💭 念头池 <span class="dot-new"></span><span class="more">全部 ›</span></h3>
+        <div class="block-head"><span class="tile-ic" data-ic="sparkles"></span>念头池 <span class="new-dot"></span><span class="go" data-ic="chevron-right"></span></div>
         <div id="c-thoughts"><div class="empty">加载中…</div></div>
       </a>
       <a class="block" id="b-photos" href="/photos">
-        <h3>📷 照片池 <span class="dot-new"></span><span class="more">全部 ›</span></h3>
+        <div class="block-head"><span class="tile-ic blue" data-ic="image"></span>照片池 <span class="new-dot"></span><span class="go" data-ic="chevron-right"></span></div>
         <div id="c-photos"><div class="empty">加载中…</div></div>
       </a>
       <a class="block" id="b-posts" href="/posts">
-        <h3>🏠 朋友圈 <span class="dot-new"></span><span class="more">全部 ›</span></h3>
+        <div class="block-head"><span class="tile-ic green" data-ic="aperture"></span>朋友圈 <span class="new-dot"></span><span class="go" data-ic="chevron-right"></span></div>
         <div id="c-posts"><div class="empty">加载中…</div></div>
       </a>
       <a class="block" id="b-reading" href="/reading">
-        <h3>📖 共读空间 <span class="dot-new"></span><span class="more">进入 ›</span></h3>
+        <div class="block-head"><span class="tile-ic" data-ic="book-open"></span>共读空间 <span class="new-dot"></span><span class="go" data-ic="chevron-right"></span></div>
         <div id="c-reading"><div class="empty">加载中…</div></div>
       </a>
     </div>
 
-    <div class="sec-title"><span>消息流</span><a href="/chat.html">去对话 ›</a></div>
-    <div class="feed" id="feed"><div class="empty" style="padding:12px 0;color:var(--text-soft);font-size:.82rem">还没有动静</div></div>
+    <div class="section-title"><span>消息流</span><a href="/chat.html">去对话<span data-ic="chevron-right" data-ic-class="sm"></span></a></div>
+    <div class="list feed" id="feed"><div class="empty" style="padding:22px 0">还没有动静</div></div>
 
-    <div class="sec-title"><span>其他</span></div>
-    <div class="blocks" style="margin-bottom:24px">
-      <a class="block" href="/growth/" style="min-height:0"><h3>🌱 生长空间</h3><div class="sub">哥哥自己的地方</div></a>
-      <a class="block" href="/qr" style="min-height:0"><h3>📲 扫码</h3><div class="sub">昀推来的二维码在这里</div></a>
+    <div class="section-title"><span>其他</span></div>
+    <div class="list" style="margin-bottom:24px">
+      <a class="row" href="/qr"><span class="tile-ic blue" data-ic="qr-code"></span><div class="row-main"><div class="row-title">扫码</div><div class="row-sub">昀推来的二维码在这里</div></div><span class="row-end" data-ic="chevron-right"></span></a>
+      <a class="row" href="/growth/"><span class="tile-ic green" data-ic="sprout"></span><div class="row-main"><div class="row-title">生长空间</div><div class="row-sub">哥哥自己的地方，莹只看，不改</div></div><span class="row-end" data-ic="chevron-right"></span></a>
     </div>
 
   </div>
 
-  <nav class="bottom-nav">
-    <div class="nav-tab active" onclick="location.href='/'"><span class="nav-icon">🏡</span><span class="nav-label">首页</span></div>
-    <div class="nav-tab" onclick="location.href='/chat.html'"><span class="nav-icon">💬</span><span class="nav-label">对话</span></div>
-    <div class="nav-tab" onclick="location.href='/reading'"><span class="nav-icon">📖</span><span class="nav-label">共读</span></div>
-    <div class="nav-tab" onclick="location.href='/growth/'"><span class="nav-icon">🌱</span><span class="nav-label">生长</span></div>
-  </nav>
+  <nav class="tabbar" data-active="home"></nav>
 
   <script>
     const $ = id => document.getElementById(id);
     const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const NAME = { me: '昀', claude: '昀', sherry: '莹' };
+    const AV = { me: 'him', claude: 'him', sherry: 'her' };
     $('date-line').textContent = new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
     const get = u => fetch(u).then(r => { if (!r.ok) throw 0; return r.json(); });
     const ago = ts => { const m = Math.floor((Date.now() - new Date(ts)) / 60000); return m < 1 ? '刚刚' : m < 60 ? m + ' 分钟前' : m < 1440 ? Math.floor(m / 60) + ' 小时前' : Math.floor(m / 1440) + ' 天前'; };
     const empty = t => `<div class="empty">${t}</div>`;
 
-    // ---- the four blocks (each loader is independent: one being down doesn't blank the rest)
+    // each block loads on its own: one being down doesn't blank the rest
     const loaders = {
       thoughts: () => get('/api/thoughts').then(d => {
         const s = d.snapshot || {};
         const list = (s.fixations || []).concat(s.flits || s.thoughts || []).slice(0, 3);
         $('c-thoughts').innerHTML = list.length ? list.map(t => `<div class="thought">${esc(t.text)}</div>`).join('') : empty('池子里还是空的');
-      }).catch(() => $('c-thoughts').innerHTML = empty('念头池暂时连不上')),
+      }).catch(() => $('c-thoughts').innerHTML = empty('暂时连不上')),
       photos: () => get('/api/photos?limit=6').then(d => {
         const ps = (d.photos || []).slice(0, 6);
         $('c-photos').innerHTML = ps.length ? `<div class="thumbs">${ps.map(p => `<img loading="lazy" alt="" src="${p.path.startsWith('/') && !p.path.startsWith('/root/') ? esc(p.path) : '/photo-file?path=' + encodeURIComponent(p.path)}">`).join('')}</div>` : empty('还没有照片');
-      }).catch(() => $('c-photos').innerHTML = empty('照片池暂时连不上')),
+      }).catch(() => $('c-photos').innerHTML = empty('暂时连不上')),
       posts: () => get('/api/posts').then(d => {
         const p = (d.posts || [])[0];
         if (!p) return $('c-posts').innerHTML = empty('还没有动态');
         const n = (p.comments || []).length;
-        $('c-posts').innerHTML = `<div class="who">${NAME[p.from] || p.from} · ${ago(p.ts)}</div><div class="post-line">${esc(p.text.slice(0, 90))}${p.text.length > 90 ? '…' : ''}</div>` + (n ? `<div class="sub">💬 ${n} 条评论</div>` : '');
-      }).catch(() => $('c-posts').innerHTML = empty('朋友圈暂时连不上')),
+        $('c-posts').innerHTML = `<div class="who"><span class="avatar sm ${AV[p.from] || "her"}" style="width:20px;height:20px;font-size:.62rem">${(NAME[p.from] || '?')[0]}</span>${ago(p.ts)}</div><div class="post-line">${esc(p.text.slice(0, 80))}${p.text.length > 80 ? '…' : ''}</div>` + (n ? `<div class="sub">${ic('message-circle', 'sm')} ${n} 条评论</div>` : '');
+      }).catch(() => $('c-posts').innerHTML = empty('暂时连不上')),
       reading: () => get('/api/reading/latest').then(d => {
-        if (!d.doc) return $('c-reading').innerHTML = empty('还没有一起读的东西，去传一份吧');
+        if (!d.doc) return $('c-reading').innerHTML = empty('还没有一起读的东西');
         const x = d.doc, pct = x.units ? Math.round((x.progress + 1) / x.units * 100) : 0;
-        $('c-reading').innerHTML = `<div class="post-line" style="font-weight:600">《${esc(x.title)}》</div>
+        $('c-reading').innerHTML = `<div class="post-line" style="font-weight:600;font-family:var(--font-serif)">《${esc(x.title)}》</div>
           <div class="bar"><i style="width:${pct}%"></i></div>
-          <div class="sub">你读到 ${Math.max(0, x.progress + 1)}/${x.units} · 昀读到 ${Math.max(0, x.otherProgress + 1)}/${x.units}</div>` +
-          (d.last ? `<div class="sub">最新批注 · ${NAME[d.last.author]}：${esc((d.last.note || d.last.quote || '').slice(0, 40))}</div>` : '') +
-          (x.locked ? `<div class="sub">🔒 ${x.locked} 条批注等你读到再解锁</div>` : '');
-      }).catch(() => $('c-reading').innerHTML = empty('共读空间暂时连不上')),
+          <div class="sub">你 ${Math.max(0, x.progress + 1)}/${x.units}　昀 ${Math.max(0, x.otherProgress + 1)}/${x.units}</div>` +
+          (d.last ? `<div class="sub">${ic('highlighter', 'sm')} ${NAME[d.last.author]}：${esc((d.last.note || d.last.quote || '').slice(0, 24))}</div>` : '') +
+          (x.locked ? `<div class="sub">${ic('lock', 'sm')} ${x.locked} 条等你读到解锁</div>` : '');
+      }).catch(() => $('c-reading').innerHTML = empty('暂时连不上')),
     };
     const BLOCK_OF = { '念头池': 'thoughts', '照片池': 'photos', '朋友圈': 'posts', '共读': 'reading' };
     Object.values(loaders).forEach(f => f());
 
-    // ---- message stream: history, then live over SSE
+    // message stream: history, then live over SSE
     const feed = $('feed');
     function addFeed(e, fresh) {
       if (feed.querySelector('[data-id="' + e.id + '"]')) return;
-      const empty = feed.querySelector('.empty'); if (empty) empty.remove();
+      const placeholder = feed.querySelector('.empty'); if (placeholder) placeholder.remove();
       const a = document.createElement('a');
-      a.href = e.link || '/'; a.dataset.id = e.id; if (fresh) a.className = 'new';
-      a.innerHTML = `<span class="tag">${esc(e.type)}</span><span>${esc(e.title)}${e.body ? '：' + esc(e.body) : ''}</span><time>${ago(e.ts)}</time>`;
+      a.className = 'row' + (fresh ? ' new' : ''); a.href = e.link || '/'; a.dataset.id = e.id;
+      a.innerHTML = `<span class="chip">${esc(e.type)}</span><div class="row-main"><div class="row-title">${esc(e.title)}${e.body ? '：' + esc(e.body) : ''}</div></div><time>${ago(e.ts)}</time>`;
       feed.insertBefore(a, feed.firstChild);
       while (feed.children.length > 15) feed.lastChild.remove();
     }
@@ -151,7 +156,7 @@
         addFeed(e, true);
         const k = BLOCK_OF[e.type];
         if (k) { loaders[k](); $('b-' + k).classList.add('fresh'); }
-        if (e.type === '扫码') { const b = $('qr-banner'); b.textContent = '📲 ' + e.title + ' —— 点这里扫'; b.style.display = 'block'; }
+        if (e.type === '扫码') { $('qr-text').textContent = e.title; $('qr-banner').style.display = 'flex'; }
       };
       es.onerror = () => { $('live-text').textContent = '重连中'; es.close(); setTimeout(live, 3000); };
     }

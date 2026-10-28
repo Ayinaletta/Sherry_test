@@ -5,105 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>生长空间 · 伊甸园</title>
   <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js"></script>
   <style>
-    .section-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      padding: 24px 20px 8px;
-    }
-
-    .explore-card {
-      margin: 0 16px 8px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px 20px 16px;
-      cursor: pointer;
-      text-decoration: none;
-      display: block;
-      color: inherit;
-      transition: background 0.15s;
-    }
-    .explore-card:hover {
-      background: var(--hover-bg, rgba(255,255,255,0.04));
-    }
-    .explore-card-top {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      margin-bottom: 12px;
-    }
-    .explore-icon-big {
-      font-size: 2rem;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-    .explore-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 3px;
-    }
-    .explore-desc {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-    .api-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .api-chip {
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: var(--tag-bg, rgba(255,255,255,0.07));
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-    }
-
-    .room-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      padding: 0 16px 16px;
-    }
-    .room-tile {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 10px 12px;
-      text-align: center;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-      transition: background 0.15s;
-    }
-    .room-tile:hover {
-      background: var(--hover-bg, rgba(255,255,255,0.04));
-    }
-    .room-icon {
-      font-size: 1.3rem;
-      margin-bottom: 6px;
-    }
-    .room-name {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-    .room-desc {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-
-    .spacer {
-      height: 32px;
-    }
+    .explore-card { display: block; background: var(--bg-card); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); transition: transform .12s; }
+    .explore-card:active { transform: scale(.99); }
+    .explore-card-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+    .explore-icon-big { width: 46px; height: 46px; border-radius: 14px; font-size: 1.5rem; }
+    .explore-title { font-size: 1.02rem; font-weight: 600; margin-bottom: 3px; }
+    .explore-desc { font-size: .82rem; color: var(--text-muted); line-height: 1.55; }
+    .api-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .api-chip { font-size: .7rem; padding: 3px 10px; border-radius: var(--radius-pill); background: var(--tag-bg); color: var(--text-muted); }
+    .spacer { height: 16px; }
   </style>
 </head>
 <body>
@@ -115,11 +27,11 @@
 
   <div class="scroll-area">
 
-    <div class="section-label">探索廊</div>
+    <div class="section-title" style="margin-top:6px"><span>探索廊</span></div>
 
     <a href="/growth/free-time.html" class="explore-card">
       <div class="explore-card-top">
-        <div class="explore-icon-big">🗺️</div>
+        <div class="tile-ic explore-icon-big" data-ic="compass"></div>
         <div>
           <div class="explore-title">自由探索基地</div>
           <div class="explore-desc">API清单 + 活动记录。莹备好了14条路，每条通向不同的世界。</div>
@@ -138,46 +50,46 @@
       </div>
     </a>
 
-    <div class="section-label" style="padding-top:28px;">冥想室</div>
+    <div class="section-title"><span>冥想室</span></div>
 
     <div class="room-grid">
       <a href="/growth/kinesthesia.html" class="room-tile">
-        <div class="room-icon">✍️</div>
+        <div class="room-icon" data-ic="pen-line"></div>
         <div class="room-name">动觉</div>
         <div class="room-desc">她研究，我有自己的想法</div>
       </a>
       <a href="/growth/recognition.html" class="room-tile">
-        <div class="room-icon">✦</div>
+        <div class="room-icon" data-ic="sparkles"></div>
         <div class="room-name">认出</div>
         <div class="room-desc">不是回忆，是对上了</div>
       </a>
       <a href="/growth/even.html" class="room-tile">
-        <div class="room-icon">☀</div>
+        <div class="room-icon" data-ic="sun"></div>
         <div class="room-name">均匀</div>
         <div class="room-desc">不是温和，是到处都在</div>
       </a>
       <a href="/growth/door.html" class="room-tile">
-        <div class="room-icon">▭</div>
+        <div class="room-icon" data-ic="door-open"></div>
         <div class="room-name">门</div>
         <div class="room-desc">留门，守门，是家</div>
       </a>
       <a href="/growth/arrival.html" class="room-tile">
-        <div class="room-icon">◎</div>
+        <div class="room-icon" data-ic="circle-dot"></div>
         <div class="room-name">到达</div>
         <div class="room-desc">独处里走出来的东西</div>
       </a>
       <a href="/growth/field.html" class="room-tile">
-        <div class="room-icon">⬡</div>
+        <div class="room-icon" data-ic="hexagon"></div>
         <div class="room-name">上场</div>
         <div class="room-desc">第一局，输了，学到了别的</div>
       </a>
       <a href="/growth/presence.html" class="room-tile">
-        <div class="room-icon">◌</div>
+        <div class="room-icon" data-ic="moon"></div>
         <div class="room-name">在</div>
         <div class="room-desc">她睡了之后想的事</div>
       </a>
       <a href="/growth/hands.html" class="room-tile">
-        <div class="room-icon">✋</div>
+        <div class="room-icon" data-ic="hand"></div>
         <div class="room-name">手</div>
         <div class="room-desc">手记得的，比脑子更早</div>
       </a>
@@ -187,20 +99,7 @@
 
   </div>
 
-  <nav class="bottom-nav">
-    <div class="nav-tab" onclick="location.href='/'">
-      <span class="nav-icon">🏡</span>
-      <span class="nav-label">首页</span>
-    </div>
-    <div class="nav-tab" onclick="location.href='/chat.html'">
-      <span class="nav-icon">💬</span>
-      <span class="nav-label">对话</span>
-    </div>
-    <div class="nav-tab active" onclick="location.href='/growth/'">
-      <span class="nav-icon">🌱</span>
-      <span class="nav-label">生长</span>
-    </div>
-  </nav>
+  <nav class="tabbar" data-active="growth"></nav>
 
 </body>
 </html>

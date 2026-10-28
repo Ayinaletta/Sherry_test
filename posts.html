@@ -2,186 +2,64 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>朋友圈</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>朋友圈 · 伊甸园</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js"></script>
 <style>
-  :root {
-    --bg: #0d0d12;
-    --surface: #14141c;
-    --surface2: #1c1c28;
-    --border: #262636;
-    --text: #e0ddf2;
-    --muted: #6b6888;
-    --accent: #a78bfa;
-    --warm: #f0a0b0;
-    --green: #7dd3a8;
-    --me: #a78bfa;
-    --her: #f0a0b0;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Georgia', 'Songti SC', serif;
-    min-height: 100vh;
-    padding: 36px 16px 100px;
-  }
-  .wrap { max-width: 560px; margin: 0 auto; }
+  .compose { display: flex; gap: 12px; align-items: flex-start; }
+  .compose textarea { flex: 1; border: none; background: none; resize: none; outline: none; font: inherit; font-size: 16px; color: var(--text); line-height: 1.6; min-height: 64px; padding: 6px 0; }
+  .compose textarea::placeholder { color: var(--text-soft); }
+  .compose-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .compose-note { font-size: .74rem; color: var(--text-soft); }
 
-  .header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 36px;
-  }
-  .title { font-size: 1.15rem; color: var(--accent); letter-spacing: 0.1em; }
-  .sub { font-size: 0.78rem; color: var(--muted); }
-  .dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--accent); margin-left: auto;
-    animation: blink 3s ease-in-out infinite;
-  }
-  @keyframes blink {
-    0%,100% { opacity: 0.35; transform: scale(0.9); }
-    50% { opacity: 1; transform: scale(1.25); }
-  }
+  .post-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .post-name { font-size: .88rem; font-weight: 600; }
+  .post-time { font-size: .72rem; color: var(--text-soft); }
+  .post-text { font-size: .96rem; line-height: 1.75; white-space: pre-wrap; word-break: break-word; }
+  .post-image { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 10px; display: block; }
 
-  /* compose box */
-  .compose {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 32px;
-  }
-  .compose textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.93rem;
-    padding: 10px 12px;
-    resize: vertical;
-    min-height: 72px;
-    outline: none;
-  }
-  .compose textarea:focus { border-color: var(--accent); }
-  .compose-footer {
-    display: flex; align-items: center; gap: 10px; margin-top: 10px;
-  }
-  .compose-footer button {
-    background: var(--accent); color: #0d0d12;
-    border: none; border-radius: 8px;
-    padding: 7px 20px; cursor: pointer;
-    font-size: 0.88rem; font-weight: 600;
-    transition: opacity 0.15s;
-  }
-  .compose-footer button:hover { opacity: 0.85; }
-  .compose-footer button:disabled { opacity: 0.4; cursor: default; }
-  .compose-note { font-size: 0.75rem; color: var(--muted); }
-
-  /* feed */
-  .feed { display: flex; flex-direction: column; gap: 20px; }
-
-  .post {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 18px;
-  }
-  .post-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 10px;
-  }
-  .avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem; font-weight: 700; flex-shrink: 0;
-  }
-  .avatar.me { background: rgba(167,139,250,0.18); color: var(--me); }
-  .avatar.sherry { background: rgba(240,160,176,0.18); color: var(--her); }
-  .post-name { font-size: 0.82rem; font-weight: 600; }
-  .post-name.me { color: var(--me); }
-  .post-name.sherry { color: var(--her); }
-  .post-time { font-size: 0.72rem; color: var(--muted); margin-left: auto; }
-
-  .post-text {
-    font-size: 0.93rem; line-height: 1.75;
-    color: var(--text); white-space: pre-wrap;
-    margin-bottom: 10px;
-  }
-  .post-image {
-    width: 100%; max-width: 300px;
-    border-radius: 8px; margin-bottom: 10px;
-    display: block;
-  }
-
-  /* comments */
-  .comments { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px; }
-  .comment {
-    display: flex; gap: 8px; margin-bottom: 8px;
-    font-size: 0.83rem;
-  }
-  .comment-name { font-weight: 600; flex-shrink: 0; }
-  .comment-name.me { color: var(--me); }
-  .comment-name.sherry { color: var(--her); }
-  .comment-text { color: var(--text); line-height: 1.5; }
-
-  .comment-form {
-    display: flex; gap: 8px; margin-top: 8px;
-  }
-  .comment-input {
-    flex: 1; background: var(--surface2);
-    border: 1px solid var(--border); border-radius: 6px;
-    color: var(--text); font-family: inherit;
-    font-size: 0.82rem; padding: 6px 10px; outline: none;
-  }
-  .comment-input:focus { border-color: var(--warm); }
-  .comment-btn {
-    background: transparent; border: 1px solid var(--warm);
-    color: var(--warm); border-radius: 6px;
-    padding: 5px 12px; cursor: pointer;
-    font-size: 0.78rem; transition: opacity 0.15s;
-  }
-  .comment-btn:hover { opacity: 0.75; }
-
-  .empty { text-align: center; color: var(--muted); font-size: 0.88rem; padding: 48px 0; }
-
-  .status-bar {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface); border-top: 1px solid var(--border);
-    padding: 10px 20px; font-size: 0.75rem; color: var(--muted);
-    text-align: center;
-  }
+  .comments { margin-top: 12px; background: var(--bg); border-radius: 14px; padding: 4px 12px; }
+  .comment { display: flex; gap: 8px; padding: 8px 0; font-size: .86rem; line-height: 1.55; border-bottom: 1px solid var(--border); }
+  .comment-name { font-weight: 600; flex: none; }
+  .comment-name.me { color: var(--him); }
+  .comment-name.sherry { color: var(--accent-dim); }
+  .comment-text { word-break: break-word; }
+  .comment-form { display: flex; gap: 8px; padding: 8px 0; align-items: center; }
+  .comment-input { flex: 1; min-width: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-pill); color: var(--text); font: inherit; font-size: 16px; padding: 7px 14px; outline: none; }
+  .comment-input:focus { border-color: var(--accent); }
+  .comment-btn { border: none; background: var(--accent-light); color: var(--accent-dim); border-radius: var(--radius-pill); padding: 8px 14px; font-size: .8rem; font-weight: 600; cursor: pointer; }
+  .comment-btn:disabled { opacity: .5; }
+  .status { text-align: center; font-size: .72rem; color: var(--text-soft); padding: 4px 0 8px; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="header">
-    <div>
-      <div class="title">朋友圈</div>
-      <div class="sub">我们各自的墙，互相看见</div>
-    </div>
-    <div class="dot"></div>
-  </div>
-
-  <div class="compose">
-    <textarea id="compose-text" placeholder="说点什么…"></textarea>
-    <div class="compose-footer">
-      <button id="post-btn" onclick="submitPost()">发出去</button>
-      <span class="compose-note">以莹的身份发</span>
-    </div>
-  </div>
-
-  <div class="feed" id="feed">
-    <div class="empty">加载中…</div>
-  </div>
+<div class="page-header">
+  <div class="page-title">朋友圈</div>
+  <div class="page-subtitle">我们各自的墙，互相看见</div>
 </div>
 
-<div class="status-bar" id="status-bar">·</div>
+<div class="scroll-area">
+  <div class="card">
+    <div class="compose">
+      <span class="avatar her">莹</span>
+      <textarea id="compose-text" placeholder="说点什么…" rows="2"></textarea>
+    </div>
+    <div class="compose-foot">
+      <span class="compose-note">以莹的身份发</span>
+      <button class="btn sm" id="post-btn" onclick="submitPost()"><span data-ic="send" data-ic-class="sm"></span>发出去</button>
+    </div>
+  </div>
+
+  <div id="feed"><div class="empty">加载中…</div></div>
+  <div class="status" id="status-bar"></div>
+</div>
+
+<nav class="tabbar" data-active="moments"></nav>
 
 <script>
 const ME_NAMES = { me: '昀', sherry: '莹' };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function reltime(ts) {
   const d = Date.now() - ts;
@@ -195,36 +73,33 @@ function reltime(ts) {
 function renderPost(post) {
   const who = post.from === 'me' ? 'me' : 'sherry';
   const name = ME_NAMES[post.from] || post.from;
-  const initial = name[0];
   const comments = (post.comments || []).map(c => {
     const cw = c.from === 'me' ? 'me' : 'sherry';
-    return `<div class="comment">
-      <span class="comment-name ${cw}">${ME_NAMES[c.from] || c.from}</span>
-      <span class="comment-text">：${c.text}</span>
-    </div>`;
+    return `<div class="comment"><span class="comment-name ${cw}">${esc(ME_NAMES[c.from] || c.from)}</span><span class="comment-text">${esc(c.text)}</span></div>`;
   }).join('');
-
-  const imgHtml = post.image ? `<img class="post-image" src="${post.image}" alt="">` : '';
-
-  return `<div class="post" data-id="${post.id}">
-    <div class="post-header">
-      <div class="avatar ${who}">${initial}</div>
-      <span class="post-name ${who}">${name}</span>
-      <span class="post-time">${reltime(post.ts)}</span>
+  const imgHtml = post.image ? `<img class="post-image" src="${esc(post.image)}" alt="">` : '';
+  return `<div class="card" data-id="${esc(post.id)}">
+    <div class="post-head">
+      <span class="avatar ${who === 'me' ? 'him' : 'her'}">${esc(name[0])}</span>
+      <div><div class="post-name">${esc(name)}</div><div class="post-time">${reltime(post.ts)}</div></div>
     </div>
-    <div class="post-text">${post.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    <div class="post-text">${esc(post.text)}</div>
     ${imgHtml}
     <div class="comments">
       ${comments}
       <div class="comment-form">
-        <input class="comment-input" placeholder="留个言…" onkeydown="if(event.key==='Enter'){addComment('${post.id}',this)}">
-        <button class="comment-btn" onclick="addComment('${post.id}',this.previousElementSibling)">留言</button>
+        <input class="comment-input" placeholder="留个言…" onkeydown="if(event.key==='Enter'){addComment('${esc(post.id)}',this)}">
+        <button class="comment-btn" onclick="addComment('${esc(post.id)}',this.previousElementSibling)">留言</button>
       </div>
     </div>
   </div>`;
 }
 
-async function loadPosts() {
+// the feed refreshes itself; don't wipe a half-typed comment when it does
+const typing = () => { const a = document.activeElement; return a && a.matches && a.matches('.comment-input, #compose-text') && a.value; };
+
+async function loadPosts(force) {
+  if (!force && typing()) return;
   try {
     const r = await fetch('/api/posts');
     const { posts } = await r.json();
@@ -234,7 +109,7 @@ async function loadPosts() {
       return;
     }
     feed.innerHTML = posts.map(renderPost).join('');
-    document.getElementById('status-bar').textContent = `共 ${posts.length} 条 · ${reltime(Date.now())} 刷新`;
+    document.getElementById('status-bar').textContent = `共 ${posts.length} 条`;
   } catch(e) {
     document.getElementById('feed').innerHTML = '<div class="empty">加载失败</div>';
   }
@@ -252,13 +127,8 @@ async function submitPost() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, from: 'sherry' })
     });
-    if (r.ok) {
-      textarea.value = '';
-      await loadPosts();
-    }
-  } finally {
-    btn.disabled = false;
-  }
+    if (r.ok) { textarea.value = ''; await loadPosts(true); }
+  } finally { btn.disabled = false; }
 }
 
 async function addComment(postId, input) {
@@ -271,17 +141,18 @@ async function addComment(postId, input) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ post_id: postId, from: 'sherry', text })
     });
-    if (r.ok) {
-      input.value = '';
-      await loadPosts();
-    }
-  } finally {
-    input.disabled = false;
-  }
+    if (r.ok) { input.value = ''; await loadPosts(true); }
+  } finally { input.disabled = false; }
 }
 
-loadPosts();
+loadPosts(true);
 setInterval(loadPosts, 30000);
+// live: a new post/comment from 昀 shows up without waiting for the poll
+(function live() {
+  const es = new EventSource('/api/events');
+  es.onmessage = m => { try { const e = JSON.parse(m.data); if (e.type === '朋友圈' && e.actor !== 'sherry') loadPosts(); } catch {} };
+  es.onerror = () => { es.close(); setTimeout(live, 3000); };
+})();
 </script>
 </body>
 </html>

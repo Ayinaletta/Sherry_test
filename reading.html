@@ -5,20 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>共读</title>
 <link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js"></script>
 <style>
-  body { padding-bottom: 120px; }
-  .top { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--border); padding: 10px 14px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); display: flex; align-items: center; gap: 10px; }
-  .top a, .top button { color: var(--text-muted); text-decoration: none; background: none; border: none; font-size: .9rem; cursor: pointer; }
-  .top .ttl { flex: 1; font-weight: 600; font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body { padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 90px); }
+  .doc { box-shadow: var(--shadow); border: none; }
+  .banner { display: flex; align-items: center; gap: 8px; }
+  .unit { box-shadow: var(--shadow); border: none; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; }
   .wrap { max-width: 720px; margin: 0 auto; padding: 14px; }
   .doc { display: block; text-decoration: none; color: inherit; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
   .doc h3 { font-size: .98rem; margin-bottom: 6px; font-family: var(--font-serif); }
   .meta { font-size: .74rem; color: var(--text-soft); line-height: 1.7; }
-  .bar { height: 5px; border-radius: 3px; background: var(--bg-dim); margin: 8px 0 4px; overflow: hidden; }
-  .bar > i { display: block; height: 100%; background: var(--accent); }
-  .btn { background: var(--accent); color: #fff; border: none; border-radius: 999px; padding: 9px 18px; font-size: .88rem; cursor: pointer; }
-  .btn.ghost { background: var(--bg-dim); color: var(--text); }
-  .btn:disabled { opacity: .5; }
   .banner { margin: 0 0 12px; padding: 9px 12px; border-radius: 10px; background: var(--accent-light); color: var(--accent-dim); font-size: .8rem; line-height: 1.5; }
 
   .unit { position: relative; margin: 0 0 14px; padding: 14px 14px 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); }
@@ -37,13 +34,10 @@
   .textLayer mark.hl { color: transparent; }
   .unit.cur { box-shadow: 0 0 0 2px var(--accent-light); }
 
-  .fab { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 40; display: none; gap: 8px; background: var(--text); padding: 8px; border-radius: 999px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
-  .fab button { background: none; border: none; color: var(--bg); font-size: .9rem; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+  .fab { position: fixed; left: 50%; bottom: calc(var(--nav-height) + var(--safe-bottom) + 14px); transform: translateX(-50%); z-index: 40; display: none; gap: 8px; background: var(--text); padding: 8px; border-radius: 999px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+  .fab button { display: inline-flex; align-items: center; gap: 5px; background: none; border: none; color: var(--bg); font-size: .9rem; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
   .fab button + button { border-left: 1px solid rgba(128,128,128,.4); }
 
-  .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 50; display: none; }
-  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 51; max-height: 78vh; overflow: auto; background: var(--bg); border-radius: 18px 18px 0 0; padding: 16px 16px calc(18px + env(safe-area-inset-bottom, 0px)); display: none; max-width: 720px; margin: 0 auto; }
-  .sheet.open, .sheet-bg.open { display: block; }
   .quote { border-left: 3px solid var(--accent); padding: 2px 0 2px 10px; color: var(--text-muted); font-size: .86rem; line-height: 1.6; margin-bottom: 10px; font-style: italic; }
   textarea, input[type=text] { width: 100%; font: inherit; font-size: .95rem; color: var(--text); background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; resize: vertical; }
   .row { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
@@ -53,23 +47,22 @@
   .by .t { color: var(--text-soft); } .by .del { margin-left: auto; color: var(--text-soft); background: none; border: none; cursor: pointer; font-size: .72rem; }
   .note { font-size: .92rem; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
   .reply { margin: 8px 0 0 10px; padding-left: 10px; border-left: 2px solid var(--bg-dim); }
-  .toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: .82rem; z-index: 60; opacity: 0; transition: opacity .25s; pointer-events: none; }
-  .toast.on { opacity: 1; }
   .empty { text-align: center; color: var(--text-soft); padding: 40px 0; font-size: .9rem; line-height: 1.8; }
 </style>
 </head>
 <body>
-<div class="top">
-  <a href="/" id="back">‹ 首页</a>
-  <div class="ttl" id="ttl">共读</div>
-  <button id="listBtn" style="display:none">批注</button>
-  <button id="menuBtn" style="display:none">⋯</button>
-</div>
+<header class="appbar">
+  <a class="icon-btn" id="back" href="/" data-ic="chevron-left" title="返回"></a>
+  <div class="appbar-main"><div class="appbar-title" id="ttl">共读</div><div class="appbar-sub" id="sub">一起读，读到哪看到哪</div></div>
+  <button class="icon-btn" id="listBtn" style="display:none" data-ic="message-square-text" title="全部批注"></button>
+  <button class="icon-btn" id="menuBtn" style="display:none" data-ic="trash-2" title="删除这份读物"></button>
+</header>
 <div class="wrap" id="app"></div>
-<div class="fab" id="fab"><button id="fabNote">✏️ 批注</button><button id="fabHl">🖍 划线</button></div>
+<div class="fab" id="fab"><button id="fabNote"><span data-ic="pen-line"></span> 批注</button><button id="fabHl"><span data-ic="highlighter"></span> 划线</button></div>
 <div class="sheet-bg" id="bg"></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
+<nav class="tabbar" data-active="reading"></nav>
 
 <script type="module">
 const $ = id => document.getElementById(id);
@@ -88,13 +81,13 @@ async function openLibrary() {
   $('ttl').textContent = '共读空间';
   const { docs } = await j('/api/reading');
   $('app').innerHTML = `
-    <button class="btn" id="newBtn" style="margin-bottom:14px">＋ 一起读点新的</button>
+    <button class="btn block" id="newBtn" style="margin-bottom:14px">${ic('plus')}一起读点新的</button>
     ${docs.length ? docs.map(d => {
       const pct = Math.round((d.progress + 1) / d.units * 100);
       return `<a class="doc" href="/reading?doc=${d.id}"><h3>《${esc(d.title)}》</h3>
         <div class="bar"><i style="width:${pct}%"></i></div>
         <div class="meta">${d.kind === 'pdf' ? 'PDF ' : '文章 '}· 共 ${d.units} ${d.kind === 'pdf' ? '页' : '段'} · 你读到 ${d.progress + 1} · 昀读到 ${d.otherProgress + 1}
-        · ${d.annotations} 条批注${d.locked ? ` · 🔒 ${d.locked} 条等你解锁` : ''}</div></a>`;
+        · ${d.annotations} 条批注${d.locked ? ` · ${ic('lock','sm')} ${d.locked} 条等你解锁` : ''}</div></a>`;
     }).join('') : '<div class="empty">还没有一起读的东西。<br>传一份 PDF，或者贴一篇文章。</div>'}`;
   $('newBtn').onclick = openUpload;
 }
@@ -128,7 +121,7 @@ async function openReader(id) {
   let d;
   try { d = await j('/api/reading/' + id); } catch { $('app').innerHTML = '<div class="empty">找不到这份读物</div>'; return; }
   S = { doc: d, anns: d.annotations, progress: d.progress, other: d.otherProgress, locked: d.locked };
-  $('ttl').textContent = d.title; $('back').href = '/reading'; $('back').textContent = '‹ 共读';
+  $('ttl').textContent = d.title; $('back').href = '/reading'; $('sub').textContent = d.kind === 'pdf' ? 'PDF 共读' : '文章共读';
   $('listBtn').style.display = $('menuBtn').style.display = '';
   $('listBtn').onclick = openAnnList;
   $('menuBtn').onclick = () => { if (confirm('删除《' + d.title + '》和上面所有批注？删掉就找不回来了。')) j('/api/reading/' + id, { method: 'DELETE' }).then(() => location.href = '/reading'); };
@@ -228,7 +221,7 @@ function applyMarks(i) {
     const r = locate(text, a); if (r) wrap(root, r[0], r[1], a.author === 'sherry' ? 'mine' : 'theirs', a.id);
   });
   const here = S.anns.filter(a => a.unit === i);
-  unitEls[i].querySelector('.bd').innerHTML = here.length ? `<button class="badge" data-u="${i}">💬 ${here.length}</button>` : '';
+  unitEls[i].querySelector('.bd').innerHTML = here.length ? `<button class="badge" data-u="${i}">${ic('message-circle','sm')} ${here.length}</button>` : '';
 }
 function applyAllMarks() { unitEls.forEach((_, i) => applyMarks(i)); }
 
@@ -244,7 +237,7 @@ $('app').addEventListener('click', e => {
 function paintStatus() {
   const d = S.doc, l = d.kind === 'pdf' ? '页' : '段';
   let t = `昀读到第 ${Math.max(0, S.other + 1)} / ${d.total} ${l}`;
-  if (S.locked) t += `　🔒 昀在你前面留了 ${S.locked} 条批注，读到那里就解锁`;
+  if (S.locked) t += `　昀在你前面留了 ${S.locked} 条批注，读到那里就解锁`;
   $('banner').textContent = t;
   unitEls.forEach((el, i) => el.classList.toggle('cur', i === S.progress));
 }

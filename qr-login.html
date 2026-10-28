@@ -2,76 +2,8 @@
 <html lang="zh">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>淘宝扫码</title>
-<style>
-body {
-  margin: 0; padding: 32px 16px;
-  background: #111; color: #f0f0f0;
-  font-family: -apple-system, "PingFang SC", sans-serif;
-  display: flex; flex-direction: column;
-  align-items: center; gap: 20px; min-height: 100vh;
-  box-sizing: border-box;
-}
-.logo { font-size: 26px; font-weight: 700; color: #ff6900; }
-.card {
-  background: #1c1c1c; border: 1px solid #2e2e2e;
-  border-radius: 12px; padding: 28px 24px;
-  width: 100%; max-width: 340px;
-  display: flex; flex-direction: column; align-items: center; gap: 14px;
-}
-img#qr {
-  width: 240px; height: 240px;
-  border: 4px solid #fff; border-radius: 8px;
-  image-rendering: pixelated;
-}
-.hint { font-size: 13px; color: #888; text-align: center; line-height: 1.7; }
-#timer { font-size: 14px; color: #888; font-variant-numeric: tabular-nums; }
-#timer.urgent { color: #e05a00; }
-button {
-  background: #ff6900; color: #fff; border: none;
-  padding: 9px 22px; border-radius: 8px;
-  font-size: 13px; cursor: pointer; width: 100%;
-}
-button:hover { opacity: 0.85; }
-</style>
+<meta http-equiv="refresh" content="0; url=/qr">
+<title>扫码</title>
 </head>
-<body>
-<div class="logo">淘宝 Taobao</div>
-<div class="card">
-  <img id="qr" src="/qr.png" alt="二维码">
-  <p class="hint">用<strong>淘宝APP</strong>扫码 → 右上角相机/扫一扫</p>
-  <div id="timer">—</div>
-  <button onclick="reload()">哥哥截好新码了，点这里刷新</button>
-</div>
-<script>
-let secs = 180, iv = null;
-const timerEl = document.getElementById('timer');
-
-function startTimer() {
-  clearInterval(iv);
-  secs = 180;
-  timerEl.className = '';
-  iv = setInterval(() => {
-    secs--;
-    if (secs <= 0) {
-      clearInterval(iv);
-      timerEl.textContent = '⚠️ 可能已过期，截好了点上面刷新';
-      timerEl.className = 'urgent';
-    } else {
-      const m = Math.floor(secs/60), s = secs % 60;
-      timerEl.textContent = `剩余 ${m}:${s.toString().padStart(2,'0')}`;
-      if (secs <= 30) timerEl.className = 'urgent';
-    }
-  }, 1000);
-}
-
-function reload() {
-  document.getElementById('qr').src = '/qr.png?t=' + Date.now();
-  startTimer();
-}
-
-startTimer();
-</script>
-</body>
+<body><a href="/qr">二维码已搬到这里</a></body>
 </html>
