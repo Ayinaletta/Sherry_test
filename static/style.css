@@ -313,7 +313,7 @@ a.row:active, .row.tappable:active { background: var(--bg-dim); }
 .msg-row { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; max-width: 100%; min-width: 0; }
 .msg-row.mine { align-items: flex-end; }
 .msg-bubble { max-width: 80%; min-width: 0; padding: 10px 14px; border-radius: 20px; font-size: 0.94rem; line-height: 1.55; word-break: break-word; overflow-wrap: break-word; }
-.msg-bubble.theirs { background: var(--bg-card); border-bottom-left-radius: 6px; box-shadow: var(--shadow); }
+.msg-bubble.theirs { background: var(--bg-card); border-bottom-left-radius: 6px; box-shadow: 0 0 0 1px var(--border); }   /* flat ring: big blurred shadows on hundreds of bubbles made phones lag */
 .msg-bubble.mine { background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 6px; }
 .msg-meta, .msg-ts { font-size: 0.68rem; color: var(--text-soft); padding: 0 6px; }
 .msg-system { text-align: center; font-size: 0.74rem; color: var(--text-soft); }
@@ -353,7 +353,6 @@ a.row:active, .row.tappable:active { background: var(--bg-dim); }
     border-left: 1px solid var(--border); border-right: 1px solid var(--border);
   }
   .menu { right: max(8px, calc(50% - 352px)); }
-  .tray { right: auto; left: max(10px, calc(50% - 350px)); }
   .appbar, .page-header, .scroll-area, .chat-area, .wrap-narrow, .list { background-clip: padding-box; }
   .scroll-area, .chat-area, .wrap-narrow { background: var(--bg); min-height: calc(100vh - var(--bar-height)); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
 }

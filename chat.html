@@ -62,9 +62,19 @@
     .chat-send.rec { background: var(--accent-light); color: var(--accent); }
     .chat-send.rec.recording { background: var(--danger); color: #fff; animation: pulse 1.2s ease-in-out infinite; }
     @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(196,72,62,.45); } 50% { box-shadow: 0 0 0 9px rgba(196,72,62,0); } }
-    .tray { top: auto; right: auto; left: 10px; bottom: calc(var(--nav-height) + var(--safe-bottom) + 62px); }
-    .menu-item.recording { color: var(--danger); }
-    .menu-item.recording .ic { color: var(--danger); }
+    /* + opens a row of actions inside the bar itself: it moves with the keyboard, no overlay to get stuck */
+    .chat-input-bar { flex-direction: column; align-items: stretch; gap: 8px; background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none; }
+    .input-line { display: flex; align-items: flex-end; gap: 6px; }
+    .attach-row { display: none; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .attach-row.open { display: grid; }
+    .attach-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0 8px; font-size: .72rem; color: var(--text-muted); background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; cursor: pointer; touch-action: manipulation; }
+    .attach-btn .ic { font-size: 1.35rem; color: var(--accent); }
+    .attach-btn:active { background: var(--bg-dim); }
+    .attach-btn.recording { color: var(--danger); border-color: var(--danger); }
+    .attach-btn.recording .ic { color: var(--danger); }
+    #tray-btn { transition: transform .2s; touch-action: manipulation; }
+    #tray-btn.rot { transform: rotate(45deg); color: var(--accent); }
+    .load-older { align-self: center; border: none; background: var(--bg-dim); color: var(--text-muted); font-size: .78rem; padding: 7px 16px; border-radius: 999px; cursor: pointer; }
 
     /* expand textarea overlay */
     .expand-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 998; flex-direction: column; padding: calc(var(--safe-top) + 14px) 16px calc(var(--safe-bottom) + 14px); gap: 10px; }
@@ -127,21 +137,22 @@
     </div>
   </div>
 
-  <div class="menu-bg" id="tray-bg"></div>
-  <div class="menu tray" id="tray">
-    <button class="menu-item" onclick="document.getElementById('file-input').click();closeTray()"><span data-ic="image"></span>发图片</button>
-    <button class="menu-item" onclick="document.getElementById('doc-input').click();closeTray()"><span data-ic="paperclip"></span>发文件</button>
-    <button class="menu-item" id="mic-btn" title="语音转文字（写进输入框）"><span data-ic="mic"></span><span id="mic-label">语音转文字</span></button>
-    <button class="menu-item" onclick="closeTray();openExpand()"><span data-ic="maximize-2"></span>展开输入框</button>
-  </div>
   <input type="file" id="file-input" accept="image/*" style="display:none">
   <input type="file" id="doc-input" style="display:none">
 
-  <div class="chat-input-bar">
-    <button class="icon-btn" id="tray-btn" title="更多输入方式" data-ic="plus"></button>
-    <textarea class="chat-input" id="msg-input" placeholder="跟哥哥说点什么…" rows="1"></textarea>
-    <button class="chat-send rec" id="rec-btn" title="发语音消息（再点一次发送）" data-ic="mic"></button>
-    <button class="chat-send" id="send-btn" onclick="handleSend()" style="display:none" data-ic="arrow-up"></button>
+  <div class="chat-input-bar" id="input-bar">
+    <div class="attach-row" id="attach-row">
+      <button class="attach-btn" onclick="document.getElementById('file-input').click();closeTray()"><span data-ic="image"></span>图片</button>
+      <button class="attach-btn" onclick="document.getElementById('doc-input').click();closeTray()"><span data-ic="paperclip"></span>文件</button>
+      <button class="attach-btn" id="mic-btn" title="语音转文字（写进输入框）"><span data-ic="mic"></span><span id="mic-label">听写</span></button>
+      <button class="attach-btn" onclick="closeTray();openExpand()"><span data-ic="maximize-2"></span>长文本</button>
+    </div>
+    <div class="input-line">
+      <button class="icon-btn" id="tray-btn" title="更多输入方式" data-ic="plus"></button>
+      <textarea class="chat-input" id="msg-input" placeholder="跟哥哥说点什么…" rows="1"></textarea>
+      <button class="chat-send rec" id="rec-btn" title="发语音消息（再点一次发送）" data-ic="mic"></button>
+      <button class="chat-send" id="send-btn" onclick="handleSend()" style="display:none" data-ic="arrow-up"></button>
+    </div>
   </div>
 
   <nav class="tabbar" data-active="chat"></nav>
@@ -297,7 +308,47 @@
       requestAnimationFrame(() => window.scrollTo(0, document.body.scrollHeight));
     }
 
-    // Load history
+    // Load history: a long chat is thousands of DOM nodes, which makes phones sluggish.
+    // Render the latest PAGE messages; older ones come in on demand (or all at once when searching).
+    const PAGE = 150;
+    let _older = [];                        // entries not rendered yet, oldest first
+    const dayKey = ts => new Date(ts).toDateString();
+
+    function olderButton() {
+      let b = document.getElementById('load-older');
+      if (!_older.length) { if (b) b.remove(); return; }
+      if (!b) {
+        b = document.createElement('button');
+        b.id = 'load-older'; b.className = 'load-older';
+        b.onclick = () => loadOlder(PAGE);
+        area.insertBefore(b, area.firstChild);
+      }
+      b.textContent = `加载更早的消息（还有 ${_older.length} 条）`;
+    }
+
+    function loadOlder(n) {
+      if (!_older.length) return;
+      const batch = _older.splice(Math.max(0, _older.length - n), n);          // newest n of the unrendered
+      const firstShown = area.querySelector('.msg-row, .msg-notice, .msg-system-warn');
+      const hOld = document.documentElement.scrollHeight, yOld = window.scrollY;
+      const frag = document.createDocumentFragment();
+      let last = null;
+      batch.forEach(e => {
+        const k = dayKey(e.ts);
+        if (k !== last) { const s = document.createElement('div'); s.className = 'date-sep'; s.textContent = fmtDateLabel(e.ts); frag.appendChild(s); last = k; }
+        frag.appendChild(renderMsg(e));
+      });
+      // the day that continues into what is already on screen should not get a second separator
+      const firstSep = area.querySelector('.date-sep');
+      if (firstSep && last === window._oldestDay) firstSep.remove();
+      const anchor = document.getElementById('load-older');
+      area.insertBefore(frag, anchor ? anchor.nextSibling : area.firstChild);
+      if (batch.length) window._oldestDay = dayKey(batch[0].ts);
+      olderButton();
+      window.scrollTo(0, yOld + (document.documentElement.scrollHeight - hOld));   // keep the reader where they were
+    }
+    function loadAllOlder() { while (_older.length) loadOlder(500); }
+
     fetch('/api/chat/history')
       .then(r => r.json())
       .then(entries => {
@@ -307,14 +358,17 @@
           note.textContent = '这里是我们的对话，还没有记录～';
           area.appendChild(note);
         } else {
-          const seenIds = new Set();
-          entries.forEach(e => {
-            seenIds.add(e.id);
+          const seenIds = new Set(entries.map(e => e.id));
+          const shown = entries.slice(-PAGE);
+          _older = entries.slice(0, entries.length - shown.length);
+          shown.forEach(e => {
             const sep = maybeInsertDateSep(e.ts);
             if (sep) area.appendChild(sep);
             area.appendChild(renderMsg(e));
           });
+          window._oldestDay = dayKey(shown[0].ts);
           window._seenIds = seenIds;
+          olderButton();
         }
         scrollToBottom();
       })
@@ -374,6 +428,7 @@
       input.value = '';
       input.style.height = 'auto';
       syncSendMic();
+      closeTray();
       document.getElementById('send-btn').disabled = true;
 
       // /compact command
@@ -415,7 +470,7 @@
 
     searchToggle.addEventListener('click', () => {
       const open = searchBar.classList.toggle('open');
-      if (open) { searchInput.focus(); }
+      if (open) { loadAllOlder(); searchInput.focus(); }
       else { searchInput.value = ''; applySearch(''); }
     });
 
@@ -486,14 +541,13 @@
     setMenu(pushBtn, 'bell-off', '开启通知', false);
     setMenu(document.getElementById('voice-toggle'), 'volume-x', '朗读哥哥的话：关', false);
     const menu = document.getElementById('menu'), menuBg = document.getElementById('menu-bg');
-    const tray = document.getElementById('tray'), trayBg = document.getElementById('tray-bg');
+    const attachRow = document.getElementById('attach-row'), trayBtn = document.getElementById('tray-btn');
     const toggleMenu = open => { menu.classList.toggle('open', open); menuBg.classList.toggle('open', open); };
     document.getElementById('menu-toggle').onclick = () => toggleMenu(!menu.classList.contains('open'));
     menuBg.onclick = () => toggleMenu(false);
     menu.addEventListener('click', e => { if (e.target.closest('.menu-item') && !e.target.closest('#voice-toggle')) toggleMenu(false); });
-    function closeTray() { tray.classList.remove('open'); trayBg.classList.remove('open'); }
-    document.getElementById('tray-btn').onclick = () => { const o = !tray.classList.contains('open'); tray.classList.toggle('open', o); trayBg.classList.toggle('open', o); };
-    trayBg.onclick = closeTray;
+    function closeTray() { attachRow.classList.remove('open'); trayBtn.classList.remove('rot'); }
+    trayBtn.onclick = () => { const o = !attachRow.classList.contains('open'); attachRow.classList.toggle('open', o); trayBtn.classList.toggle('rot', o); };
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
@@ -631,15 +685,15 @@
       };
       recognition.onerror = () => {
         sttActive = false;
-        document.getElementById('mic-btn').classList.remove('recording'); document.getElementById('mic-label').textContent = '语音转文字';
+        document.getElementById('mic-btn').classList.remove('recording'); document.getElementById('mic-label').textContent = '听写';
         recognition = null;
       };
       recognition.onend = () => {
         if (sttActive) {
           // auto-restart if stopped unexpectedly (browser timeout)
-          try { recognition.start(); } catch { sttActive = false; document.getElementById('mic-btn').classList.remove('recording'); document.getElementById('mic-label').textContent = '语音转文字'; recognition = null; }
+          try { recognition.start(); } catch { sttActive = false; document.getElementById('mic-btn').classList.remove('recording'); document.getElementById('mic-label').textContent = '听写'; recognition = null; }
         } else {
-          document.getElementById('mic-btn').classList.remove('recording'); document.getElementById('mic-label').textContent = '语音转文字';
+          document.getElementById('mic-btn').classList.remove('recording'); document.getElementById('mic-label').textContent = '听写';
           // clean up interim brackets from input
           const inp = document.getElementById('msg-input');
           inp.value = inp.value.replace(/\s*\[.*?\]$/,'').trim();
@@ -648,7 +702,7 @@
         }
       };
       sttActive = true;
-      document.getElementById('mic-btn').classList.add('recording'); document.getElementById('mic-label').textContent = '听写中，点这里停止';
+      document.getElementById('mic-btn').classList.add('recording'); document.getElementById('mic-label').textContent = '停止';
       try { recognition.start(); } catch { sttActive = false; recognition = null; }
     }
 
@@ -658,9 +712,7 @@
     }
 
     const micBtn = document.getElementById('mic-btn');
-    micBtn.addEventListener('click', closeTray);
     micBtn.addEventListener('click', toggleSTT);
-    micBtn.addEventListener('touchend', e => { e.preventDefault(); toggleSTT(); }, { passive: false });
 
     // Any file: raw upload, shows up as a file card
     const docInput = document.getElementById('doc-input');
