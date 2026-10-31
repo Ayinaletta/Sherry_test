@@ -1,7 +1,6 @@
 /* 伊甸园 UI — one design language for every page.
    Tokens → base → icons → app bar → tab bar → surfaces → controls → overlays → chat.
    Icons come from /static/icons.svg (Lucide); see /static/app.js for ic() and the tab bar. */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&display=swap');
 
 :root {
   --bg: #F5F1EA;
@@ -28,7 +27,7 @@
   --radius-lg: 24px;
   --radius-pill: 999px;
   --font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
-  --font-serif: 'Noto Serif SC', 'Songti SC', Georgia, serif;
+  --font-serif: 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', STSong, Georgia, serif;   /* system fonts only: no request leaves the house */
   --font-mono: 'Menlo', 'SF Mono', monospace;
   --nav-height: 62px;
   --bar-height: 52px;

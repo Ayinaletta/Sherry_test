@@ -10,6 +10,8 @@ const Busboy = require('busboy');
 let sharp; try { sharp = require('sharp'); } catch {}
 const core = require('./lib/core');
 const guard = require('./lib/guard');
+const security = require('./lib/security');
+const admin = require('./lib/admin');
 const homeRoutes = require('./lib/home');
 const reading = require('./lib/reading');
 const voice = require('./lib/voice');
@@ -50,7 +52,6 @@ function forwardToTG(text) {
 }
 
 const PORT = 3000;
-const LEGACY_EXPLORE_TOKEN = '06f46a4704af0051d042dbba5ac3cb07';   // in git history: set explore_token in peek_config.json to replace it
 const ROOT = __dirname;
 const FREE_LOG = '/root/free_time_log.jsonl';
 const CHAT_LOG = path.join(__dirname, 'chat_messages.jsonl');
@@ -142,28 +143,9 @@ const SITE_PASSWORD = fs.existsSync(AUTH_FILE)
   ? fs.readFileSync(AUTH_FILE, 'utf8').trim()
   : '';
 
-// Logged-in browsers survive a restart: tokens live in .sessions (0600, gitignored)
-const SESSIONS_FILE = path.join(__dirname, '.sessions');
-const sessions = new Set();
-try { JSON.parse(fs.readFileSync(SESSIONS_FILE, 'utf8')).forEach(t => sessions.add(t)); } catch {}
-function saveSessions() { try { fs.writeFileSync(SESSIONS_FILE, JSON.stringify([...sessions]), { mode: 0o600 }); } catch {} }
-
-function generateToken() {
-  return crypto.randomBytes(32).toString('hex');
-}
-
-function parseCookies(req) {
-  const cookies = {};
-  for (const part of (req.headers.cookie || '').split(';')) {
-    const [k, ...v] = part.trim().split('=');
-    if (k) cookies[k.trim()] = v.join('=').trim();
-  }
-  return cookies;
-}
-
 function isAuthenticated(req) {
-  if (!SITE_PASSWORD) return true;
-  return sessions.has(parseCookies(req)['session']);
+  if (!SITE_PASSWORD) return false;     // no password set = nobody can log in (fail closed)
+  return security.checkSession(req);
 }
 
 // SSE clients waiting for new chat messages
@@ -281,6 +263,9 @@ function serveFile(filePath, res, req) {
         headers['Cache-Control'] = 'no-cache';
         if (req && req.headers['if-none-match'] === etag) { res.writeHead(304, headers); res.end(); return; }
       }
+    } else {
+      // uploads, photos, audio: the browser may keep them, a shared cache (Cloudflare, a proxy) must not
+      headers['Cache-Control'] = 'private, max-age=3600';
     }
     res.writeHead(200, headers);
     res.end(data);
@@ -295,28 +280,49 @@ function safePath(root, urlPath) {
   return full;
 }
 
-// Gate for a route: Sherry's session, Claude (key / local), or - where a device can only carry a URL - the shared secret.
-//   legacy: honour `legacy_public: true` in peek_config.json (the old wide-open behaviour for read-only pools)
-// Returns true when it already answered (caller must `return`).
-function deny(req, res, url, { secret = false, html = false, legacy = false } = {}) {
+// The front door. Default-deny: everything needs an identity except the few things listed here.
+//   open    : the login page and what a browser fetches before logging in
+//   device  : phone shortcuts / Mac daemon / ESP32 may use the shared secret (?secret=) instead of a login
+//   private : everything else - Sherry's session, Claude's key, or a direct local call
+const OPEN = new Set(['GET /login', 'GET /manifest.json', 'GET /sw.js', 'GET /api/health', 'GET /static/home_icon.jpg', 'POST /api/login', 'POST /api/logout']);
+const DEVICE = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch', 'POST /api/peek/screenshot', 'POST /api/snap/upload', 'GET /api/snap/stream']);
+const INGEST = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch']);
+const ASSET = /(\.(png|jpe?g|gif|webp|svg|ico|js|mjs|css|mp3|webm|m4a|wav|ogg|aac|pdf|py|json|txt)$)|^\/(photo-file|uploads\/|static\/|vendor\/)/i;
+
+function gate(req, res, url) {
+  const p = url.pathname, key = `${req.method} ${p}`;
+  if (p === '/robots.txt') { res.writeHead(200, { 'Content-Type': 'text/plain' }); res.end('User-agent: *\nDisallow: /\n'); return true; }
+  const who = core.who(req);
+  if (security.isLocked() && who !== 'claude') {              // panic lock: only the server side (昀) gets through
+    res.writeHead(423, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('门锁上了。'); return true;
+  }
+  if (OPEN.has(key)) return false;
+  if (p === '/api/explore-log' && core.conf('explore_token', '')) return false;   // claude.ai sibling: its own token, checked in the route
+  if (who) {
+    if (who === 'sherry' && !security.originOk(req)) {        // a login cookie alone must not let another website act for her
+      security.audit('blocked_origin', req, { path: p });
+      res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'cross-site request refused' })); return true;
+    }
+    return false;
+  }
+  if (DEVICE.has(key) && (guard.secretOk(req, url) || (INGEST.has(key) && core.conf('open_device_ingest', false) === true))) return false;
+  security.audit('denied', req, { path: p, method: req.method });
+  if (req.method === 'GET' && !p.startsWith('/api/') && !ASSET.test(p)) { res.writeHead(302, { Location: '/login' }); res.end(); return true; }
+  res.writeHead(401, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'login required' }));
+  return true;
+}
+// kept so the per-route checks read the same; the gate above already refused anyone without an identity
+function deny(req, res, url, { secret = false, html = false } = {}) {
   if (core.who(req) || (secret && guard.secretOk(req, url))) return false;
-  if (legacy && core.conf('legacy_public', false) === true) return false;
   if (html) { res.writeHead(302, { Location: '/login' }); res.end(); return true; }
   res.writeHead(401, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: 'login required' }));
   return true;
 }
-// device -> server writes (phone shortcut, ESP32): open unless `device_secret` is configured, then required
-function deviceWriteBlocked(req, res, url) {
-  const want = guard.deviceSecret();
-  if (!want || core.who(req) || guard.secretOk(req, url)) return false;
-  res.writeHead(403, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: 'forbidden' }));
-  return true;
-}
 
 // New feature modules (own auth: session cookie or Claude's key) get first look at each request.
-const MODULES = [homeRoutes, reading, voice, qr];
+const MODULES = [homeRoutes, reading, voice, qr, admin];
 async function routeModules(req, res) {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   for (const m of MODULES) if (await m.handle(req, res, url, { appendChat })) return true;
@@ -324,7 +330,10 @@ async function routeModules(req, res) {
 }
 
 const server = http.createServer((req, res) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
+  security.headers(req, res);
+  let url;
+  try { url = new URL(req.url, `http://localhost:${PORT}`); } catch { res.writeHead(400); res.end(); return; }
+  if (gate(req, res, url)) return;
   routeModules(req, res).then(handled => { if (!handled) legacyHandler(req, res); })
     .catch(e => { if (!res.headersSent) { res.writeHead(500); res.end('error'); } console.error(e); });
 });
@@ -342,53 +351,42 @@ function legacyHandler(req, res) {
 
   // Login API
   if (pathname === '/api/login' && req.method === 'POST') {
-    let body = '';
-    req.on('data', c => { body += c; });
-    req.on('end', () => {
-      try {
-        if (guard.loginBlocked(req)) {
-          res.writeHead(429, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'too many attempts, try again in a few minutes' }));
-          return;
-        }
-        const { password } = JSON.parse(body);
-        if (SITE_PASSWORD && guard.same(String(password ?? ''), SITE_PASSWORD)) {
-          guard.loginOk(req);
-          const token = generateToken();
-          sessions.add(token);
-          saveSessions();
-          res.writeHead(200, {
-            'Set-Cookie': `session=${token}; HttpOnly; Path=/; Max-Age=2592000`,
-            'Content-Type': 'application/json',
-          });
-          res.end(JSON.stringify({ ok: true }));
-        } else {
-          guard.loginFailed(req);
-          res.writeHead(401, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'wrong password' }));
-        }
-      } catch {
-        res.writeHead(400); res.end();
+    core.readBody(req, 4096).then(buf => {
+      if (guard.loginBlocked(req)) {
+        security.audit('login_blocked', req);
+        res.writeHead(429, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'too many attempts, try again in a few minutes' }));
+        return;
       }
-    });
+      let password = '';
+      try { password = String(JSON.parse(buf.toString('utf8')).password ?? ''); } catch {}
+      if (SITE_PASSWORD && security.verifyPassword(password, SITE_PASSWORD)) {
+        guard.loginOk(req);
+        const token = security.createSession(req);
+        security.audit('login_ok', req);
+        res.writeHead(200, { 'Set-Cookie': security.sessionCookie(token, req), 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } else {
+        guard.loginFailed(req);
+        security.audit('login_fail', req);
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'wrong password' }));
+      }
+    }).catch(() => { res.writeHead(400); res.end(); });
     return;
   }
 
   // Logout API
   if (pathname === '/api/logout' && req.method === 'POST') {
-    const token = parseCookies(req)['session'];
-    if (token) { sessions.delete(token); saveSessions(); }
-    res.writeHead(200, {
-      'Set-Cookie': 'session=; HttpOnly; Path=/; Max-Age=0',
-      'Content-Type': 'application/json',
-    });
+    security.revokeCurrent(req);
+    res.writeHead(200, { 'Set-Cookie': security.clearCookie(req), 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
     return;
   }
 
   // Public: explore log (read-only, token-gated for claude.ai sibling access)
   if (pathname === '/api/explore-log') {
-    const EXPLORE_TOKEN = core.conf('explore_token', '') || LEGACY_EXPLORE_TOKEN;
+    const EXPLORE_TOKEN = core.conf('explore_token', '');
     const token = url.searchParams.get('token') || '';
     if (token !== EXPLORE_TOKEN) {
       res.writeHead(403, { 'Content-Type': 'application/json' });
@@ -408,7 +406,7 @@ function legacyHandler(req, res) {
         .map(line => { try { return JSON.parse(line); } catch { return null; } })
         .filter(Boolean)
         .reverse();
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' });
       res.end(JSON.stringify(entries));
     } catch (e) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -426,7 +424,7 @@ function legacyHandler(req, res) {
     if (deny(req, res, url, { legacy: true })) return;
     const qrFile = path.join(ROOT, 'qr.png');
     if (fs.existsSync(qrFile)) {
-      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-cache, no-store', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-cache, no-store' });
       res.end(fs.readFileSync(qrFile));
     } else {
       res.writeHead(404); res.end('no qr');
@@ -449,7 +447,6 @@ function legacyHandler(req, res) {
 
   // Public: checkin from iPhone Shortcuts or Mac script (no auth — device can't store tokens)
   if (pathname === '/api/checkin' && (req.method === 'POST' || req.method === 'GET')) {
-    if (req.method === 'GET' ? deny(req, res, url) : deviceWriteBlocked(req, res, url)) return;
     if (req.method === 'POST') {
       let body = '';
       req.on('data', d => body += d);
@@ -492,7 +489,6 @@ function legacyHandler(req, res) {
 
   // Public: ring health data push (from iOS Shortcut) and read
   if (pathname === '/api/ring' && req.method === 'POST') {
-    if (deviceWriteBlocked(req, res, url)) return;
     let body = '';
     req.on('data', d => body += d);
     req.on('end', () => {
@@ -656,7 +652,6 @@ function legacyHandler(req, res) {
 
   // Public: touch events from Pico (no auth — board can't store tokens)
   if (pathname === '/api/touch' && req.method === 'POST') {
-    if (deviceWriteBlocked(req, res, url)) return;
     let body = '';
     req.on('data', d => body += d);
     req.on('end', () => {
@@ -709,8 +704,7 @@ function legacyHandler(req, res) {
         if (err2) { res.writeHead(500); res.end('read error'); return; }
         res.writeHead(200, {
           'Content-Type': 'audio/wav',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'public, max-age=3600',
+          'Cache-Control': 'private, max-age=3600',
         });
         res.end(data);
       });
@@ -802,7 +796,7 @@ function legacyHandler(req, res) {
     if (deny(req, res, url, { secret: true })) return;
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'private, no-store',
       'Connection': 'keep-alive',
     });
     res.write(': connected\n\n');
@@ -889,7 +883,7 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/thoughts') {
-    if (deny(req, res, url, { html: true, legacy: true })) return;
+    if (deny(req, res, url, { html: true })) return;
     const p = path.join(ROOT, 'thoughts.html');
     if (fs.existsSync(p)) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
@@ -953,7 +947,7 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/photos') {
-    if (deny(req, res, url, { html: true, legacy: true })) return;
+    if (deny(req, res, url, { html: true })) return;
     const p = path.join(ROOT, 'photos.html');
     if (fs.existsSync(p)) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
@@ -981,7 +975,7 @@ function legacyHandler(req, res) {
     const ext = path.extname(resolved).toLowerCase();
     const types = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp' };
     const ct = types[ext] || 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': ct });
+    res.writeHead(200, { 'Content-Type': ct, 'Cache-Control': 'private, max-age=3600' });
     fs.createReadStream(resolved).pipe(res);
     return;
   }
@@ -990,7 +984,7 @@ function legacyHandler(req, res) {
   if (pathname === '/api/posts' && req.method === 'GET') {
     if (deny(req, res, url, { legacy: true })) return;
     const posts = loadPosts().reverse();
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' });
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' });
     res.end(JSON.stringify({ posts }));
     return;
   }
@@ -1061,7 +1055,7 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/posts') {
-    if (deny(req, res, url, { html: true, legacy: true })) return;
+    if (deny(req, res, url, { html: true })) return;
     const p = path.join(ROOT, 'posts.html');
     if (fs.existsSync(p)) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
@@ -1073,7 +1067,7 @@ function legacyHandler(req, res) {
   }
 
   // Auth gate
-  if (!isAuthenticated(req)) {
+  if (!core.who(req) && !OPEN.has(`${req.method} ${pathname}`)) {
     res.writeHead(302, { Location: '/login' });
     res.end();
     return;
@@ -1105,7 +1099,7 @@ function legacyHandler(req, res) {
         .map(line => { try { return JSON.parse(line); } catch { return null; } })
         .filter(Boolean)
         .reverse();
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' });
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' });
       res.end(JSON.stringify(entries));
     } catch (e) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -1123,10 +1117,13 @@ function legacyHandler(req, res) {
         return;
       }
       const raw = fs.readFileSync(CHAT_LOG, 'utf8').trim();
-      const entries = raw.split('\n').filter(Boolean)
+      let entries = raw.split('\n').filter(Boolean)
         .map(l => { try { return JSON.parse(l); } catch { return null; } })
         .filter(Boolean);
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' });
+      const before = parseInt(url.searchParams.get('before') || '0', 10), limit = parseInt(url.searchParams.get('limit') || '0', 10);
+      if (before) entries = entries.filter(e => e.id < before);
+      if (limit > 0) entries = entries.slice(-limit);
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' });
       res.end(JSON.stringify(entries));
     } catch (e) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -1139,9 +1136,8 @@ function legacyHandler(req, res) {
   if (pathname === '/api/chat/stream') {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'private, no-store',
       'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
     });
     res.write(': connected\n\n');
     chatClients.add(res);
@@ -1254,6 +1250,20 @@ function legacyHandler(req, res) {
     return;
   }
 
+  // API: Claude says something in chat (text). Voice version: /api/voice/say
+  if (pathname === '/api/chat/say' && req.method === 'POST') {
+    if (core.who(req) !== 'claude') { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'claude only' })); return; }
+    core.readJson(req, 64 * 1024).then(b => {
+      const text = String(b.text || '').trim();
+      if (!text || text.length > 10000) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'text required (<=10000 chars)' })); return; }
+      const entry = { id: Date.now(), from: 'claude', text, ts: new Date().toISOString() };
+      appendChat(entry);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, id: entry.id }));
+    }).catch(e => { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: e.message })); });
+    return;
+  }
+
   // API: push subscribe
   if (pathname === '/api/push/subscribe' && req.method === 'POST') {
     let body = '';
@@ -1333,9 +1343,8 @@ function legacyHandler(req, res) {
   if (pathname === '/api/snap/stream' && req.method === 'GET') {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'private, no-store',
       'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
     });
     res.write(': connected\n\n');
     snapClients.add(res);
@@ -1416,12 +1425,15 @@ function legacyHandler(req, res) {
   serveFile(filePath, res, req);
 }
 
-server.listen(PORT, '0.0.0.0', () => {
+const BIND = core.conf('bind', '0.0.0.0');
+server.listen(PORT, BIND, () => {
   console.log(`哥哥的家 · http://localhost:${PORT}`);
-  if (!SITE_PASSWORD) console.warn('[security] .auth_password is missing: the whole site is OPEN to anyone.');
-  if (!guard.deviceSecret()) console.warn(`[security] no device secret${guard.secretIsLeaked() ? ' (the old hardcoded "peek2024" is no longer accepted)' : ''}: Mac camera daemon / peek shortcut uploads are refused. Run tools/rotate_secret.sh`);
+  if (!SITE_PASSWORD) console.warn('[security] .auth_password is missing: NOBODY can log in (the site fails closed). Run tools/set_password.sh');
+  else if (!SITE_PASSWORD.startsWith('scrypt$')) console.warn('[security] the site password is stored in plain text: run tools/set_password.sh to store only a hash');
+  if (BIND === '0.0.0.0') console.warn(`[security] listening on every interface (:${PORT}). If you only use the Cloudflare tunnel, set "bind": "127.0.0.1" in peek_config.json (or block port ${PORT} in the firewall).`);
+  if (!guard.deviceSecret()) console.warn(`[security] no device secret${guard.secretIsLeaked() ? ' (the old hardcoded "peek2024" is no longer accepted)' : ''}: Mac camera daemon, peek shortcut, check-in/ring shortcuts and the ESP32 are refused. Run tools/rotate_secret.sh`);
+  if (core.conf('open_device_ingest', false) === true) console.warn('[security] open_device_ingest is ON: check-in / ring / touch accept data without a secret.');
   if (!core.conf('ob_mcp_token', '')) console.warn('[security] ob_mcp_token not set: using the legacy token that is in git history - rotate it and set ob_mcp_token');
-  if (!core.conf('explore_token', '')) console.warn('[security] explore_token not set: using the legacy token that is in git history');
   startChatWatcher();
   core.watchSidecar();
 });

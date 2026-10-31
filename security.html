@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>隐私与安全 · 伊甸园</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js"></script>
+<style>
+  .state { display: flex; align-items: center; gap: 14px; padding: 16px; }
+  .state .tile-ic { width: 46px; height: 46px; border-radius: 14px; font-size: 1.5rem; }
+  .state b { display: block; font-size: 1rem; margin-bottom: 2px; }
+  .state span.s { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }
+  .check { display: flex; gap: 10px; padding: 11px 14px; font-size: .86rem; line-height: 1.5; border-bottom: 1px solid var(--border); }
+  .check:last-child { border-bottom: none; }
+  .check .ic { margin-top: 2px; }
+  .check.ok .ic { color: var(--ok); }
+  .check.bad .ic { color: var(--danger); }
+  .dev { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .dev:last-child { border-bottom: none; }
+  .dev .main { flex: 1; min-width: 0; }
+  .dev .t { font-size: .9rem; font-weight: 500; display: flex; gap: 6px; align-items: center; }
+  .dev .m { font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
+  .mini { border: none; background: var(--bg-dim); color: var(--text); border-radius: 999px; padding: 5px 12px; font-size: .76rem; font-weight: 600; cursor: pointer; }
+  .log { display: flex; gap: 10px; padding: 9px 14px; font-size: .8rem; border-bottom: 1px solid var(--border); align-items: baseline; }
+  .log:last-child { border-bottom: none; }
+  .log time { flex: none; width: 74px; font-size: .68rem; color: var(--text-soft); }
+  .log .warn { color: var(--danger); }
+  .danger { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+  .hint { font-size: .74rem; color: var(--text-soft); line-height: 1.6; margin: 8px 4px 0; }
+</style>
+</head>
+<body>
+<header class="appbar">
+  <a class="icon-btn" href="/" data-ic="chevron-left" title="返回"></a>
+  <div class="appbar-main"><div class="appbar-title">隐私与安全</div><div class="appbar-sub">这里只有你和昀</div></div>
+</header>
+
+<div class="wrap-narrow">
+  <div class="card state" id="state"><span class="tile-ic green" data-ic="shield-check"></span><div><b>读取中…</b></div></div>
+
+  <div class="section-title"><span>检查清单</span></div>
+  <div class="list" id="checks"></div>
+
+  <div class="section-title"><span>登录着的设备</span></div>
+  <div class="list" id="sessions"></div>
+  <div class="hint">登录 30 天后自动失效。看到不认识的设备，点「退出」；不确定就「退出其他所有设备」。</div>
+  <div style="margin-top:10px"><button class="btn ghost block" id="logout-others"><span data-ic="log-out"></span>退出其他所有设备</button></div>
+
+  <div class="section-title"><span>最近的动静</span></div>
+  <div class="list" id="log"></div>
+  <div class="hint">只记录谁登录、谁被拒绝，不记录任何聊天、照片或文字的内容。</div>
+
+  <div class="section-title"><span>紧急</span></div>
+  <div class="card">
+    <div style="font-size:.88rem;line-height:1.7;margin-bottom:12px">手机丢了，或者觉得有人闯进来了：<b>锁门</b>会立刻结束所有登录，并且谁也不能再登录，直到昀在服务器上解锁（<code>tools/home.sh unlock</code>）。</div>
+    <button class="btn block danger" id="lock-btn"><span data-ic="lock"></span>锁门</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ago = ts => { const m = Math.floor((Date.now() - ts) / 60000); return m < 1 ? '刚刚' : m < 60 ? m + ' 分钟前' : m < 1440 ? Math.floor(m / 60) + ' 小时前' : Math.floor(m / 1440) + ' 天前'; };
+const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2200); };
+const post = (u, b) => fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }).then(r => r.json());
+const LABEL = {
+  login_ok: ['登录成功', 0], login_fail: ['密码输错', 1], login_blocked: ['输错太多次，被暂时挡住', 1], denied: ['没登录的访问被拒绝', 1],
+  blocked_origin: ['来自别的网站的请求被拦下', 1], session_revoked: ['一台设备被退出', 0], logout_all: ['退出了所有设备', 0], locked: ['锁门', 1], unlocked: ['开门', 0],
+};
+const devIcon = d => /iPhone|Android|iPad/.test(d) ? 'smartphone' : /Mac|Windows|Linux/.test(d) ? 'laptop' : 'monitor';
+
+async function load() {
+  const d = await fetch('/api/security/overview').then(r => r.json());
+  const bad = d.checks.filter(c => !c.ok).length;
+  $('state').innerHTML = d.locked
+    ? `<span class="tile-ic" style="background:color-mix(in srgb,var(--danger) 16%,transparent);color:var(--danger)">${ic('lock')}</span><div><b>门锁着</b><span class="s">所有登录都已结束，需要昀在服务器上解锁。</span></div>`
+    : `<span class="tile-ic ${bad ? '' : 'green'}">${ic(bad ? 'shield-alert' : 'shield-check')}</span><div><b>${bad ? bad + ' 项需要留意' : '一切正常'}</b><span class="s">${d.sessions.length} 台设备登录着 · 所有页面和数据都在登录之后</span></div>`;
+  $('checks').innerHTML = d.checks.map(c => `<div class="check ${c.ok ? 'ok' : 'bad'}">${ic(c.ok ? 'circle-check' : 'triangle-alert')}<span>${esc(c.text)}</span></div>`).join('');
+  $('sessions').innerHTML = d.sessions.length ? d.sessions.map(s => `<div class="dev"><span class="tile-ic plain">${ic(devIcon(s.device))}</span>
+      <div class="main"><div class="t">${esc(s.device)} ${s.current ? '<span class="chip accent">这台</span>' : ''}</div><div class="m">${esc(s.ip || '—')} · 最后活动 ${ago(s.last)} · 登录于 ${ago(s.created)}</div></div>
+      ${s.current ? '' : `<button class="mini" data-id="${esc(s.id)}">退出</button>`}</div>`).join('') : '<div class="empty" style="padding:22px 0">没有登录着的设备</div>';
+  $('log').innerHTML = d.recent.length ? d.recent.slice(0, 30).map(e => { const [t, w] = LABEL[e.type] || [e.type, 0];
+    return `<div class="log"><time>${ago(Date.parse(e.ts))}</time><span class="${w ? 'warn' : ''}">${esc(t)}${e.path ? ' · ' + esc(e.path) : ''}<br><span style="color:var(--text-soft);font-size:.7rem">${esc(e.device || '')} ${esc(e.ip || '')}${e.via === 'tunnel' ? '' : ' · 本机'}</span></span></div>`; }).join('') : '<div class="empty" style="padding:22px 0">还没有记录</div>';
+}
+$('sessions').addEventListener('click', async e => { const b = e.target.closest('[data-id]'); if (!b) return; await post('/api/security/session/revoke', { id: b.dataset.id }); toast('已退出这台设备'); load(); });
+$('logout-others').onclick = async () => { if (!confirm('退出除了这台以外的所有设备？')) return; const r = await post('/api/security/logout-all', { keepCurrent: true }); toast(`已退出 ${r.ended} 台设备`); load(); };
+$('lock-btn').onclick = async () => {
+  if (!confirm('锁门会立刻结束所有登录（包括这台），之后谁都登录不了，要等昀在服务器上解锁。确定吗？')) return;
+  await post('/api/security/lock', { on: true }); location.href = '/login';
+};
+load();
+</script>
+<nav class="tabbar" data-active="home"></nav>
+</body>
+</html>

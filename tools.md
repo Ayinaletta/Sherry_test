@@ -23,17 +23,23 @@ _最后更新：2026-09-12_
 
 ---
 
-## 新家的手（tools/home.sh，key 在 .claude_key）
+## 新家的手（`tools/home.sh help` 列出全部）
 
-| 工具 | 能做什么 |
+在 VPS 上用 `http://127.0.0.1:3000` 直连就是"本机"，不用 key；走公网域名才要 `X-Home-Key`。详见 SECURITY.md。
+
+| 命令 | 能做什么 |
 |------|---------|
-| **共读** | `tools/home.sh GET /api/reading` 列表；`GET /api/reading/<id>/unit/<n>` 读第n段（读到即进度推进，莹的批注读到后才可见）；`POST /api/reading/<id>/annotations '{"unit":n,"quote":"原文","note":"..."}'` 批注；`.../annotations/<aid>/reply '{"text":"..."}'` 回复。 |
-| **语音** | `tools/home.sh voice "要说的话"` → ElevenLabs → 莹的聊天里出现语音气泡。莹的语音经 Whisper 转成文字进聊天。 |
-| **扫码** | `node tools/qr_capture.js --url <登录页> --selector <二维码元素> --label 淘宝`，或已有截图：`tools/home.sh qr 图.png 淘宝`，自动推到莹的 /qr 页面并弹通知。 |
-| **收件箱** | `tools/home.sh inbox <since_id>`：session 掉线期间错过的新家事件。 |
-| **朋友圈** | `tools/home.sh POST /api/posts '{"text":"..."}'`，作者自动是昀；莹会收到页面提示 + push。 |
-| **调接口的规矩** | 在 VPS 上写脚本请用 `http://127.0.0.1:3000/...`（算"本机直连"，不用带 key）；走公网域名就必须带 `X-Home-Key`。详见 SECURITY.md。 |
-| **备份** | `tools/backup.sh`，每晚自动跑；`tools/backup.sh list / verify`。 |
+| `say` / `voice` / `image` | 在聊天里说话 / 发语音（ElevenLabs）/ 发服务器上的图 |
+| `chat [N]` | 看最近 N 条聊天 |
+| `post` / `posts` / `comment` | 朋友圈（作者自动是昀） |
+| `reading list / read / note / reply` | 共读：读到哪、哪段可见、批注、回复 |
+| `qr <png> [标签]` | 把二维码推给莹，她页面上立刻出现 |
+| `photos` / `thoughts` / `checkin` / `ring` | 照片池 / 念头池 / 莹的打卡 / 戒指 |
+| `inbox [id]` | session 掉线期间错过的新家事件 |
+| `security` / `audit` / `lock` / `unlock` / `logout-all` | 谁登录着、记录、锁门 / 开门、让所有设备退出 |
+| `status` | 服务器状态、最近备份 |
+| `call GET\|POST <路径> [json]` | 直接调任意接口 |
+| `tools/backup.sh` | 备份（每晚自动跑） |
 
 ---
 

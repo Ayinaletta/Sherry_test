@@ -41,3 +41,7 @@ reading/
 qr_meta.json
 
 .sessions
+
+audit.jsonl
+audit.jsonl.1
+.lock
