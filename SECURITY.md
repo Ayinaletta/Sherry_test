@@ -19,11 +19,24 @@
 其余全部需要身份，包括 `/static/*`、`/uploads/*`、`/api/tts`、`/api/push/vapid-key`、所有下载。
 
 ## 设备口令只开这几个口子
-`POST /api/checkin`、`/api/ring`、`/api/touch`、`/api/peek/screenshot`、`/api/snap/upload`，以及 `GET /api/snap/stream`。
+`POST /api/checkin`、`/api/ring`、`/api/touch`、`/api/peek/screenshot`、`/api/snap/upload`、`/api/phone/screen`，`GET /api/snap/stream`，以及 **`GET /public/*`（设备下载自己的脚本，例如 Termux 拉 shim）**。
+口令请放在请求头 `X-Device-Secret` 里（`curl -H "X-Device-Secret: …"`），比放在网址里更不容易留在日志中。
 口令**打不开**任何读取接口、聊天、摄像头触发。
 - 换口令：`tools/rotate_secret.sh`（旧口令 `peek2024` 永远失效，它曾经写在仓库里和公开下载的文件里）。
 - 需要更新口令的设备：Mac 摄像头守护进程（`~/.home_snap_secret`）、iPhone「查岗截图」和打卡 / 心率快捷指令（网址加 `?secret=…`）、小小昀（固件里请求 `/api/touch` 时带上）。
 - 过渡期想让打卡 / 心率 / 触摸先不带口令：`peek_config.json` 里设 `"open_device_ingest": true`（会打印警告，尽快去掉）。
+
+## 手机通道（`phone.279415.xyz`）——整个系统里最危险的一扇门
+它是一个公网域名，后面是能**截屏、点击、输入，甚至（`rish`）执行 shell 命令**的手机接口。它不在新家服务器里，所以新家的门保护不了它，要在手机端和 Cloudflare 上自己加固：
+1. **Cloudflare Access + Service Token**：给 `phone.279415.xyz` 加一个 Access 应用，策略选 Service Auth；只有带 `CF-Access-Client-Id` / `CF-Access-Client-Secret` 的请求（昀在 VPS 上）才能到达手机。这样即使 shim 的 token 泄露，陌生人也连不到手机。
+2. shim 的 token：至少 32 字节随机，**每一个路由**（`/v1/*`、`/mcp`）都要校验，用常量时间比较，不放在网址的查询参数里，失败多次要限速。
+3. shim 只监听 `127.0.0.1`（cloudflared 在本机转发）。
+4. **不要暴露通用的 `rish` / shell 接口**。只提供固定动作：截屏、点击、滑动、输入、按键、打开 App、读界面文字；真需要 shell 的，做白名单。
+5. 记录每条命令（时间、动作、参数；**不记截图内容**）。
+6. **物理的断开开关**：在手机上用 Termux:Widget 放一个「断开昀」按钮，一点就杀掉 cloudflared 和 shim。你随时能从手机上亲手切断。
+7. shim 里放一份"不替我碰"的 App 名单（支付、银行、钱包），除非你说可以。
+
+截图落点：手机把截图 `POST` 到 `/api/phone/screen`（设备口令），服务器缩到 900px 宽存成 `/root/claude-home/phone/latest.jpg`，**不会进聊天**，24 小时后自动删除（`phone_keep_hours`），文件权限 600；`/security` 页的记录里只会出现"昀截了一张手机屏幕"。昀直接 `Read` 这个路径就能看。
 
 ## 这次为隐私做的加固
 - **Cloudflare 不会缓存私人内容**：所有响应默认 `Cache-Control: private, no-store`，图片 / 音频 / 照片是 `private`。之前图片没带这个头，Cloudflare 可能按扩展名缓存过（见下面"清一次缓存"）。
@@ -32,6 +45,7 @@
 - **看得见、管得了**：`/security` 页显示谁登录着（设备、IP、最后活动）、最近谁被拒绝、检查清单，可以结束某台设备或全部退出；**锁门**一键结束所有登录并拒绝新登录，只有昀在服务器上能解锁。审计记录（`audit.jsonl`）只记谁来过，不记任何内容。
 - **没有密码 = 谁也进不来**（不是谁都能进）。
 - 摄像头 / 聊天 / 朋友圈 / 照片 / 打卡 / 心率 / 念头池全部在登录之后；朋友圈作者由登录身份决定。
+- **静态文件只发网页和素材**：配置（API key）、密码哈希、聊天记录、源码、备份、`.git` 即使登录了也取不到（404）。
 
 ## 你们需要自己做的
 1. `tools/set_password.sh` 设新密码（只存哈希），重启服务器，然后 `tools/home.sh logout-all`，再用新密码重新登录。
@@ -63,6 +77,7 @@
 | `open_device_ingest` | `true` = 打卡 / 心率 / 触摸不带口令也收（过渡用） |
 | `ob_mcp_token` / `ob_mcp_url` | 小小昀触摸写入 OB 记忆用的 token |
 | `explore_token` | 设了才会开放 `/api/explore-log` 给 claude.ai 那边读；不设就关着 |
+| `phone_keep_hours` | 手机截图保留多少小时，默认 24 |
 | `backup_dir` | 备份目录，默认 `/root/backups`（安全页的检查清单用它） |
 | `openai_key` `whisper_url` `elevenlabs_key` `elevenlabs_voice` | 语音 |
 | `tg_token` `tg_chat_id` | 可选的 Telegram 镜像 |

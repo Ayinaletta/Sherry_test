@@ -67,7 +67,7 @@ const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('o
 const post = (u, b) => fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }).then(r => r.json());
 const LABEL = {
   login_ok: ['登录成功', 0], login_fail: ['密码输错', 1], login_blocked: ['输错太多次，被暂时挡住', 1], denied: ['没登录的访问被拒绝', 1],
-  blocked_origin: ['来自别的网站的请求被拦下', 1], session_revoked: ['一台设备被退出', 0], logout_all: ['退出了所有设备', 0], locked: ['锁门', 1], unlocked: ['开门', 0],
+  blocked_origin: ['来自别的网站的请求被拦下', 1], phone_screen: ['昀截了一张手机屏幕', 0], session_revoked: ['一台设备被退出', 0], logout_all: ['退出了所有设备', 0], locked: ['锁门', 1], unlocked: ['开门', 0],
 };
 const devIcon = d => /iPhone|Android|iPad/.test(d) ? 'smartphone' : /Mac|Windows|Linux/.test(d) ? 'laptop' : 'monitor';
 

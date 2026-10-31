@@ -12,6 +12,7 @@ const core = require('./lib/core');
 const guard = require('./lib/guard');
 const security = require('./lib/security');
 const admin = require('./lib/admin');
+const phone = require('./lib/phone');
 const homeRoutes = require('./lib/home');
 const reading = require('./lib/reading');
 const voice = require('./lib/voice');
@@ -272,6 +273,19 @@ function serveFile(filePath, res, req) {
   });
 }
 
+// What the static handler may hand out. Everything else in the project folder (config with API keys, the
+// password hash, chat logs, source code, backups) is not a web page and is never served - not even to a logged-in browser.
+const SERVED_TOP = new Set(['static', 'growth', 'public', 'uploads']);
+const SERVED_EXT = /\.(html|css|js|mjs|svg|png|jpe?g|gif|webp|ico|mp3|webm|m4a|wav|ogg|aac|pdf|txt)$/i;
+function staticAllowed(filePath) {
+  const rel = path.relative(ROOT, filePath).split(path.sep);
+  if (rel.some(seg => seg.startsWith('.'))) return false;                       // .auth_password, .claude_key, .sessions, .git ...
+  if (rel.length === 1) return /\.html$/i.test(rel[0]);                         // top level: only the pages themselves
+  if (!SERVED_TOP.has(rel[0])) return false;                                    // lib/ tools/ deploy/ node_modules/ reading/ phone/ ...
+  if (rel[0] === 'public') return /\.(py|js|txt|json|sh)$/i.test(rel[rel.length - 1]);   // scripts for devices
+  return SERVED_EXT.test(rel[rel.length - 1]);
+}
+
 function safePath(root, urlPath) {
   const decoded = decodeURIComponent(urlPath);
   const normalized = path.normalize(decoded);
@@ -285,7 +299,9 @@ function safePath(root, urlPath) {
 //   device  : phone shortcuts / Mac daemon / ESP32 may use the shared secret (?secret=) instead of a login
 //   private : everything else - Sherry's session, Claude's key, or a direct local call
 const OPEN = new Set(['GET /login', 'GET /manifest.json', 'GET /sw.js', 'GET /api/health', 'GET /static/home_icon.jpg', 'POST /api/login', 'POST /api/logout']);
-const DEVICE = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch', 'POST /api/peek/screenshot', 'POST /api/snap/upload', 'GET /api/snap/stream']);
+const DEVICE = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch', 'POST /api/peek/screenshot', 'POST /api/snap/upload', 'GET /api/snap/stream', 'POST /api/phone/screen']);
+// scripts a device downloads (Termux pulls its shim from here): the device secret is enough, and only for GET under /public/
+const DEVICE_DOWNLOAD = p => p.startsWith('/public/');
 const INGEST = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch']);
 const ASSET = /(\.(png|jpe?g|gif|webp|svg|ico|js|mjs|css|mp3|webm|m4a|wav|ogg|aac|pdf|py|json|txt)$)|^\/(photo-file|uploads\/|static\/|vendor\/)/i;
 
@@ -305,7 +321,7 @@ function gate(req, res, url) {
     }
     return false;
   }
-  if (DEVICE.has(key) && (guard.secretOk(req, url) || (INGEST.has(key) && core.conf('open_device_ingest', false) === true))) return false;
+  if ((DEVICE.has(key) || (req.method === 'GET' && DEVICE_DOWNLOAD(p))) && (guard.secretOk(req, url) || (INGEST.has(key) && core.conf('open_device_ingest', false) === true))) { req.deviceOk = true; return false; }
   security.audit('denied', req, { path: p, method: req.method });
   if (req.method === 'GET' && !p.startsWith('/api/') && !ASSET.test(p)) { res.writeHead(302, { Location: '/login' }); res.end(); return true; }
   res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -322,7 +338,7 @@ function deny(req, res, url, { secret = false, html = false } = {}) {
 }
 
 // New feature modules (own auth: session cookie or Claude's key) get first look at each request.
-const MODULES = [homeRoutes, reading, voice, qr, admin];
+const MODULES = [homeRoutes, reading, voice, qr, admin, phone];
 async function routeModules(req, res) {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   for (const m of MODULES) if (await m.handle(req, res, url, { appendChat })) return true;
@@ -1067,7 +1083,7 @@ function legacyHandler(req, res) {
   }
 
   // Auth gate
-  if (!core.who(req) && !OPEN.has(`${req.method} ${pathname}`)) {
+  if (!core.who(req) && !req.deviceOk && !OPEN.has(`${req.method} ${pathname}`)) {
     res.writeHead(302, { Location: '/login' });
     res.end();
     return;
@@ -1420,6 +1436,7 @@ function legacyHandler(req, res) {
     if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
       filePath = path.join(filePath, 'index.html');
     }
+    if (!staticAllowed(filePath)) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('404 not found'); return; }
   }
 
   serveFile(filePath, res, req);

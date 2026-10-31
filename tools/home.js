@@ -45,6 +45,7 @@ const C = {
   qr: ['qr <png> [标签] [秒]', '把二维码推给莹', async a => out(await api('POST', `/api/qr/push?label=${encodeURIComponent(a[2] || '二维码')}&ttl=${a[3] || 180}`, fs.readFileSync(a[1]), 'image/png'))],
   snap: ['snap', '触发 Mac 摄像头', async () => out(await api('POST', '/api/snap'))],
   inbox: ['inbox [since_id]', '我错过的新家事件', async a => (await api('GET', `/api/inbox?since=${a[1] || 0}`)).items.forEach(i => console.log(`${i.id}  ${i.line}`))],
+  phone: ['phone', '手机最新截图在哪、多久前拍的（然后 Read 它）', async () => { const f = path.join(__dirname, '..', 'phone', 'latest.jpg'); try { const st = fs.statSync(f); console.log(`${f}\n${Math.round((Date.now() - st.mtimeMs) / 1000)} 秒前，${Math.round(st.size / 1024)} KB`); } catch { console.log('还没有手机截图（手机上的 shim 要 POST /api/phone/screen）'); } }],
   status: ['status', '服务器状态', async () => out(await api('GET', '/api/status'))],
   security: ['security', '安全总览（谁登录着、检查清单）', async () => { const d = await api('GET', '/api/security/overview'); console.log(d.locked ? '【门锁着】' : '门开着'); d.checks.forEach(c => console.log(`  ${c.ok ? '✓' : '✗'} ${c.text}`)); console.log('登录着：'); d.sessions.forEach(s => console.log(`  ${s.id}  ${s.device}  ${s.ip}  最后活动 ${when(s.last)}${s.current ? '  (当前)' : ''}`)); }],
   audit: ['audit [N=30]', '最近的登录 / 拒绝记录', async a => (await api('GET', '/api/security/overview')).recent.slice(0, +a[1] || 30).forEach(e => console.log(`${e.ts}  ${e.type.padEnd(14)} ${e.ip || ''} ${e.device || ''} ${e.path || ''}`))],
