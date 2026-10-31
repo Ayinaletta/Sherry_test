@@ -9,6 +9,7 @@ const nodemailer = require('nodemailer');
 const Busboy = require('busboy');
 let sharp; try { sharp = require('sharp'); } catch {}
 const core = require('./lib/core');
+const guard = require('./lib/guard');
 const homeRoutes = require('./lib/home');
 const reading = require('./lib/reading');
 const voice = require('./lib/voice');
@@ -49,6 +50,7 @@ function forwardToTG(text) {
 }
 
 const PORT = 3000;
+const LEGACY_EXPLORE_TOKEN = '06f46a4704af0051d042dbba5ac3cb07';   // in git history: set explore_token in peek_config.json to replace it
 const ROOT = __dirname;
 const FREE_LOG = '/root/free_time_log.jsonl';
 const CHAT_LOG = path.join(__dirname, 'chat_messages.jsonl');
@@ -65,7 +67,7 @@ const POSTS_FILE = path.join(__dirname, 'posts.jsonl');
 function notifyPost(kind, from, text, req, post) {
   const actor = from === 'me' ? 'claude' : from === 'sherry' ? 'sherry' : 'system';
   const name = actor === 'claude' ? '昀' : actor === 'sherry' ? '莹' : '有人';
-  const trusted = !!core.who(req);
+  const trusted = true;   // posts need a login now
   const snippet = trusted ? String(text).replace(/\s+/g, ' ').slice(0, 60) : '';
   const title = kind === 'post' ? `${name}发了新动态`
     : `${name}评论了${post && post.from === from ? '自己' : post && post.from === 'me' ? '昀' : '莹'}的动态`;
@@ -88,8 +90,9 @@ webpush.setVapidDetails('mailto:ayinaletta@gmail.com', vapidKeys.publicKey, vapi
 let pushSubs = [];
 try { pushSubs = JSON.parse(fs.readFileSync(PUSH_SUBS_FILE, 'utf8')); } catch {}
 
-const OB_MCP_URL = 'https://ob.279415.xyz/mcp';
-const OB_MCP_TOKEN = 'qGtTTwFfTnfEbdRDfx63i4WXqwtDoAc2RmjfQ-XCn_Y';
+const OB_MCP_URL = core.conf('ob_mcp_url', 'https://ob.279415.xyz/mcp');
+const LEGACY_OB_TOKEN = 'qGtTTwFfTnfEbdRDfx63i4WXqwtDoAc2RmjfQ-XCn_Y';   // in git history: set ob_mcp_token in peek_config.json to replace it
+const OB_MCP_TOKEN = core.conf('ob_mcp_token', '') || LEGACY_OB_TOKEN;
 let lastObTouchTs = 0;
 
 function obHoldTouch(sensor, gesture, dur) {
@@ -139,7 +142,11 @@ const SITE_PASSWORD = fs.existsSync(AUTH_FILE)
   ? fs.readFileSync(AUTH_FILE, 'utf8').trim()
   : '';
 
+// Logged-in browsers survive a restart: tokens live in .sessions (0600, gitignored)
+const SESSIONS_FILE = path.join(__dirname, '.sessions');
 const sessions = new Set();
+try { JSON.parse(fs.readFileSync(SESSIONS_FILE, 'utf8')).forEach(t => sessions.add(t)); } catch {}
+function saveSessions() { try { fs.writeFileSync(SESSIONS_FILE, JSON.stringify([...sessions]), { mode: 0o600 }); } catch {} }
 
 function generateToken() {
   return crypto.randomBytes(32).toString('hex');
@@ -288,6 +295,26 @@ function safePath(root, urlPath) {
   return full;
 }
 
+// Gate for a route: Sherry's session, Claude (key / local), or - where a device can only carry a URL - the shared secret.
+//   legacy: honour `legacy_public: true` in peek_config.json (the old wide-open behaviour for read-only pools)
+// Returns true when it already answered (caller must `return`).
+function deny(req, res, url, { secret = false, html = false, legacy = false } = {}) {
+  if (core.who(req) || (secret && guard.secretOk(req, url))) return false;
+  if (legacy && core.conf('legacy_public', false) === true) return false;
+  if (html) { res.writeHead(302, { Location: '/login' }); res.end(); return true; }
+  res.writeHead(401, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'login required' }));
+  return true;
+}
+// device -> server writes (phone shortcut, ESP32): open unless `device_secret` is configured, then required
+function deviceWriteBlocked(req, res, url) {
+  const want = guard.deviceSecret();
+  if (!want || core.who(req) || guard.secretOk(req, url)) return false;
+  res.writeHead(403, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'forbidden' }));
+  return true;
+}
+
 // New feature modules (own auth: session cookie or Claude's key) get first look at each request.
 const MODULES = [homeRoutes, reading, voice, qr];
 async function routeModules(req, res) {
@@ -319,16 +346,24 @@ function legacyHandler(req, res) {
     req.on('data', c => { body += c; });
     req.on('end', () => {
       try {
+        if (guard.loginBlocked(req)) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'too many attempts, try again in a few minutes' }));
+          return;
+        }
         const { password } = JSON.parse(body);
-        if (password === SITE_PASSWORD) {
+        if (SITE_PASSWORD && guard.same(String(password ?? ''), SITE_PASSWORD)) {
+          guard.loginOk(req);
           const token = generateToken();
           sessions.add(token);
+          saveSessions();
           res.writeHead(200, {
             'Set-Cookie': `session=${token}; HttpOnly; Path=/; Max-Age=2592000`,
             'Content-Type': 'application/json',
           });
           res.end(JSON.stringify({ ok: true }));
         } else {
+          guard.loginFailed(req);
           res.writeHead(401, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'wrong password' }));
         }
@@ -342,7 +377,7 @@ function legacyHandler(req, res) {
   // Logout API
   if (pathname === '/api/logout' && req.method === 'POST') {
     const token = parseCookies(req)['session'];
-    if (token) sessions.delete(token);
+    if (token) { sessions.delete(token); saveSessions(); }
     res.writeHead(200, {
       'Set-Cookie': 'session=; HttpOnly; Path=/; Max-Age=0',
       'Content-Type': 'application/json',
@@ -353,7 +388,7 @@ function legacyHandler(req, res) {
 
   // Public: explore log (read-only, token-gated for claude.ai sibling access)
   if (pathname === '/api/explore-log') {
-    const EXPLORE_TOKEN = '06f46a4704af0051d042dbba5ac3cb07';
+    const EXPLORE_TOKEN = core.conf('explore_token', '') || LEGACY_EXPLORE_TOKEN;
     const token = url.searchParams.get('token') || '';
     if (token !== EXPLORE_TOKEN) {
       res.writeHead(403, { 'Content-Type': 'application/json' });
@@ -388,6 +423,7 @@ function legacyHandler(req, res) {
     return;
   }
   if (pathname === '/qr.png') {
+    if (deny(req, res, url, { legacy: true })) return;
     const qrFile = path.join(ROOT, 'qr.png');
     if (fs.existsSync(qrFile)) {
       res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-cache, no-store', 'Access-Control-Allow-Origin': '*' });
@@ -413,6 +449,7 @@ function legacyHandler(req, res) {
 
   // Public: checkin from iPhone Shortcuts or Mac script (no auth — device can't store tokens)
   if (pathname === '/api/checkin' && (req.method === 'POST' || req.method === 'GET')) {
+    if (req.method === 'GET' ? deny(req, res, url) : deviceWriteBlocked(req, res, url)) return;
     if (req.method === 'POST') {
       let body = '';
       req.on('data', d => body += d);
@@ -455,6 +492,7 @@ function legacyHandler(req, res) {
 
   // Public: ring health data push (from iOS Shortcut) and read
   if (pathname === '/api/ring' && req.method === 'POST') {
+    if (deviceWriteBlocked(req, res, url)) return;
     let body = '';
     req.on('data', d => body += d);
     req.on('end', () => {
@@ -472,6 +510,7 @@ function legacyHandler(req, res) {
     return;
   }
   if (pathname === '/api/ring' && req.method === 'GET') {
+    if (deny(req, res, url)) return;
     try {
       const latest = JSON.parse(fs.readFileSync('/root/claude-home/ring_latest.json', 'utf8'));
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -482,6 +521,7 @@ function legacyHandler(req, res) {
 
   // Public: trigger ring data pull (send email to iCloud → iPhone auto-runs health shortcut)
   if (pathname === '/api/ring-peek' && req.method === 'POST') {
+    if (deny(req, res, url, { secret: true })) return;
     if (!peekConfig.gmail_user || !peekConfig.icloud_email) {
       res.writeHead(503, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'peek not configured' }));
@@ -510,6 +550,7 @@ function legacyHandler(req, res) {
 
   // Public: trigger peek (send email to iCloud → iPhone auto-screenshots)
   if (pathname === '/api/peek' && req.method === 'POST') {
+    if (deny(req, res, url, { secret: true })) return;
     if (!peekConfig.gmail_user || !peekConfig.icloud_email) {
       res.writeHead(503, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'peek not configured' }));
@@ -538,13 +579,7 @@ function legacyHandler(req, res) {
 
   // Public: screenshot upload from iPhone peek shortcut (multipart form, field=image)
   if (pathname === '/api/peek/screenshot' && req.method === 'POST') {
-    console.log('[peek/screenshot] headers:', JSON.stringify(req.headers));
-    const secret = url.searchParams.get('secret') || '';
-    if (peekConfig.secret && secret !== peekConfig.secret) {
-      res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'forbidden' }));
-      return;
-    }
+    if (deny(req, res, url, { secret: true })) return;
     const ct = req.headers['content-type'] || '';
     // Collect raw body first for all non-multipart types
     if (!ct.includes('multipart/form-data')) {
@@ -621,6 +656,7 @@ function legacyHandler(req, res) {
 
   // Public: touch events from Pico (no auth — board can't store tokens)
   if (pathname === '/api/touch' && req.method === 'POST') {
+    if (deviceWriteBlocked(req, res, url)) return;
     let body = '';
     req.on('data', d => body += d);
     req.on('end', () => {
@@ -647,6 +683,7 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/api/touch-log' && req.method === 'GET') {
+    if (deny(req, res, url)) return;
     let events = [];
     try {
       const lines = fs.readFileSync('/root/toy/touch_log.jsonl', 'utf8').trim().split('\n');
@@ -664,8 +701,8 @@ function legacyHandler(req, res) {
       res.writeHead(400); res.end('bad request'); return;
     }
     const tmpFile = `/tmp/tts_${Date.now()}_${Math.random().toString(36).slice(2)}.wav`;
-    const safe = text.replace(/['"\\$`]/g, '');
-    exec(`espeak-ng -v lt -s 130 -w ${tmpFile} "${safe}"`, (err) => {
+    // execFile: the text is an argument, never parsed by a shell
+    require('child_process').execFile('espeak-ng', ['-v', 'lt', '-s', '130', '-w', tmpFile, '--', text], (err) => {
       if (err) { res.writeHead(500); res.end('tts error'); return; }
       fs.readFile(tmpFile, (err2, data) => {
         fs.unlink(tmpFile, () => {});
@@ -683,10 +720,9 @@ function legacyHandler(req, res) {
 
   // Public: claude sends image from server-local file path (localhost only)
   if (pathname === '/api/chat/claude-image' && req.method === 'POST') {
-    const remoteAddr = req.socket.remoteAddress;
-    if (remoteAddr !== '127.0.0.1' && remoteAddr !== '::1' && remoteAddr !== '::ffff:127.0.0.1') {
+    if (core.who(req) !== 'claude') {
       res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'localhost only' }));
+      res.end(JSON.stringify({ error: 'claude only (X-Home-Key, or a direct request to 127.0.0.1)' }));
       return;
     }
     let body = '';
@@ -725,12 +761,7 @@ function legacyHandler(req, res) {
 
   // Public: snap trigger — called by Claude from terminal (secret required)
   if (pathname === '/api/snap' && req.method === 'POST') {
-    const secret = url.searchParams.get('secret') || '';
-    if (peekConfig.secret && secret !== peekConfig.secret) {
-      res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'forbidden' }));
-      return;
-    }
+    if (deny(req, res, url, { secret: true })) return;
     const cmd = `data: ${JSON.stringify({ cmd: 'snap', ts: Date.now() })}\n\n`;
     let count = 0;
     for (const c of snapClients) { try { c.write(cmd); count++; } catch {} }
@@ -741,6 +772,7 @@ function legacyHandler(req, res) {
 
   // Public: snap status (no auth needed for Claude to check)
   if (pathname === '/api/snap/status' && req.method === 'GET') {
+    if (deny(req, res, url, { secret: true })) return;
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ clients: snapClients.size, has_latest: fs.existsSync(SNAP_LATEST) }));
     return;
@@ -748,10 +780,7 @@ function legacyHandler(req, res) {
 
   // Public: serve snap/upload image by filename with secret (for OB media)
   if (pathname.startsWith('/api/snap/file/') && req.method === 'GET') {
-    const secret = url.searchParams.get('secret') || '';
-    if (peekConfig.secret && secret !== peekConfig.secret) {
-      res.writeHead(403); res.end('forbidden'); return;
-    }
+    if (deny(req, res, url, { secret: true })) return;
     const filename = path.basename(pathname.slice('/api/snap/file/'.length));
     const filePath = path.join(UPLOADS_DIR, filename);
     if (!fs.existsSync(filePath)) { res.writeHead(404); res.end('not found'); return; }
@@ -769,11 +798,12 @@ function legacyHandler(req, res) {
 
   // Public: snap/stream — camera page and Mac daemon subscribe here (no auth — trusted by secret on POST)
   if (pathname === '/api/snap/stream' && req.method === 'GET') {
+    // who is asking for photos is private: only the logged-in camera page and the Mac daemon (secret) may listen
+    if (deny(req, res, url, { secret: true })) return;
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
     });
     res.write(': connected\n\n');
     snapClients.add(res);
@@ -783,12 +813,9 @@ function legacyHandler(req, res) {
 
   // Public: snap/upload — camera page and Mac daemon POST captured image here (secret required)
   if (pathname === '/api/snap/upload' && req.method === 'POST') {
-    const uploadSecret = url.searchParams.get('secret') || '';
-    if (peekConfig.secret && uploadSecret !== peekConfig.secret) {
-      res.writeHead(403); res.end(JSON.stringify({ error: 'forbidden' })); return;
-    }
-    let chunks = [];
-    req.on('data', c => chunks.push(c));
+    if (deny(req, res, url, { secret: true })) return;
+    let chunks = [], size = 0;
+    req.on('data', c => { size += c.length; if (size > 15 * 1024 * 1024) { req.destroy(); return; } chunks.push(c); });
     req.on('end', async () => {
       const body = Buffer.concat(chunks);
       const compressed = await compressToJpeg(body);
@@ -807,8 +834,9 @@ function legacyHandler(req, res) {
 
   // Public: camera upload — phone browser capture by Sherry
   if (pathname === '/api/camera/upload' && req.method === 'POST') {
-    let chunks = [];
-    req.on('data', c => chunks.push(c));
+    if (deny(req, res, url)) return;
+    let chunks = [], size = 0;
+    req.on('data', c => { size += c.length; if (size > 15 * 1024 * 1024) { req.destroy(); return; } chunks.push(c); });
     req.on('end', async () => {
       const body = Buffer.concat(chunks);
       const compressed = await compressToJpeg(body);
@@ -827,6 +855,7 @@ function legacyHandler(req, res) {
 
   // Public: serve camera.html
   if (pathname === '/camera') {
+    if (deny(req, res, url, { html: true })) return;
     const p = path.join(ROOT, 'camera.html');
     if (fs.existsSync(p)) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
@@ -839,6 +868,7 @@ function legacyHandler(req, res) {
 
   // Public: thought pool — proxies sidecar2 snapshot
   if (pathname === '/api/thoughts' && req.method === 'GET') {
+    if (deny(req, res, url, { legacy: true })) return;
     const sidecarReq = http.get('http://127.0.0.1:4002/snapshot', (sr) => {
       let raw = '';
       sr.on('data', c => raw += c);
@@ -859,6 +889,7 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/thoughts') {
+    if (deny(req, res, url, { html: true, legacy: true })) return;
     const p = path.join(ROOT, 'thoughts.html');
     if (fs.existsSync(p)) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
@@ -871,6 +902,7 @@ function legacyHandler(req, res) {
 
   // Public: pin a chat image to the photo pool
   if (pathname === '/api/pin-photo' && req.method === 'POST') {
+    if (deny(req, res, url)) return;
     let body = '';
     req.on('data', c => body += c);
     req.on('end', () => {
@@ -899,6 +931,7 @@ function legacyHandler(req, res) {
 
   // Public: photo pool — proxies sidecar2
   if (pathname === '/api/photos' && req.method === 'GET') {
+    if (deny(req, res, url, { legacy: true })) return;
     const limit = new URL('http://x' + req.url).searchParams.get('limit') || '20';
     const sidecarReq = http.get(`http://127.0.0.1:4002/photos?limit=${limit}`, (sr) => {
       let raw = '';
@@ -920,6 +953,7 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/photos') {
+    if (deny(req, res, url, { html: true, legacy: true })) return;
     const p = path.join(ROOT, 'photos.html');
     if (fs.existsSync(p)) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
@@ -932,6 +966,7 @@ function legacyHandler(req, res) {
 
   // Public: serve photo files from /root/sherry/ only
   if (pathname === '/photo-file' && req.method === 'GET') {
+    if (deny(req, res, url, { legacy: true })) return;
     const qs = new URL('http://x' + req.url).searchParams;
     const filePath = qs.get('path') || '';
     const resolved = path.resolve(filePath);
@@ -953,6 +988,7 @@ function legacyHandler(req, res) {
 
   // Public: posts (朋友圈) — no auth needed (served on trusted server, localhost write ok)
   if (pathname === '/api/posts' && req.method === 'GET') {
+    if (deny(req, res, url, { legacy: true })) return;
     const posts = loadPosts().reverse();
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' });
     res.end(JSON.stringify({ posts }));
@@ -960,12 +996,14 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/api/posts' && req.method === 'POST') {
+    if (deny(req, res, url)) return;
     let body = '';
     req.on('data', c => body += c);
     req.on('end', () => {
       try {
-        const { text, from, image } = JSON.parse(body);
-        if (!text || !from) { res.writeHead(400); res.end('need text and from'); return; }
+        const { text, image } = JSON.parse(body);
+        const from = core.who(req) === 'claude' ? 'me' : 'sherry';     // identity comes from the login, not the request body
+        if (!text) { res.writeHead(400); res.end('need text'); return; }
         const posts = loadPosts();
         const post = { id: crypto.randomUUID(), ts: Date.now(), from, text, comments: [] };
         if (image) post.image = image;
@@ -980,12 +1018,14 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/api/posts/comment' && req.method === 'POST') {
+    if (deny(req, res, url)) return;
     let body = '';
     req.on('data', c => body += c);
     req.on('end', () => {
       try {
-        const { post_id, from, text } = JSON.parse(body);
-        if (!post_id || !from || !text) { res.writeHead(400); res.end('need post_id, from, text'); return; }
+        const { post_id, text } = JSON.parse(body);
+        const from = core.who(req) === 'claude' ? 'me' : 'sherry';
+        if (!post_id || !text) { res.writeHead(400); res.end('need post_id, text'); return; }
         const posts = loadPosts();
         const post = posts.find(p => p.id === post_id);
         if (!post) { res.writeHead(404); res.end('post not found'); return; }
@@ -1001,11 +1041,13 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/api/posts/delete' && req.method === 'POST') {
+    if (deny(req, res, url)) return;
     let body = '';
     req.on('data', c => body += c);
     req.on('end', () => {
       try {
-        const { post_id, from } = JSON.parse(body);
+        const { post_id } = JSON.parse(body);
+        const from = core.who(req) === 'claude' ? 'me' : 'sherry';
         const posts = loadPosts();
         const idx = posts.findIndex(p => p.id === post_id && p.from === from);
         if (idx === -1) { res.writeHead(404); res.end('not found or not yours'); return; }
@@ -1019,6 +1061,7 @@ function legacyHandler(req, res) {
   }
 
   if (pathname === '/posts') {
+    if (deny(req, res, url, { html: true, legacy: true })) return;
     const p = path.join(ROOT, 'posts.html');
     if (fs.existsSync(p)) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache, no-store, must-revalidate' });
@@ -1375,6 +1418,10 @@ function legacyHandler(req, res) {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`哥哥的家 · http://localhost:${PORT}`);
+  if (!SITE_PASSWORD) console.warn('[security] .auth_password is missing: the whole site is OPEN to anyone.');
+  if (!guard.deviceSecret()) console.warn(`[security] no device secret${guard.secretIsLeaked() ? ' (the old hardcoded "peek2024" is no longer accepted)' : ''}: Mac camera daemon / peek shortcut uploads are refused. Run tools/rotate_secret.sh`);
+  if (!core.conf('ob_mcp_token', '')) console.warn('[security] ob_mcp_token not set: using the legacy token that is in git history - rotate it and set ob_mcp_token');
+  if (!core.conf('explore_token', '')) console.warn('[security] explore_token not set: using the legacy token that is in git history');
   startChatWatcher();
   core.watchSidecar();
 });

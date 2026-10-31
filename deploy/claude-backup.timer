@@ -1,0 +1,11 @@
+# /etc/systemd/system/claude-backup.timer   ->   systemctl enable --now claude-backup.timer
+[Unit]
+Description=Run the home backup every night
+
+[Timer]
+OnCalendar=*-*-* 04:20:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

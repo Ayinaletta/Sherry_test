@@ -10,10 +10,27 @@ import cv2
 import requests
 import time
 import sys
+import os
 
 SERVER = "https://home.279415.xyz"
-SECRET = "peek2024"
-SSE_URL = f"{SERVER}/api/snap/stream"
+
+
+def _load_secret():
+    """The shared secret is NOT in this file (this file is downloadable). Put it in the SNAP_SECRET
+    environment variable, or in ~/.home_snap_secret (chmod 600). tools/rotate_secret.sh on the server
+    prints the exact line to use."""
+    s = os.environ.get("SNAP_SECRET", "").strip()
+    if not s:
+        p = os.path.expanduser("~/.home_snap_secret")
+        if os.path.exists(p):
+            s = open(p).read().strip()
+    if not s:
+        sys.exit("缺少口令：设置环境变量 SNAP_SECRET，或把口令写进 ~/.home_snap_secret")
+    return s
+
+
+SECRET = _load_secret()
+SSE_URL = f"{SERVER}/api/snap/stream?secret={SECRET}"
 UPLOAD_URL = f"{SERVER}/api/snap/upload?secret={SECRET}"
 
 

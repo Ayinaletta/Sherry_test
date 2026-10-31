@@ -39,3 +39,5 @@ events.jsonl
 inbox.jsonl
 reading/
 qr_meta.json
+
+.sessions

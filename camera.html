@@ -96,7 +96,7 @@ async function triggerMacSnap() {
   st.textContent = '触发中…';
   st.className = 'ch-status wait';
   try {
-    const r = await fetch('/api/snap?secret=peek2024', { method: 'POST' });
+    const r = await fetch('/api/snap', { method: 'POST' })   // logged-in session is the credential; no secret in the page;
     const d = await r.json();
     if (!r.ok || d.clients === 0) {
       st.textContent = 'Mac 没在线';

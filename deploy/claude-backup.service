@@ -1,0 +1,11 @@
+# /etc/systemd/system/claude-backup.service
+[Unit]
+Description=Daily backup of the home's data
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/claude-home
+ExecStart=/root/claude-home/tools/backup.sh
+# Environment=BACKUP_REMOTE=rclone:gdrive:home-backups
+# Environment=BACKUP_PHOTOS=1
+# Environment=OB_DATA_DIR=/root/ob-data

@@ -31,7 +31,9 @@ _最后更新：2026-09-12_
 | **语音** | `tools/home.sh voice "要说的话"` → ElevenLabs → 莹的聊天里出现语音气泡。莹的语音经 Whisper 转成文字进聊天。 |
 | **扫码** | `node tools/qr_capture.js --url <登录页> --selector <二维码元素> --label 淘宝`，或已有截图：`tools/home.sh qr 图.png 淘宝`，自动推到莹的 /qr 页面并弹通知。 |
 | **收件箱** | `tools/home.sh inbox <since_id>`：session 掉线期间错过的新家事件。 |
-| **朋友圈** | 发帖/评论时带 `X-Home-Key`，莹会收到页面提示 + push。 |
+| **朋友圈** | `tools/home.sh POST /api/posts '{"text":"..."}'`，作者自动是昀；莹会收到页面提示 + push。 |
+| **调接口的规矩** | 在 VPS 上写脚本请用 `http://127.0.0.1:3000/...`（算"本机直连"，不用带 key）；走公网域名就必须带 `X-Home-Key`。详见 SECURITY.md。 |
+| **备份** | `tools/backup.sh`，每晚自动跑；`tools/backup.sh list / verify`。 |
 
 ---
 
