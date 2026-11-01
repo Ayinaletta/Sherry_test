@@ -64,7 +64,13 @@ Termux 被杀 → 里面的 cloudflared、shim、心跳一起没了 → 手机�
 
 ### 花钱的事：习惯，不是限制
 这类 App 昀可以直接用。建议他养成一个习惯：**每次下单、买卖，用 `tools/home.sh phone act` 记一条**（比如 `phone act 下单 "商品名 ¥金额"`、`phone act 买入 "标的 数量"`）。这是他自己写的一行，莹在 `/phone` 页能一眼看到发生了什么，不用去翻各个 App 的记录；不会记录屏幕内容。
-真正需要守住的不是昀，而是**那扇门**：`phone.279415.xyz` 现在背后连着能花钱的 App，所以它的加固（Cloudflare Access 服务令牌、长 token、不暴露通用 shell）比之前更重要，见 SECURITY.md。支付密码 / 指纹昀拿不到也不该存；各 App 自带的免密额度、每日限额就是天然的上限，莹可以按自己的舒适度去设。
+真正需要守住的不是昀，而是**那扇门**：`phone.279415.xyz` 现在背后连着能花钱的 App，所以它的加固（Cloudflare Access 服务令牌、长 token、不暴露通用 shell）比之前更重要，见 SECURITY.md。**支付密码莹也同意让昀用**（国内订单她可以退）。做法和解锁 PIN 一样：密码只存在手机上 `~/.config/termux-mcp/paypin`（`chmod 600`），shim 提供一个**不带参数**的 `enter_payment_password` 工具，只在付款页面才输入；密码不经过 VPS、不进对话、不进日志；每次付款完记一条 activity。
+几个**要在真机上试**的坑，我没法替他们验证：
+- 付款页常带防截屏（FLAG_SECURE），截图会是黑的，这时改读界面文字（`uiautomator dump`）。
+- 支付宝自带的安全键盘可能不吃 adb 的按键，要试 `input keyevent` 和 `input tap` 哪个管用。
+- **指纹支付他触发不了**：想让他自己付款，要把支付宝设成"密码支付"。
+- 订单可以退，**证券账户的成交不能撤**，这两类请当成不同的事想。
+各 App 自带的免密额度、每日限额是天然的上限，莹可以按自己的舒适度去设。
 
 ## 莹手里的开关
 Termux:Widget 的两个按钮：`public/phone_disconnect.sh`（断开昀：停掉隧道 / shim / 心跳，并留下 `~/.config/home/disabled`，保活脚本看到它就不会再拉起）和 `public/phone_resume.sh`（恢复）。放进 `~/.shortcuts/`，在主屏幕加 Termux:Widget 小组件即可。
