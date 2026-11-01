@@ -28,7 +28,9 @@ Zero Trust → **Access controls → Applications → Add an application → Sel
 - 保存。
 
 ## 4. 让昀带上令牌
-在 VPS 上，把令牌存成一个只有自己能读的文件（别发到聊天里；万一发了，就回 Cloudflare 删掉令牌重建一个）：
+**推荐：用新家的「递钥匙」页面。** 新家 → 隐私与安全 → 递钥匙，把 Client ID 和 Client Secret 粘贴进去，点「交给昀」。它会存成服务器上 `~/.config/phone/cf-access`（权限 600），**不进聊天、不进推送预览、不进备份预览**；昀只会收到一句"令牌放好了，文件在哪"，他的工具自己读文件。（要求新家和昀在服务器上是同一个用户；位置可用 `vault_dir` 改。）
+
+**备选：手动在 VPS 上写文件**（别发到聊天里；万一发了，就回 Cloudflare 删掉令牌重建一个）：
 ```
 mkdir -p ~/.config/phone && chmod 700 ~/.config/phone
 printf '%s\n%s\n' 'Client ID 粘贴在这里' 'Client Secret 粘贴在这里' > ~/.config/phone/cf-access

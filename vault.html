@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>递钥匙 · 伊甸园</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js"></script>
+<style>
+  .lead { font-size: .86rem; line-height: 1.8; color: var(--text-muted); }
+  label { display: block; font-size: .78rem; color: var(--text-muted); margin: 14px 0 6px; font-weight: 600; }
+  .state { display: flex; align-items: center; gap: 12px; padding: 14px; }
+  .ok { color: var(--ok); } .no { color: var(--text-soft); }
+  .hint { font-size: .74rem; color: var(--text-soft); line-height: 1.7; margin: 10px 4px 0; }
+  .row2 { display: flex; gap: 10px; margin-top: 16px; }
+  .row2 .btn { flex: 1; }
+</style>
+</head>
+<body>
+<header class="appbar">
+  <a class="icon-btn" href="/security" data-ic="chevron-left" title="返回"></a>
+  <div class="appbar-main"><div class="appbar-title">递钥匙</div><div class="appbar-sub">给昀一把钥匙，不经过聊天</div></div>
+</header>
+<div class="wrap-narrow">
+  <div class="card state" id="state"></div>
+
+  <div class="section-title"><span>手机门的令牌（Cloudflare Access）</span></div>
+  <div class="card">
+    <div class="lead">把 Cloudflare 里那个服务令牌的两项粘贴在这里。它会被存成服务器上一个只有自己能读的文件，<b>不会出现在聊天、推送和备份预览里</b>。昀只会收到一句"令牌放好了"，他的工具自己去读文件。</div>
+    <label for="cid">Client ID</label>
+    <input class="field" id="cid" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="以 .access 结尾的那一串">
+    <label for="csec">Client Secret</label>
+    <input class="field" id="csec" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="只显示过一次的那一长串">
+    <div class="row2"><button class="btn" id="save"><span data-ic="lock"></span>交给昀</button><button class="btn ghost" id="clear" style="display:none">撤回</button></div>
+    <div class="hint">保存后输入框会立刻清空。看不到已存的内容是故意的；想换就重新粘贴一份，旧的会被覆盖。</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $ = id => document.getElementById(id);
+const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2400); };
+const post = (u, b) => fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }).then(async r => ({ ok: r.ok, ...(await r.json().catch(() => ({}))) }));
+const ago = ts => { const m = Math.floor((Date.now() - ts) / 60000); return m < 1 ? '刚刚' : m < 60 ? m + ' 分钟前' : m < 1440 ? Math.floor(m / 60) + ' 小时前' : Math.floor(m / 1440) + ' 天前'; };
+async function load() {
+  const d = (await fetch('/api/vault/status').then(r => r.json())).cf_access;
+  $('state').innerHTML = d.present
+    ? `<span class="tile-ic green">${ic('shield-check')}</span><div><b class="ok">令牌已经放好</b><div class="hint" style="margin:2px 0 0">${ago(d.updated)}放进去的 · 在服务器上的 ${d.path.replace(/</g, '')}</div></div>`
+    : `<span class="tile-ic plain">${ic('key-round')}</span><div><b class="no">还没有放令牌</b><div class="hint" style="margin:2px 0 0">按照 docs/CLOUDFLARE_ACCESS.md 建好令牌后，把 ID 和 Secret 粘贴到下面</div></div>`;
+  $('clear').style.display = d.present ? '' : 'none';
+}
+$('save').onclick = async () => {
+  const id = $('cid').value.trim(), secret = $('csec').value.trim();
+  if (!id || !secret) return toast('两项都要填');
+  $('save').disabled = true;
+  const r = await post('/api/vault/cf-access', { id, secret });
+  $('cid').value = ''; $('csec').value = '';                      // gone from the screen either way
+  $('save').disabled = false;
+  if (r.ok) { toast('已交给昀'); load(); } else toast(r.error || '没存上');
+};
+$('clear').onclick = async () => { if (!confirm('撤回这把钥匙？昀就进不了手机了，直到你再放一份。')) return; await post('/api/vault/cf-access/clear'); toast('已撤回'); load(); };
+load();
+</script>
+</body>
+</html>

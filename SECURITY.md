@@ -26,6 +26,8 @@
 - 需要更新口令的设备：Mac 摄像头守护进程（`~/.home_snap_secret`）、iPhone「查岗截图」和打卡 / 心率快捷指令（网址加 `?secret=…`）、小小昀（固件里请求 `/api/touch` 时带上）。
 - 过渡期想让打卡 / 心率 / 触摸先不带口令：`peek_config.json` 里设 `"open_device_ingest": true`（会打印警告，尽快去掉）。
 
+**递钥匙**（`/vault`）：莹把需要交给昀的密钥粘贴进去，只存成服务器上权限 600 的文件，不经过聊天、推送、日志。只有莹的登录能放，昀和设备都不能。
+
 ## 手机通道（`phone.279415.xyz`）——整个系统里最危险的一扇门
 它是一个公网域名，后面是能**截屏、点击、输入，甚至（`rish`）执行 shell 命令**的手机接口。它不在新家服务器里，所以新家的门保护不了它，要在手机端和 Cloudflare 上自己加固：
 1. **Cloudflare Access + Service Token**（做完用 `tools/check_phone_door.sh` 验证门有没有真的锁上；步骤见 docs/CLOUDFLARE_ACCESS.md）：给 `phone.279415.xyz` 加一个 Access 应用，策略选 Service Auth；只有带 `CF-Access-Client-Id` / `CF-Access-Client-Secret` 的请求（昀在 VPS 上）才能到达手机。这样即使 shim 的 token 泄露，陌生人也连不到手机。
@@ -79,6 +81,7 @@
 | `explore_token` | 设了才会开放 `/api/explore-log` 给 claude.ai 那边读；不设就关着 |
 | `phone_offline_after_min` `phone_low_battery` `phone_check_seconds` | 红米多久没心跳算掉线（默认 15 分钟）；电量低于多少提醒（默认 25）；检查间隔（默认 60 秒） |
 | `phone_keep_hours` | 手机截图保留多少小时，默认 24 |
+| `vault_dir` | 「递钥匙」页面把令牌存到哪，默认 `~/.config/phone` |
 | `backup_dir` | 备份目录，默认 `/root/backups`（安全页的检查清单用它） |
 | `openai_key` `whisper_url` `elevenlabs_key` `elevenlabs_voice` | 语音 |
 | `tg_token` `tg_chat_id` | 可选的 Telegram 镜像 |

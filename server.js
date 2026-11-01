@@ -13,6 +13,7 @@ const guard = require('./lib/guard');
 const security = require('./lib/security');
 const admin = require('./lib/admin');
 const phone = require('./lib/phone');
+const vault = require('./lib/vault');
 const homeRoutes = require('./lib/home');
 const reading = require('./lib/reading');
 const voice = require('./lib/voice');
@@ -338,7 +339,7 @@ function deny(req, res, url, { secret = false, html = false } = {}) {
 }
 
 // New feature modules (own auth: session cookie or Claude's key) get first look at each request.
-const MODULES = [homeRoutes, reading, voice, qr, admin, phone];
+const MODULES = [homeRoutes, reading, voice, qr, admin, phone, vault];
 async function routeModules(req, res) {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   for (const m of MODULES) if (await m.handle(req, res, url, { appendChat })) return true;
