@@ -19,7 +19,7 @@
 其余全部需要身份，包括 `/static/*`、`/uploads/*`、`/api/tts`、`/api/push/vapid-key`、所有下载。
 
 ## 设备口令只开这几个口子
-`POST /api/checkin`、`/api/ring`、`/api/touch`、`/api/peek/screenshot`、`/api/snap/upload`、`/api/phone/screen`，`GET /api/snap/stream`，以及 **`GET /public/*`（设备下载自己的脚本，例如 Termux 拉 shim）**。
+`POST /api/checkin`、`/api/ring`、`/api/touch`、`/api/peek/screenshot`、`/api/snap/upload`、`/api/phone/screen`、`/api/phone/heartbeat`、`/api/phone/activity`，`GET /api/snap/stream`，以及 **`GET /public/*`（设备下载自己的脚本，例如 Termux 拉 shim）**。
 口令请放在请求头 `X-Device-Secret` 里（`curl -H "X-Device-Secret: …"`），比放在网址里更不容易留在日志中。
 口令**打不开**任何读取接口、聊天、摄像头触发。
 - 换口令：`tools/rotate_secret.sh`（旧口令 `peek2024` 永远失效，它曾经写在仓库里和公开下载的文件里）。
@@ -77,6 +77,7 @@
 | `open_device_ingest` | `true` = 打卡 / 心率 / 触摸不带口令也收（过渡用） |
 | `ob_mcp_token` / `ob_mcp_url` | 小小昀触摸写入 OB 记忆用的 token |
 | `explore_token` | 设了才会开放 `/api/explore-log` 给 claude.ai 那边读；不设就关着 |
+| `phone_offline_after_min` `phone_low_battery` `phone_check_seconds` | 红米多久没心跳算掉线（默认 15 分钟）；电量低于多少提醒（默认 25）；检查间隔（默认 60 秒） |
 | `phone_keep_hours` | 手机截图保留多少小时，默认 24 |
 | `backup_dir` | 备份目录，默认 `/root/backups`（安全页的检查清单用它） |
 | `openai_key` `whisper_url` `elevenlabs_key` `elevenlabs_voice` | 语音 |

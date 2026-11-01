@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>红米 · 伊甸园</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js"></script>
+<style>
+  .top { display: flex; align-items: center; gap: 14px; padding: 16px; }
+  .top .tile-ic { width: 46px; height: 46px; border-radius: 14px; font-size: 1.5rem; }
+  .top b { display: block; font-size: 1.05rem; }
+  .top span.s { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .stat { background: var(--bg-card); border-radius: 14px; padding: 12px 14px; box-shadow: var(--shadow); }
+  .stat .k { font-size: .72rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; margin-bottom: 6px; }
+  .stat .v { font-size: .98rem; font-weight: 600; }
+  .stat .bar { margin-top: 8px; }
+  .bad { color: var(--danger); } .good { color: var(--ok); }
+  .shot { width: 100%; max-width: 280px; display: block; margin: 0 auto; border-radius: 18px; box-shadow: var(--shadow); cursor: zoom-in; }
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 300; align-items: center; justify-content: center; }
+  .lightbox.open { display: flex; } .lightbox img { max-width: 96vw; max-height: 94vh; border-radius: 12px; }
+  .log { display: flex; gap: 10px; padding: 9px 14px; font-size: .82rem; border-bottom: 1px solid var(--border); }
+  .log:last-child { border-bottom: none; } .log time { flex: none; width: 74px; font-size: .68rem; color: var(--text-soft); padding-top: 2px; }
+  .hint { font-size: .76rem; color: var(--text-muted); line-height: 1.7; margin: 8px 4px 0; }
+</style>
+</head>
+<body>
+<header class="appbar">
+  <a class="icon-btn" href="/" data-ic="chevron-left" title="返回"></a>
+  <div class="appbar-main"><div class="appbar-title">红米</div><div class="appbar-sub">昀的手机</div></div>
+  <button class="icon-btn" id="reload" data-ic="refresh-cw" title="刷新"></button>
+</header>
+<div class="wrap-narrow">
+  <div class="card top" id="top"></div>
+  <div class="grid" id="grid"></div>
+  <div class="hint" id="hint"></div>
+
+  <div class="section-title"><span>最新截图</span></div>
+  <div id="shot"></div>
+
+  <div class="section-title"><span>最近的动静</span></div>
+  <div class="list" id="log"></div>
+  <div class="hint">只记录昀做了什么动作、手机掉线和回来，不记录屏幕上的内容。截图 24 小时后自动删除。</div>
+</div>
+<div class="lightbox" id="lb" onclick="this.classList.remove('open')"><img id="lb-img" alt=""></div>
+<nav class="tabbar" data-active="home"></nav>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ago = s => s == null ? '—' : s < 60 ? s + ' 秒前' : s < 3600 ? Math.round(s / 60) + ' 分钟前' : s < 86400 ? Math.round(s / 3600) + ' 小时前' : Math.round(s / 86400) + ' 天前';
+const tago = ts => ago(Math.round((Date.now() - ts) / 1000));
+const TYPE = { offline: ['掉线了', 1], online: ['回来了', 0], restarted: ['Termux 被系统杀掉后重新启动', 1], low_battery: ['电量低', 1], action: ['昀', 0] };
+const yn = v => v === undefined || v === null ? '<span style="color:var(--text-soft)">未知</span>' : v ? '<span class="good">正常</span>' : '<span class="bad">没连上</span>';
+
+async function load() {
+  const d = await fetch('/api/phone/status').then(r => r.json());
+  if (!d.seen) {
+    $('top').innerHTML = `<span class="tile-ic plain">${ic('smartphone')}</span><div><b>还没有连上</b><span class="s">手机上的 phone_heartbeat.sh 开始跑之后，这里就会亮起来。</span></div>`;
+    $('grid').innerHTML = ''; $('hint').textContent = ''; return;
+  }
+  $('top').innerHTML = d.online
+    ? `<span class="tile-ic green">${ic('smartphone')}</span><div><b>在线</b><span class="s">最后一次心跳 ${ago(d.age_s)}</span></div>`
+    : `<span class="tile-ic" style="background:color-mix(in srgb,var(--danger) 16%,transparent);color:var(--danger)">${ic('smartphone')}</span><div><b class="bad">离线 ${Math.round(d.age_s / 60)} 分钟</b><span class="s">最后一次心跳 ${ago(d.age_s)}</span></div>`;
+  const low = d.battery != null && d.battery <= d.thresholds.low_battery && !d.charging;
+  $('grid').innerHTML = `
+    <div class="stat"><div class="k">${ic(d.charging ? 'battery-charging' : low ? 'battery-low' : 'battery')} 电量</div><div class="v ${low ? 'bad' : ''}">${d.battery ?? '—'}%${d.charging ? ' · 充电中' : ''}</div><div class="bar"><i style="width:${d.battery ?? 0}%;${low ? 'background:var(--danger)' : ''}"></i></div></div>
+    <div class="stat"><div class="k">${ic(d.locked ? 'lock' : 'lock-open')} 屏幕</div><div class="v">${d.screen === 'on' ? '亮着' : d.screen === 'off' ? '灭着' : '—'}${d.locked ? ' · 已锁' : d.locked === false ? ' · 已解锁' : ''}</div></div>
+    <div class="stat"><div class="k">${ic(d.net === 'wifi' ? 'wifi' : 'wifi-off')} 网络</div><div class="v">${{ wifi: 'Wi-Fi', mobile: '流量', none: '没有网络' }[d.net] || '—'}</div></div>
+    <div class="stat"><div class="k">${ic('refresh-cw')} Termux 重启</div><div class="v ${d.restarts_7d > 3 ? 'bad' : ''}">7 天 ${d.restarts_7d} 次</div></div>
+    <div class="stat"><div class="k">adb</div><div class="v">${yn(d.adb)}</div></div>
+    <div class="stat"><div class="k">Shizuku</div><div class="v">${yn(d.shizuku)}</div></div>`;
+  $('hint').innerHTML = !d.online ? '多半是系统在后台把 Termux 杀掉了。打开一下手机上的 Termux 让它重新起来，或者等 15 分钟一次的自动保活。'
+    : d.restarts_7d > 3 ? 'Termux 最近被系统杀得有点频繁，说明系统在后台限制它；设置里把 Termux 的电池改成「无限制」、开启自启动、在多任务里锁定它。' : '';
+  $('shot').innerHTML = d.screenshot_age_s == null ? '<div class="empty" style="padding:22px 0">还没有截图</div>'
+    : `<img class="shot" src="/api/phone/screen?t=${Date.now()}" alt="手机屏幕"><div class="hint" style="text-align:center">${ago(d.screenshot_age_s)}拍的</div>`;
+  $('log').innerHTML = d.activity.length ? d.activity.map(e => { const [t, w] = TYPE[e.type] || [e.type, 0];
+    return `<div class="log"><time>${tago(e.ts)}</time><span class="${w ? 'bad' : ''}">${e.type === 'action' ? '昀：' + esc(e.text) : esc(t) + (e.text && e.type !== 'restarted' ? ' · ' + esc(e.text) : '')}</span></div>`; }).join('') : '<div class="empty" style="padding:22px 0">还没有记录</div>';
+}
+$('shot').addEventListener('click', e => { if (e.target.classList.contains('shot')) { $('lb-img').src = e.target.src; $('lb').classList.add('open'); } });
+$('reload').onclick = load;
+load(); setInterval(load, 10000);
+(function live() { const es = new EventSource('/api/events'); es.onmessage = m => { try { if (JSON.parse(m.data).type === '手机') load(); } catch {} }; es.onerror = () => { es.close(); setTimeout(live, 3000); }; })();
+</script>
+</body>
+</html>

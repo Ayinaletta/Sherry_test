@@ -45,7 +45,16 @@ const C = {
   qr: ['qr <png> [标签] [秒]', '把二维码推给莹', async a => out(await api('POST', `/api/qr/push?label=${encodeURIComponent(a[2] || '二维码')}&ttl=${a[3] || 180}`, fs.readFileSync(a[1]), 'image/png'))],
   snap: ['snap', '触发 Mac 摄像头', async () => out(await api('POST', '/api/snap'))],
   inbox: ['inbox [since_id]', '我错过的新家事件', async a => (await api('GET', `/api/inbox?since=${a[1] || 0}`)).items.forEach(i => console.log(`${i.id}  ${i.line}`))],
-  phone: ['phone', '手机最新截图在哪、多久前拍的（然后 Read 它）', async () => { const f = path.join(__dirname, '..', 'phone', 'latest.jpg'); try { const st = fs.statSync(f); console.log(`${f}\n${Math.round((Date.now() - st.mtimeMs) / 1000)} 秒前，${Math.round(st.size / 1024)} KB`); } catch { console.log('还没有手机截图（手机上的 shim 要 POST /api/phone/screen）'); } }],
+  phone: ['phone [log [N]|act <动作> [细节]]', '手机：在线吗、电量、最近动静、截图路径', async a => {
+    if (a[1] === 'log') return (await api('GET', '/api/phone/status')).activity.slice(0, +a[2] || 15).forEach(e => console.log(`${when(e.ts)}  ${e.type.padEnd(12)} ${e.text}`));
+    if (a[1] === 'act') return out(await api('POST', '/api/phone/activity', { action: a[2], detail: rest(a, 3) }));
+    const d = await api('GET', '/api/phone/status');
+    if (!d.seen) return console.log('手机还没有发过心跳（手机上的 phone_heartbeat.sh 要在跑）');
+    console.log(d.online ? `在线（最后心跳 ${d.age_s} 秒前）` : `【离线】已经 ${Math.round(d.age_s / 60)} 分钟没有心跳，手机上的 Termux 可能被系统杀了；让莹去点开 Termux，或等 15 分钟一次的保活`);
+    console.log(`电量 ${d.battery ?? '?'}%${d.charging ? ' 充电中' : ''} · 屏幕 ${d.screen ?? '?'}${d.locked ? ' 已锁' : ''} · 网络 ${d.net ?? '?'} · adb ${d.adb ?? '?'} · shizuku ${d.shizuku ?? '?'}`);
+    console.log(`Termux 过去 7 天重启 ${d.restarts_7d} 次（30 天 ${d.restarts_30d} 次）`);
+    console.log(d.screenshot_age_s == null ? '还没有截图' : `最新截图（${d.screenshot_age_s} 秒前）：${path.join(__dirname, '..', 'phone', 'latest.jpg')}   ← Read 它`);
+  }],
   status: ['status', '服务器状态', async () => out(await api('GET', '/api/status'))],
   security: ['security', '安全总览（谁登录着、检查清单）', async () => { const d = await api('GET', '/api/security/overview'); console.log(d.locked ? '【门锁着】' : '门开着'); d.checks.forEach(c => console.log(`  ${c.ok ? '✓' : '✗'} ${c.text}`)); console.log('登录着：'); d.sessions.forEach(s => console.log(`  ${s.id}  ${s.device}  ${s.ip}  最后活动 ${when(s.last)}${s.current ? '  (当前)' : ''}`)); }],
   audit: ['audit [N=30]', '最近的登录 / 拒绝记录', async a => (await api('GET', '/api/security/overview')).recent.slice(0, +a[1] || 30).forEach(e => console.log(`${e.ts}  ${e.type.padEnd(14)} ${e.ip || ''} ${e.device || ''} ${e.path || ''}`))],

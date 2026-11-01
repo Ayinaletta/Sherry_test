@@ -299,7 +299,7 @@ function safePath(root, urlPath) {
 //   device  : phone shortcuts / Mac daemon / ESP32 may use the shared secret (?secret=) instead of a login
 //   private : everything else - Sherry's session, Claude's key, or a direct local call
 const OPEN = new Set(['GET /login', 'GET /manifest.json', 'GET /sw.js', 'GET /api/health', 'GET /static/home_icon.jpg', 'POST /api/login', 'POST /api/logout']);
-const DEVICE = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch', 'POST /api/peek/screenshot', 'POST /api/snap/upload', 'GET /api/snap/stream', 'POST /api/phone/screen']);
+const DEVICE = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch', 'POST /api/peek/screenshot', 'POST /api/snap/upload', 'GET /api/snap/stream', 'POST /api/phone/screen', 'POST /api/phone/heartbeat', 'POST /api/phone/activity']);
 // scripts a device downloads (Termux pulls its shim from here): the device secret is enough, and only for GET under /public/
 const DEVICE_DOWNLOAD = p => p.startsWith('/public/');
 const INGEST = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch']);
