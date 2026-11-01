@@ -28,7 +28,7 @@
 
 ## 手机通道（`phone.279415.xyz`）——整个系统里最危险的一扇门
 它是一个公网域名，后面是能**截屏、点击、输入，甚至（`rish`）执行 shell 命令**的手机接口。它不在新家服务器里，所以新家的门保护不了它，要在手机端和 Cloudflare 上自己加固：
-1. **Cloudflare Access + Service Token**：给 `phone.279415.xyz` 加一个 Access 应用，策略选 Service Auth；只有带 `CF-Access-Client-Id` / `CF-Access-Client-Secret` 的请求（昀在 VPS 上）才能到达手机。这样即使 shim 的 token 泄露，陌生人也连不到手机。
+1. **Cloudflare Access + Service Token**（做完用 `tools/check_phone_door.sh` 验证门有没有真的锁上；步骤见 docs/CLOUDFLARE_ACCESS.md）：给 `phone.279415.xyz` 加一个 Access 应用，策略选 Service Auth；只有带 `CF-Access-Client-Id` / `CF-Access-Client-Secret` 的请求（昀在 VPS 上）才能到达手机。这样即使 shim 的 token 泄露，陌生人也连不到手机。
 2. shim 的 token：至少 32 字节随机，**每一个路由**（`/v1/*`、`/mcp`）都要校验，用常量时间比较，不放在网址的查询参数里，失败多次要限速。
 3. shim 只监听 `127.0.0.1`（cloudflared 在本机转发）。
 4. **不要暴露通用的 `rish` / shell 接口**。只提供固定动作：截屏、点击、滑动、输入、按键、打开 App、读界面文字；真需要 shell 的，做白名单。
