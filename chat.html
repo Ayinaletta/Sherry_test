@@ -31,11 +31,32 @@
     .msg-highlight mark, mark { background: #ffe066; border-radius: 2px; color: #2A241D; }
     .msg-row.search-current .msg-bubble { outline: 2px solid var(--accent); }
 
-    /* 内心 thought blocks */
-    .thought-block { background: var(--bg-dim); border-left: 2px solid var(--text-soft); border-radius: 6px; padding: 5px 9px; margin: 4px 0; }
-    .thought-label { font-size: .72em; color: var(--text-muted); font-weight: 500; display: block; margin-bottom: 2px; }
-    .thought-content { font-size: .88em; color: var(--text-muted); white-space: pre-wrap; word-break: break-word; }
+    /* 内心: folded to a tiny "○ 内心" chip; opened, it reads as a translucent, italic aside */
+    .inner { display: inline-block; vertical-align: baseline; max-width: 100%; margin: 2px 0; }
+    .inner > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; color: var(--text-muted); background: var(--bg-dim); padding: 2px 9px 2px 7px; border-radius: 999px; opacity: .85; user-select: none; }
+    .inner > summary::-webkit-details-marker { display: none; }
+    .inner > summary .ic { font-size: .8rem; }
+    .inner[open] { display: block; background: color-mix(in srgb, var(--text) 6%, transparent); border-left: 2px solid var(--text-soft); border-radius: 10px; padding: 6px 10px 8px; margin: 6px 0; }
+    .inner[open] > summary { background: none; padding: 0; margin-bottom: 4px; opacity: .6; }
+    .inner-body { font-style: italic; color: var(--text-muted); white-space: pre-wrap; word-break: break-word; font-size: .9em; line-height: 1.6; }
+    .msg-bubble.inner-only { background: none; box-shadow: none; padding: 0 4px; }
+    .msg-bubble.mine .inner > summary { background: rgba(255,255,255,.22); color: inherit; }
+    .msg-bubble.mine .inner[open] { background: rgba(255,255,255,.14); border-left-color: rgba(255,255,255,.5); }
+    .msg-bubble.mine .inner-body { color: inherit; }
 
+    /* 语音: play button + "语音 12s｜声音亮亮的"; the transcript opens on tap */
+    .vmsg { display: flex; align-items: flex-start; gap: 10px; min-width: 190px; }
+    .vplay { flex: none; width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; background: var(--accent-light); color: var(--accent); touch-action: manipulation; }
+    .msg-bubble.mine .vplay { background: rgba(255,255,255,.25); color: inherit; }
+    .vfold { flex: 1; min-width: 0; }
+    .vfold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; flex-wrap: wrap; gap: 2px 8px; min-height: 34px; font-size: .88rem; user-select: none; }
+    .vfold > summary::-webkit-details-marker { display: none; }
+    .vlabel { font-weight: 600; }
+    .vdesc { font-size: .76rem; opacity: .75; }
+    .vchev { margin-left: auto; opacity: .55; transition: transform .2s; display: inline-flex; }
+    .vfold[open] .vchev { transform: rotate(180deg); }
+    .vtext { margin: 2px 0 2px; font-size: .92rem; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+    .vtext.dim { opacity: .6; font-size: .8rem; }
     .msg-image { max-width: 240px; max-height: 320px; border-radius: 14px; display: block; cursor: pointer; object-fit: cover; }
     .msg-caption { font-size: .85rem; margin-top: 4px; color: inherit; opacity: .9; }
     .pin-photo-btn { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,.5); color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: .95rem; display: flex; align-items: center; justify-content: center; opacity: .0; transition: opacity .2s; }
@@ -181,12 +202,47 @@
       if (last < text.length) {
         parts.push({ type: 'text', content: text.slice(last) });
       }
-      return parts.map(p => {
+      // the newline that follows / precedes a ``` fence is just the fence's own line break, not a blank line
+      parts.forEach((p, i) => {
+        if (p.type !== 'text') return;
+        if (i > 0 && parts[i - 1].type === 'thought') p.content = p.content.replace(/^\n+/, '');
+        if (i < parts.length - 1 && parts[i + 1].type === 'thought') p.content = p.content.replace(/\n+$/, '');
+      });
+      return parts.filter(p => p.type === 'thought' || p.content).map(p => {
         if (p.type === 'thought') {
-          return `<div class="thought-block"><span class="thought-label">内心</span><div class="thought-content">${escHtml(p.content).replace(/<br>/g,'\n')}</div></div>`;
+          return `<details class="inner"><summary>${ic('circle', 'sm')}内心</summary><div class="inner-body">${escHtml(p.content).replace(/<br>/g,'\n')}</div></details>`;
         }
         return `<span>${escHtml(p.content)}</span>`;
       }).join('');
+    }
+
+    const INNER_RE = /```内心\n[\s\S]*?```/g;
+    const stripInner = t => String(t ?? '').replace(INNER_RE, '').trim();
+
+    // one voice player at a time
+    let _vAudio = null, _vBtn = null;
+    function playVoice(btn) {
+      if (_vAudio && _vBtn === btn) {
+        if (_vAudio.paused) { _vAudio.play(); setIc(btn, 'pause'); } else { _vAudio.pause(); setIc(btn, 'play'); }
+        return;
+      }
+      if (_vAudio) { _vAudio.pause(); if (_vBtn) setIc(_vBtn, 'play'); }
+      _vBtn = btn; _vAudio = new Audio(btn.dataset.src);
+      _vAudio.onended = () => setIc(btn, 'play');
+      _vAudio.onerror = () => setIc(btn, 'play');
+      _vAudio.play().then(() => setIc(btn, 'pause')).catch(() => setIc(btn, 'play'));
+    }
+
+    function voiceHtml(entry) {
+      // older entries keep "[语音 12s|…] 文字" in text; newer ones have the separate fields
+      const m = /^\[语音([^\]|]*)(?:\|([^\]]*))?\]\s*/.exec(entry.text || '');
+      const dur = entry.voice_dur ?? (m && /([\d.]+)s/.exec(m[1]) ? parseFloat(/([\d.]+)s/.exec(m[1])[1]) : null);
+      const desc = entry.voice_desc ?? (m && m[2]) ?? '';
+      let text = entry.voice_text ?? (m ? (entry.text || '').slice(m[0].length) : (entry.text || ''));
+      text = String(text).replace(/（没转成文字）\s*$/, '').trim();
+      const body = text ? `<div class="vtext">${escHtml(text)}</div>` : `<div class="vtext dim">${entry.stt_error ? '没转成文字' : '没有文字'}</div>`;
+      return `<div class="vmsg"><button class="vplay" data-src="${entry.audio_url}" onclick="playVoice(this)" aria-label="播放">${ic('play')}</button>
+        <details class="vfold"><summary><span class="vlabel">语音${dur ? ' ' + dur + 's' : ''}</span>${desc ? `<span class="vdesc">${escHtml(desc)}</span>` : ''}<span class="vchev">${ic('chevron-down', 'sm')}</span></summary>${body}</details></div>`;
     }
 
     function fmtTime(ts) {
@@ -254,10 +310,8 @@
           + `<div class="file-actions"><a href="${entry.file_url}" download="${escHtml(entry.file_name || 'file')}">下载</a>`
           + (readable ? `<button onclick="readTogether('${entry.file_url}', this.dataset.n)" data-n="${escHtml(entry.file_name || '')}">一起读</button>` : '') + `</div>`;
       } else if (entry.audio_url) {
-        // Voice message: audio player + transcript (Whisper for her, the spoken text for me)
-        const t = entry.text ? `<div class="msg-caption">${escHtml(entry.text)}</div>`
-          : (entry.stt_error ? `<div class="msg-caption">（没转成文字）</div>` : '');
-        bubbleInner = `<audio controls preload="none" src="${entry.audio_url}" style="max-width:220px;height:36px"></audio>${t}`;
+        // Voice message (hers: Whisper + how she sounded; mine: what I said) - folded by default
+        bubbleInner = voiceHtml(entry);
       } else if (entry.image_url) {
         // Image message
         const cap = entry.caption ? `<div class="msg-caption">${escHtml(entry.caption)}</div>` : '';
@@ -271,7 +325,7 @@
         // Text message
         const text = entry.text ?? entry.content ?? '';
         const rawAttr = text.replace(/"/g,'&quot;');
-        if (text.length > EXPAND_THRESHOLD) {
+        if (text.length > EXPAND_THRESHOLD && !/```内心/.test(text)) {
           const preview = escHtml(text.slice(0, EXPAND_THRESHOLD));
           const full = renderText(text);
           bubbleInner = `<span class="msg-text-collapsed" data-raw="${rawAttr}">${preview}<span class="msg-ellipsis">…</span></span>` +
@@ -282,8 +336,9 @@
         }
       }
 
+      const innerOnly = !entry.file_url && !entry.audio_url && !entry.image_url && /```内心/.test(entry.text ?? '') && !stripInner(entry.text);
       row.innerHTML = `
-        <div class="msg-bubble${isMine ? ' mine' : ' theirs'}">${bubbleInner}</div>
+        <div class="msg-bubble${isMine ? ' mine' : ' theirs'}${innerOnly ? ' inner-only' : ''}">${bubbleInner}</div>
         <div class="msg-ts">${fmtTime(entry.ts)}</div>
       `;
       return row;
@@ -392,8 +447,8 @@
           if (sep) area.appendChild(sep);
           area.appendChild(renderMsg(entry));
           scrollToBottom();
-          if (voiceEnabled && entry.from === 'claude' && entry.text) {
-            speak(entry.text);
+          if (voiceEnabled && entry.from === 'claude' && entry.text && !entry.audio_url && stripInner(entry.text)) {
+            speak(stripInner(entry.text));
           }
         } catch {}
       };
@@ -477,29 +532,45 @@
     let _matchRows = [];
     let _matchIdx = 0;
 
+    function clearMarks(bubble) {
+      let had = false;
+      bubble.querySelectorAll('mark').forEach(m => { m.replaceWith(document.createTextNode(m.textContent)); had = true; });
+      if (had) bubble.normalize();
+    }
+    // wrap matches in <mark> without rebuilding the bubble (keeps folds, buttons and players intact)
+    function markMatches(root, re) {
+      const nodes = [], w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (let n; (n = w.nextNode());) if (!n.parentElement.closest('button, script, style')) nodes.push(n);
+      nodes.forEach(n => {
+        const s = n.nodeValue; re.lastIndex = 0;
+        if (!re.test(s)) return;
+        re.lastIndex = 0;
+        const frag = document.createDocumentFragment(); let last = 0, m;
+        while ((m = re.exec(s))) {
+          if (m.index > last) frag.appendChild(document.createTextNode(s.slice(last, m.index)));
+          const mk = document.createElement('mark'); mk.textContent = m[0]; frag.appendChild(mk);
+          last = m.index + m[0].length; if (!m[0]) re.lastIndex++;
+        }
+        if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last)));
+        n.parentNode.replaceChild(frag, n);
+      });
+    }
+
     function applySearch(q) {
       const rows = area.querySelectorAll('.msg-row');
       _matchRows = [];
       const navEl = document.getElementById('search-nav');
       const countEl = document.getElementById('search-count');
+      const re = q ? new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi') : null;
       rows.forEach(row => {
         const bubble = row.querySelector('.msg-bubble');
         if (!bubble) return;
         row.classList.remove('search-hidden', 'search-current');
-        if (!q) {
-          // Remove highlights, keep all messages visible
-          bubble.querySelectorAll('mark').forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
-          return;
-        }
-        const raw = bubble.dataset.raw || bubble.textContent;
-        bubble.dataset.raw = raw;
-        if (raw.toLowerCase().includes(q.toLowerCase())) {
+        clearMarks(bubble);
+        if (!q) return;
+        if (bubble.textContent.toLowerCase().includes(q.toLowerCase())) {     // folded text counts too
           _matchRows.push(row);
-          const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi');
-          if (!row.querySelector('.msg-image')) {
-            const textEl = bubble.querySelector('[data-raw]') || bubble;
-            textEl.innerHTML = escHtml(raw).replace(re, m => `<mark>${m}</mark>`);
-          }
+          markMatches(bubble, re);
         }
       });
       if (q && _matchRows.length > 0) {
@@ -517,6 +588,12 @@
       if (!_matchRows.length) return;
       const cur = _matchRows[_matchIdx];
       cur.classList.add('search-current');
+      // the match may sit inside a folded voice / 内心 block, or in the hidden half of a long message: open it
+      const mk = cur.querySelector('mark');
+      if (mk) {
+        for (let d = mk.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;
+        if (mk.closest('.msg-text-full') && getComputedStyle(mk.closest('.msg-text-full')).display === 'none') { const b = cur.querySelector('.msg-expand-btn'); if (b) b.click(); }
+      }
       cur.scrollIntoView({ behavior: 'smooth', block: 'center' });
       document.getElementById('search-count').textContent = `${_matchIdx+1}/${_matchRows.length}`;
     }
