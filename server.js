@@ -14,6 +14,7 @@ const security = require('./lib/security');
 const admin = require('./lib/admin');
 const phone = require('./lib/phone');
 const vault = require('./lib/vault');
+const ring = require('./lib/ring');
 const homeRoutes = require('./lib/home');
 const reading = require('./lib/reading');
 const voice = require('./lib/voice');
@@ -300,7 +301,7 @@ function safePath(root, urlPath) {
 //   device  : phone shortcuts / Mac daemon / ESP32 may use the shared secret (?secret=) instead of a login
 //   private : everything else - Sherry's session, Claude's key, or a direct local call
 const OPEN = new Set(['GET /login', 'GET /manifest.json', 'GET /sw.js', 'GET /api/health', 'GET /static/home_icon.jpg', 'POST /api/login', 'POST /api/logout']);
-const DEVICE = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch', 'POST /api/peek/screenshot', 'POST /api/snap/upload', 'GET /api/snap/stream', 'POST /api/phone/screen', 'POST /api/phone/heartbeat', 'POST /api/phone/activity']);
+const DEVICE = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch', 'POST /api/peek/screenshot', 'POST /api/snap/upload', 'GET /api/snap/stream', 'POST /api/phone/screen', 'POST /api/phone/heartbeat', 'POST /api/phone/activity', 'POST /api/ring/data']);
 // scripts a device downloads (Termux pulls its shim from here): the device secret is enough, and only for GET under /public/
 const DEVICE_DOWNLOAD = p => p.startsWith('/public/');
 const INGEST = new Set(['POST /api/checkin', 'POST /api/ring', 'POST /api/touch']);
@@ -339,7 +340,7 @@ function deny(req, res, url, { secret = false, html = false } = {}) {
 }
 
 // New feature modules (own auth: session cookie or Claude's key) get first look at each request.
-const MODULES = [homeRoutes, reading, voice, qr, admin, phone, vault];
+const MODULES = [homeRoutes, reading, voice, qr, admin, phone, vault, ring];
 async function routeModules(req, res) {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   for (const m of MODULES) if (await m.handle(req, res, url, { appendChat })) return true;
@@ -511,6 +512,7 @@ function legacyHandler(req, res) {
     req.on('end', () => {
       try {
         const incoming = JSON.parse(body);
+        try { ring.ingestLegacy(incoming); } catch {}                 // the new /ring page reads from its own store (before the old files, which may fail)
         let existing = {};
         try { existing = JSON.parse(fs.readFileSync('/root/claude-home/ring_latest.json', 'utf8')); } catch {}
         const merged = Object.assign({}, existing, incoming, { ts: new Date().toISOString() });

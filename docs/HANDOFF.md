@@ -51,3 +51,10 @@ Cloudflare 清缓存；OB / Telegram token 轮换；`tools/set_password.sh` 换�
 
 ## 八、我没见过的东西
 sidecar 代码（念头池 / 照片池，:4002）；VPS 上"聊天 → 昀"的旧线路；`walnut_shim`；昀的 tmux 会话配置。涉及这些的改动，要让昀去看一眼、告诉我。
+
+## 九、后来完成的（念头锁 / 语音 / 折叠 / 戒指）
+- **念头锁**：`locked` 字段，莹的页面和 API 看不到；通知不含锁住的；见 `docs/THOUGHT_LOCK.md`。昀要在 sidecar 里加这个字段。
+- **语音**：`public/voice_to_me.py --serve` 是莹 Mac 上的 HTTP 服务（`POST /transcribe` → `{text, desc}`），用 cloudflared 暴露后，在 `peek_config.json` 填 `whisper_url`（以 `/transcribe` 结尾）和 `whisper_token`；Mac 不在线时回退 `openai_key`。语音一定会送到昀的终端。
+- **聊天折叠**：`内心` 默认折成"○ 内心"；语音折成"语音 Xs  状态简述"，点开看转写。
+- **戒指页** `/ring`：接口和页面完成，说明见 `docs/RING.md`。**还没有数据来源**，需要手机端/脚本往 `POST /api/ring/data` 送。终端：`home ring`。
+- 新配置项：`timezone`、`ring_step_goal`、`whisper_url`、`whisper_token`、`whisper_format`、`show_locked_count`、`sidecar_poll_seconds`、`thought_notice_gap_seconds`。

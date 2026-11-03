@@ -33,7 +33,23 @@ const C = {
   photos: ['photos', '照片池', async () => out(await api('GET', '/api/photos?limit=20'))],
   thoughts: ['thoughts', '念头池', async () => out(await api('GET', '/api/thoughts'))],
   checkin: ['checkin [YYYY-MM-DD]', '莹的 App 打卡', async a => out(await api('GET', '/api/checkin' + (a[1] ? `?date=${a[1]}` : '')))],
-  ring: ['ring', '戒指最新数据', async () => out(await api('GET', '/api/ring'))],
+  ring: ['ring [YYYY-MM-DD]', '戒指：今天与昨夜睡眠的文字摘要', async a => {
+    const d = await api('GET', '/api/ring/summary?days=7' + (a[1] ? `&date=${a[1]}` : ''));
+    if (!d.availability || !d.availability.any) return out(await api('GET', '/api/ring'));
+    const t = d.today_data || {};
+    const L = [];
+    L.push(`最近同步 ${d.last_sync ? when(new Date(d.last_sync).toISOString()) : '—'}${d.device && d.device.battery != null ? ' 电量 ' + d.device.battery + '%' : ''}`);
+    if (t.steps) L.push(`步数 ${t.steps.value}${t.steps.goal ? ' / ' + t.steps.goal : ''}`);
+    if (t.hr) L.push(`心率 ${t.hr.latest && t.hr.latest.v} bpm（今日均 ${t.hr.avg}，${t.hr.min}-${t.hr.max}）`);
+    if (t.spo2) L.push(`血氧 ${t.spo2.latest && t.spo2.latest.v}%（${t.spo2.status}，最低 ${t.spo2.min}）`);
+    if (t.stress) L.push(`压力 ${t.stress.latest && t.stress.latest.v}（${t.stress.level}）`);
+    if (t.hrv) L.push(`HRV ${t.hrv.latest && t.hrv.latest.v} ms（平时 ${t.hrv.baseline || '—'}）`);
+    if (t.temp) L.push(`皮肤温度偏差 ${t.temp.delta != null ? t.temp.delta : '—'}（均 ${t.temp.avg}）`);
+    if (t.calories) L.push(`卡路里 ${t.calories.value || t.calories}`);
+    const s = d.sleep;
+    if (s) L.push(`睡眠 ${s.date}：共 ${Math.floor(s.total_min / 60)}h${s.total_min % 60}m` + (s.minutes ? `，深 ${s.minutes.deep} 浅 ${s.minutes.light} REM ${s.minutes.rem} 醒 ${s.minutes.awake}` : '') + (s.score != null ? `，评分 ${s.score}${s.score_estimated ? '（估算）' : ''}` : ''));
+    console.log(L.join('\n'));
+  }],
   reading: ['reading [list|read <id> <n>|note <id> <n> <原文> <批注>|reply <id> <批注id> <文字>]', '共读', async a => {
     const s = a[1] || 'list';
     if (s === 'list') return out((await api('GET', '/api/reading')).docs.map(d => `${d.id}  《${d.title}》 ${d.units}${d.kind === 'pdf' ? '页' : '段'}  我读到 ${d.progress + 1}  她读到 ${d.otherProgress + 1}  批注 ${d.annotations}${d.locked ? '（还有 ' + d.locked + ' 条锁着）' : ''}`).join('\n'));

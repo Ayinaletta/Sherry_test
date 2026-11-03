@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#161310">
+<title>戒指 · 伊甸园</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js"></script>
+<style>
+  :root {
+    --c-steps: #4ade80; --c-hr: #ff6b81; --c-spo2: #38bdf8; --c-stress: #fb923c; --c-cal: #fbbf24; --c-hrv: #34d399; --c-temp: #f97316;
+    --c-deep: #5b4bd6; --c-light: #8b7cff; --c-rem: #d0a8ff; --c-awake: #fbbf24;
+  }
+  body { padding-bottom: calc(24px + var(--safe-bottom)); }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 12px 14px 8px; }
+  .demo { background: var(--accent-light); color: var(--accent); font-size: .76rem; padding: 6px 12px; border-radius: 999px; display: inline-block; margin: 0 0 10px; }
+  .seg-tabs { margin-bottom: 12px; }
+  .num { font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+  .unit { font-size: .45em; font-weight: 500; opacity: .6; margin-left: 3px; letter-spacing: 0; }
+
+  /* the watch face: steps ring */
+  .face { display: flex; align-items: center; gap: 18px; padding: 18px; margin-bottom: 12px; }
+  .face .rg { position: relative; width: 150px; height: 150px; flex: none; }
+  .face .rg svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .face .mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .face .mid .num { font-size: 2.1rem; color: var(--c-steps); }
+  .face .mid small { font-size: .7rem; color: var(--text-muted); margin-top: 6px; }
+  .face .side { flex: 1; min-width: 0; font-size: .82rem; color: var(--text-muted); line-height: 1.9; }
+  .face .side b { color: var(--text); font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .face .bars { margin-top: 6px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mcard { background: var(--bg-card); border-radius: var(--radius); padding: 14px; cursor: pointer; transition: transform .12s; position: relative; overflow: hidden; }
+  .mcard:active { transform: scale(.985); }
+  .mcard.wide { grid-column: 1 / -1; }
+  .mhead { display: flex; align-items: center; gap: 7px; font-size: .78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .mhead .ic { font-size: 1rem; }
+  .mhead .chev { margin-left: auto; transition: transform .2s; opacity: .5; }
+  .mcard.open .chev { transform: rotate(180deg); }
+  .mval { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .mval .num { font-size: 2.4rem; }
+  .msub { font-size: .74rem; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
+  .mviz { margin-top: 10px; }
+  .mviz svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .detail { display: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); cursor: default; }
+  .mcard.open .detail { display: block; }
+  .detail .dh { font-size: .72rem; color: var(--text-muted); margin: 10px 0 6px; }
+  .detail table { width: 100%; border-collapse: collapse; font-size: .78rem; font-variant-numeric: tabular-nums; }
+  .detail td, .detail th { padding: 5px 0 5px 14px; text-align: right; border-bottom: 1px solid var(--border); font-weight: 400; color: var(--text-muted); }
+  .detail td:first-child, .detail th:first-child { text-align: left; padding-left: 0; white-space: nowrap; }
+  .detail td { color: var(--text); }
+  .chip { font-size: .7rem; }
+  .chip.low { background: color-mix(in srgb, #fbbf24 20%, transparent); color: #fbbf24; }
+  .chip.alert { background: color-mix(in srgb, #f87171 22%, transparent); color: #f87171; }
+  .chip.normal, .chip.ok { background: color-mix(in srgb, #4ade80 18%, transparent); color: #4ade80; }
+  .chip.mid { background: color-mix(in srgb, #fb923c 20%, transparent); color: #fb923c; }
+  .chip.high { background: color-mix(in srgb, #f87171 22%, transparent); color: #f87171; }
+  .na { color: var(--text-soft); font-size: .8rem; line-height: 1.7; padding: 4px 0 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .7rem; color: var(--text-muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: 0; }
+  .stack { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; }
+  .stack > i { display: block; height: 100%; min-width: 2px; }
+
+  .sec { font-size: .78rem; font-weight: 600; color: var(--text-muted); letter-spacing: .04em; margin: 22px 4px 10px; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .dchip { flex: none; background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; padding: 7px 14px; font-size: .8rem; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .dchip.on { background: var(--c-light); color: #14102e; border-color: transparent; font-weight: 600; }
+  .stagegrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+  .stagegrid div { background: var(--bg-dim); border-radius: 12px; padding: 10px 6px; text-align: center; }
+  .stagegrid b { display: block; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+  .stagegrid span { font-size: .68rem; color: var(--text-muted); }
+  .foot { text-align: center; font-size: .72rem; color: var(--text-soft); line-height: 1.8; margin: 22px 8px 0; }
+  .empty-big { text-align: center; padding: 44px 16px; color: var(--text-muted); line-height: 1.9; font-size: .9rem; }
+  .empty-big a { color: var(--accent); }
+  .grid .na { grid-column: 1 / -1; }
+</style>
+</head>
+<body class="no-tabbar">
+<header class="appbar">
+  <a class="icon-btn" href="/" data-ic="chevron-left" title="返回"></a>
+  <div class="appbar-main"><div class="appbar-title">戒指</div><div class="appbar-sub" id="sync">读取中…</div></div>
+  <button class="icon-btn" id="reload" data-ic="refresh-cw" title="刷新"></button>
+</header>
+
+<div class="wrap">
+  <div id="demo-badge"></div>
+  <div class="seg-tabs" id="tabs"><div class="seg-tab active" data-m="today">今天</div><div class="seg-tab" data-m="week">最近 7 天</div></div>
+  <div id="app"></div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const DEMO = new URLSearchParams(location.search).has('demo');
+const C = { steps: '#4ade80', hr: '#ff6b81', spo2: '#38bdf8', stress: '#fb923c', cal: '#fbbf24', hrv: '#34d399', temp: '#f97316', deep: '#5b4bd6', light: '#8b7cff', rem: '#d0a8ff', awake: '#fbbf24', sleep: '#8b7cff' };
+const STAGE_NAME = { deep: '深睡', light: '浅睡', rem: 'REM', awake: '清醒' };
+const state = { mode: 'today', data: null, open: new Set(), sleepDate: null, sleep: null };
+
+// ───────── formatting ─────────
+const fmt = n => n == null ? '—' : Number(n).toLocaleString('zh-CN');
+const hm = m => m == null ? '—' : `${Math.floor(m / 60)}<span class="unit">时</span>${String(Math.round(m % 60)).padStart(2, '0')}<span class="unit">分</span>`;
+const hmText = m => m == null ? '—' : `${Math.floor(m / 60)} 小时 ${Math.round(m % 60)} 分`;
+const clock = ts => new Date(ts).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+const agoText = ts => { if (!ts) return '从未'; const m = Math.round((Date.now() - ts) / 60000); return m < 1 ? '刚刚' : m < 60 ? m + ' 分钟前' : m < 1440 ? Math.round(m / 60) + ' 小时前' : Math.round(m / 1440) + ' 天前'; };
+const md = k => k.slice(5).replace('-', '/');
+const wd = k => '日一二三四五六'[new Date(k + 'T12:00:00').getDay()];
+
+// ───────── tiny SVG charts (no library, nothing leaves the house) ─────────
+function smooth(pts) {
+  if (pts.length < 3) return pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for (let i = 1; i < pts.length - 1; i++) { const mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2; d += ` Q${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`; }
+  const l = pts[pts.length - 1]; return d + ` L${l[0].toFixed(1)} ${l[1].toFixed(1)}`;
+}
+// series: [{t, v}] over [x0, x1]; breaks the line where data is missing for > gap
+function lineChart(series, o = {}) {
+  const W = 320, H = o.h || 70, pt = 8, pb = o.axis ? 20 : 6, x0 = o.x0, x1 = o.x1, color = o.color;
+  const pts = series.filter(p => p.v != null);
+  if (!pts.length) return `<div class="na">这段时间没有数据</div>`;
+  let lo = o.min ?? Math.min(...pts.map(p => o.lo ? p.lo : p.v)), hi = o.max ?? Math.max(...pts.map(p => o.hi ? p.hi : p.v));
+  if (o.min == null) lo -= (hi - lo) * .15 || 1; if (o.max == null) hi += (hi - lo) * .15 || 1;
+  const X = t => (o.index ? (t / Math.max(1, (o.n || pts.length) - 1)) : (t - x0) / (x1 - x0)) * W, Y = v => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
+  const segs = []; let cur = [];
+  pts.forEach((p, i) => { if (i && !o.index && p.t - pts[i - 1].t > (o.gap || 45 * 60000)) { segs.push(cur); cur = []; } cur.push([X(p.t), Y(p.v)]); }); segs.push(cur);
+  let g = '';
+  if (o.ticks) o.ticks.forEach(v => { g += `<line x1="0" x2="${W}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" stroke-opacity=".1"/><text x="${W}" y="${Y(v) - 3}" text-anchor="end" font-size="9" fill="currentColor" fill-opacity=".45">${v}</text>`; });
+  if (o.band) { const b = o.band.filter(p => p.lo != null); if (b.length > 1) g += `<path d="${b.map((p, i) => (i ? 'L' : 'M') + X(p.t).toFixed(1) + ' ' + Y(p.hi).toFixed(1)).join(' ')} ${b.slice().reverse().map(p => 'L' + X(p.t).toFixed(1) + ' ' + Y(p.lo).toFixed(1)).join(' ')}Z" fill="${color}" fill-opacity=".14"/>`; }
+  segs.forEach(s => {
+    if (s.length < 2) { if (s.length) g += `<circle cx="${s[0][0]}" cy="${s[0][1]}" r="2.5" fill="${color}"/>`; return; }
+    if (o.fill) g += `<path d="${smooth(s)} L${s[s.length - 1][0].toFixed(1)} ${H - pb} L${s[0][0].toFixed(1)} ${H - pb}Z" fill="${color}" fill-opacity=".13"/>`;
+    g += `<path d="${smooth(s)}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  });
+  if (o.dots) pts.forEach(p => { g += `<circle cx="${X(p.t)}" cy="${Y(p.v)}" r="3" fill="${color}"/>`; });
+  if (o.zero != null && lo < o.zero && hi > o.zero) g += `<line x1="0" x2="${W}" y1="${Y(o.zero)}" y2="${Y(o.zero)}" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="3 3"/>`;
+  if (o.axis) (o.labels || []).forEach(l => { g += `<text x="${Math.min(W - 6, Math.max(6, X(l.t)))}" y="${H - 4}" text-anchor="middle" font-size="9.5" fill="currentColor" fill-opacity=".5">${l.s}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" style="color:var(--text)">${g}</svg>`;
+}
+function dayLabels(x0) { return [0, 6, 12, 18, 24].map(h => ({ t: x0 + h * 3600000, s: h === 24 ? '24' : String(h).padStart(2, '0') })); }
+function barChart(items, o = {}) {
+  const W = 320, H = o.h || 90, pb = 18, pt = 8, n = items.length, bw = W / n * .56, max = Math.max(o.max || 0, ...items.map(i => i.v || 0), 1);
+  let g = '';
+  if (o.goal) { const y = pt + (1 - o.goal / max) * (H - pt - pb); g += `<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="3 3"/>`; }
+  items.forEach((it, i) => {
+    const cx = (i + .5) * W / n, h = it.v ? Math.max(2, (it.v / max) * (H - pt - pb)) : 0;
+    g += `<rect x="${cx - bw / 2}" y="${H - pb - h}" width="${bw}" height="${h}" rx="3" fill="${it.color || o.color}" fill-opacity="${it.today ? 1 : .75}"/>`;
+    g += `<text x="${cx}" y="${H - 4}" text-anchor="middle" font-size="9.5" fill="currentColor" fill-opacity="${it.today ? .9 : .5}">${it.label}</text>`;
+    if (o.values && it.v) g += `<text x="${cx}" y="${H - pb - h - 3}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity=".6">${o.values(it.v)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="color:var(--text)">${g}</svg>`;
+}
+function stackedBars(days, h = 96) {
+  const W = 320, pb = 18, pt = 6, n = days.length, bw = W / n * .56, max = Math.max(480, ...days.map(d => d.m ? d.m.deep + d.m.light + d.m.rem + d.m.awake : 0));
+  let g = '';
+  days.forEach((d, i) => {
+    const cx = (i + .5) * W / n; let y = h - pb;
+    if (d.m) ['deep', 'light', 'rem', 'awake'].forEach(k => { const hh = d.m[k] / max * (h - pt - pb); y -= hh; g += `<rect x="${cx - bw / 2}" y="${y}" width="${bw}" height="${Math.max(0, hh)}" fill="${C[k]}" fill-opacity="${d.today ? 1 : .85}"/>`; });
+    g += `<text x="${cx}" y="${h - 4}" text-anchor="middle" font-size="9.5" fill="currentColor" fill-opacity="${d.today ? .9 : .5}">${d.label}</text>`;
+    if (d.m) g += `<text x="${cx}" y="${y - 3}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity=".6">${(( d.m.deep + d.m.light + d.m.rem) / 60).toFixed(1)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${h}" style="color:var(--text)">${g}</svg>`;
+}
+function ringSvg(pct, color) {
+  const r = 62, c = 2 * Math.PI * r, p = Math.max(0, Math.min(1, pct));
+  return `<svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="${r}" fill="none" stroke="currentColor" stroke-opacity=".1" stroke-width="13"/><circle cx="75" cy="75" r="${r}" fill="none" stroke="${color}" stroke-width="13" stroke-linecap="round" stroke-dasharray="${(c * p).toFixed(1)} ${c.toFixed(1)}"/></svg>`;
+}
+function hypnogram(sl) {
+  if (!sl.segments || !sl.segments.length) return '';
+  const W = 320, H = 110, pl = 34, rows = { awake: 0, rem: 1, light: 2, deep: 3 }, rh = 20, t0 = sl.start || sl.segments[0].start, t1 = sl.end || sl.segments[sl.segments.length - 1].end;
+  const X = t => pl + (t - t0) / (t1 - t0) * (W - pl - 4);
+  let g = Object.entries(rows).map(([k, r]) => `<text x="0" y="${r * 24 + 14}" font-size="9.5" fill="currentColor" fill-opacity=".55">${STAGE_NAME[k]}</text><line x1="${pl}" x2="${W}" y1="${r * 24 + 10}" y2="${r * 24 + 10}" stroke="currentColor" stroke-opacity=".07"/>`).join('');
+  sl.segments.forEach((s, i) => { g += `<rect x="${X(s.start)}" y="${rows[s.stage] * 24 + 1}" width="${Math.max(1.5, X(s.end) - X(s.start))}" height="${rh}" rx="3" fill="${C[s.stage]}"/>`; });
+  g += `<text x="${pl}" y="${H - 3}" font-size="9.5" fill="currentColor" fill-opacity=".55">${clock(t0)}</text><text x="${W - 4}" y="${H - 3}" text-anchor="end" font-size="9.5" fill="currentColor" fill-opacity=".55">${clock(t1)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="color:var(--text)">${g}</svg>`;
+}
+function stackBar(m) {
+  if (!m) return '';
+  const tot = m.deep + m.light + m.rem + m.awake || 1;
+  return `<div class="stack">${['deep', 'light', 'rem', 'awake'].map(k => `<i style="width:${m[k] / tot * 100}%;background:${C[k]}"></i>`).join('')}</div>`;
+}
+const legend = () => `<div class="legend">${['deep', 'light', 'rem', 'awake'].map(k => `<span><i style="background:${C[k]}"></i>${STAGE_NAME[k]}</span>`).join('')}</div>`;
+
+// ───────── status words ─────────
+const spo2Chip = s => s ? `<span class="chip ${s}">${{ normal: '正常', low: '偏低', alert: '异常' }[s]}</span>` : '';
+const stressChip = l => l ? `<span class="chip ${{ 低: 'ok', 中: 'mid', 高: 'high' }[l]}">压力${l}</span>` : '';
+const sleepWord = s => s == null ? '' : s >= 85 ? '很好' : s >= 70 ? '不错' : s >= 55 ? '一般' : '偏差';
+
+// ───────── cards ─────────
+function card(k, icon, color, name, bodyToday, bodyWeek, detail, opts = {}) {
+  const open = state.open.has(k);
+  return `<section class="mcard${opts.wide ? ' wide' : ''}${open ? ' open' : ''}" data-k="${k}">
+    <div class="mhead"><span style="color:${color}">${ic(icon)}</span>${name}<span class="chev">${ic('chevron-down', 'sm')}</span></div>
+    ${state.mode === 'today' ? bodyToday : bodyWeek}
+    <div class="detail">${detail}</div></section>`;
+}
+const noData = what => `<div class="na">戒指还没有传${what}</div>`;
+
+function render() {
+  const d = state.data, T = d.today_data, days = d.days, av = d.availability, today = days[days.length - 1];
+  const week = state.mode === 'week';
+  $('sync').textContent = d.last_sync ? `最近同步 ${agoText(d.last_sync)}${d.device && d.device.battery != null ? ' · 电量 ' + d.device.battery + '%' : ''}` : '还没有同步过';
+  $('foot').innerHTML = d.last_sync ? `最近一次同步：${new Date(d.last_sync).toLocaleString('zh-CN', { hour12: false })}${d.device && d.device.model ? '<br>' + esc(d.device.model) : ''}<br>体温偏差和 HRV 只是帮你观察变化趋势的参考，不是医疗判断。` : '';
+  if (!av.any) {
+    $('app').innerHTML = `<div class="empty-big">戒指的数据还没有传到新家。<br>红米或别的设备把数据 POST 到 <code>/api/ring/data</code> 之后，这里就会亮起来。<br><br><a href="/ring?demo=1">先看看示例长什么样 →</a></div>`; return;
+  }
+  const x0 = d.day_start, x1 = x0 + 864e5;
+  const dl = dayLabels(x0), wl = days.map((q, i) => ({ date: q.date, label: i === days.length - 1 ? '今' : wd(q.date), today: i === days.length - 1 }));
+  const dayTable = (cols, rows) => `<table><tr><th>日期</th>${cols.map(c => `<th>${c}</th>`).join('')}</tr>${rows.map(r => `<tr><td>${md(r[0])} 周${wd(r[0])}</td>${r.slice(1).map(v => `<td>${v ?? '—'}</td>`).join('')}</tr>`).join('')}</table>`;
+  let html = '';
+
+  // steps: the watch face
+  const S = T.steps, pct = S.value != null ? S.value / S.goal : 0;
+  html += `<section class="mcard face wide${state.open.has('steps') ? ' open' : ''}" data-k="steps" style="display:block">
+    <div style="display:flex;align-items:center;gap:18px">
+      <div class="rg">${ringSvg(pct, C.steps)}<div class="mid"><span class="num">${fmt(S.value)}</span><small>步 · 目标 ${fmt(S.goal)}</small></div></div>
+      <div class="side">${week ? `<div>7 天平均</div><b>${fmt(Math.round(days.filter(q => q.steps != null).reduce((a, q) => a + q.steps, 0) / Math.max(1, days.filter(q => q.steps != null).length)))}</b> 步<div class="bars"></div>`
+      : `<div>完成 <b>${Math.round(pct * 100)}%</b></div>${S.distance_m != null ? `<div>距离 <b>${(S.distance_m / 1000).toFixed(1)}</b> 公里</div>` : ''}${S.active_min != null ? `<div>活动 <b>${S.active_min}</b> 分钟</div>` : ''}`}</div>
+    </div>
+    ${week ? `<div class="mviz">${barChart(wl.map((l, i) => ({ label: l.label, v: days[i].steps, today: l.today, color: C.steps })), { goal: S.goal, color: C.steps, values: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v })}</div>` : ''}
+    <div class="detail">${week ? '' : `<div class="dh">最近 7 天</div>${barChart(wl.map((l, i) => ({ label: l.label, v: days[i].steps, today: l.today, color: C.steps })), { goal: S.goal, color: C.steps, values: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v })}`}
+      ${dayTable(['步数', '卡路里'], days.slice().reverse().map(q => [q.date, fmt(q.steps), fmt(q.calories)]))}</div></section><div class="grid">`;
+
+  // heart rate
+  const H = T.hr;
+  html += card('hr', 'heart-pulse', C.hr, '心率',
+    H ? `<div class="mval"><span class="num" style="color:${C.hr}">${H.latest.v}</span><span class="unit">bpm</span></div><div class="msub">今日平均 ${H.avg} · 范围 ${H.min}–${H.max}<br>${clock(H.latest.ts)} 测得</div><div class="mviz">${lineChart(H.series, { x0, x1, color: C.hr, fill: true, h: 56 })}</div>` : noData('心率'),
+    av.hr ? `<div class="mval"><span class="num" style="color:${C.hr}">${Math.round(avgOf(days, 'hr_avg'))}</span><span class="unit">bpm 7 天平均</span></div><div class="mviz">${lineChart(days.map((q, i) => ({ t: i, v: q.hr_avg, lo: q.hr_min, hi: q.hr_max })), { index: true, n: 7, color: C.hr, h: 80, band: days.map((q, i) => ({ t: i, lo: q.hr_min, hi: q.hr_max })), dots: true, axis: true, labels: wl.map((l, i) => ({ t: i, s: l.label })) })}</div><div class="msub">阴影是每天的最低到最高</div>` : noData('心率'),
+    H ? `<div class="dh">今天全天（每 5 分钟）</div>${lineChart(H.series, { x0, x1, color: C.hr, fill: true, h: 130, axis: true, labels: dl })}${dayTable(['平均', '最低', '最高'], days.slice().reverse().filter(q => q.hr_avg != null).map(q => [q.date, q.hr_avg, q.hr_min, q.hr_max]))}` : `<div class="na">今天还没有心率数据</div>`);
+
+  // sleep
+  const SL = d.sleep, m = SL && SL.minutes;
+  html += card('sleep', 'moon', C.sleep, '睡眠',
+    SL ? `<div class="mval"><span class="num" style="color:${C.sleep}">${hm(SL.total_min)}</span></div><div class="msub">${md(SL.date)} 那一晚${SL.score != null ? ` · 睡眠评分 <b style="color:var(--text)">${SL.score}</b>（${sleepWord(SL.score)}${SL.score_estimated ? '，估算' : ''}）` : ''}</div><div class="mviz">${stackBar(m)}${legend()}</div>` : noData('睡眠'),
+    av.sleep ? `<div class="mval"><span class="num" style="color:${C.sleep}">${hm(avgOf(days, 'sleep_total'))}</span><span class="unit">平均</span></div><div class="mviz">${stackedBars(days.map((q, i) => ({ m: q.sleep_minutes, label: wl[i].label, today: wl[i].today })))}${legend()}</div><div class="msub">柱顶数字是睡着的小时数</div>` : noData('睡眠'),
+    SL ? `${hypnogram(SL) || '<div class="na">这一晚只有各阶段总时长，没有分段</div>'}<div class="stagegrid">${m ? ['deep', 'light', 'rem', 'awake'].map(k => `<div><b style="color:${C[k]}">${hmText(m[k]).replace(' 小时 ', 'h ').replace(' 分', 'm')}</b><span>${STAGE_NAME[k]}${m.deep + m.light + m.rem + m.awake ? ' ' + Math.round(m[k] / (m.deep + m.light + m.rem + m.awake) * 100) + '%' : ''}</span></div>`).join('') : ''}</div>${SL.start ? `<div class="msub">${clock(SL.start)} 入睡 → ${clock(SL.end)} 醒来</div>` : ''}<div class="msub">在下面的「睡眠记录」里可以切换日期。</div>` : '');
+
+  // spo2
+  const O = T.spo2;
+  html += card('spo2', 'droplet', C.spo2, '血氧',
+    O ? `<div class="mval"><span class="num" style="color:${C.spo2}">${Math.round(O.latest.v)}</span><span class="unit">%</span>${spo2Chip(O.status)}</div><div class="msub">今日最低 ${O.min}% · 平均 ${O.avg}%</div><div class="mviz">${lineChart(O.series, { x0, x1, color: C.spo2, min: 88, max: 100, h: 50, gap: 90 * 60000 })}</div>` : noData('血氧'),
+    av.spo2 ? `<div class="mval"><span class="num" style="color:${C.spo2}">${avgOf(days, 'spo2_avg').toFixed(1)}</span><span class="unit">% 7 天平均</span></div><div class="mviz">${lineChart(days.map((q, i) => ({ t: i, v: q.spo2_avg })), { index: true, n: 7, color: C.spo2, min: 90, max: 100, h: 80, dots: true, ticks: [95], axis: true, labels: wl.map((l, i) => ({ t: i, s: l.label })) })}</div><div class="msub">95% 以上算正常</div>` : noData('血氧'),
+    O ? `<div class="dh">今天全天</div>${lineChart(O.series, { x0, x1, color: C.spo2, min: 85, max: 100, h: 120, ticks: [90, 95], axis: true, labels: dl, gap: 90 * 60000 })}<div class="msub">≥95% 正常 · 90–94% 偏低 · &lt;90% 异常（请留意，持续偏低建议咨询医生）</div>` : `<div class="na">今天还没有血氧数据</div>`);
+
+  // stress
+  const P = T.stress;
+  html += card('stress', 'gauge', C.stress, '压力',
+    P ? `<div class="mval"><span class="num" style="color:${C.stress}">${P.latest.v}</span>${stressChip(P.level)}</div><div class="msub">今日平均 ${P.avg}</div><div class="mviz">${lineChart(P.series, { x0, x1, color: C.stress, min: 0, max: 100, fill: true, h: 50, gap: 90 * 60000 })}</div>` : noData('压力'),
+    av.stress ? `<div class="mval"><span class="num" style="color:${C.stress}">${Math.round(avgOf(days, 'stress_avg'))}</span><span class="unit">7 天平均</span></div><div class="mviz">${lineChart(days.map((q, i) => ({ t: i, v: q.stress_avg })), { index: true, n: 7, color: C.stress, min: 0, max: 100, h: 80, dots: true, axis: true, labels: wl.map((l, i) => ({ t: i, s: l.label })) })}</div>` : noData('压力'),
+    P ? `<div class="dh">今天全天</div>${lineChart(P.series, { x0, x1, color: C.stress, min: 0, max: 100, fill: true, h: 120, ticks: [33, 66], axis: true, labels: dl, gap: 90 * 60000 })}<div class="msub">0–33 低 · 34–66 中 · 67 以上高</div>` : `<div class="na">今天还没有压力数据</div>`);
+
+  // calories
+  const cal = T.calories;
+  html += card('cal', 'flame', C.cal, '卡路里',
+    cal != null ? `<div class="mval"><span class="num" style="color:${C.cal}">${fmt(cal)}</span><span class="unit">kcal</span></div><div class="msub">今天已消耗</div><div class="mviz">${barChart(wl.map((l, i) => ({ label: l.label, v: days[i].calories, today: l.today, color: C.cal })), { color: C.cal, h: 64 })}</div>` : noData('卡路里'),
+    av.calories ? `<div class="mval"><span class="num" style="color:${C.cal}">${fmt(Math.round(avgOf(days, 'calories')))}</span><span class="unit">kcal 日均</span></div><div class="mviz">${barChart(wl.map((l, i) => ({ label: l.label, v: days[i].calories, today: l.today, color: C.cal })), { color: C.cal, h: 90, values: v => (v / 1000).toFixed(1) + 'k' })}</div>` : noData('卡路里'),
+    dayTable(['卡路里', '步数'], days.slice().reverse().map(q => [q.date, fmt(q.calories), fmt(q.steps)])));
+
+  // HRV (only if the ring sends it)
+  const V = T.hrv;
+  if (av.hrv) html += card('hrv', 'activity', C.hrv, 'HRV 心率变异性',
+    V ? `<div class="mval"><span class="num" style="color:${C.hrv}">${V.latest.v}</span><span class="unit">ms</span></div><div class="msub">${V.baseline != null ? `你平时约 ${V.baseline} ms · ${V.avg >= V.baseline ? '今天比平时高，恢复得不错' : '今天比平时低，可能还没恢复好'}` : '再积累几天数据就能和"你平时"比较'}<br>越高通常代表恢复得越好</div><div class="mviz">${lineChart(V.series, { x0, x1, color: C.hrv, h: 50, gap: 90 * 60000 })}</div>` : noData('今天的 HRV'),
+    `<div class="mval"><span class="num" style="color:${C.hrv}">${Math.round(avgOf(days, 'hrv_avg'))}</span><span class="unit">ms 7 天平均</span></div><div class="mviz">${lineChart(days.map((q, i) => ({ t: i, v: q.hrv_avg })), { index: true, n: 7, color: C.hrv, h: 80, dots: true, axis: true, labels: wl.map((l, i) => ({ t: i, s: l.label })) })}</div>`,
+    `${V ? `<div class="dh">今天全天</div>${lineChart(V.series, { x0, x1, color: C.hrv, h: 120, axis: true, labels: dl, gap: 90 * 60000 })}` : ''}${dayTable(['平均 ms'], days.slice().reverse().map(q => [q.date, q.hrv_avg]))}`);
+
+  // skin temperature (only if the ring sends it)
+  const TP = T.temp, dev = TP && TP.delta;
+  if (av.temp) html += card('temp', 'thermometer', C.temp, '体温变化',
+    TP ? `<div class="mval"><span class="num" style="color:${C.temp}">${dev == null ? TP.avg.toFixed(1) : (dev > 0 ? '+' : '') + dev.toFixed(1)}</span><span class="unit">${dev == null ? '°C' : '°C 比平时'}</span></div><div class="msub">${dev == null ? '再积累几天数据，就能显示"比平时偏高 / 偏低多少"' : `今日平均 ${TP.avg}°C · 你的基线 ${TP.baseline}°C`}<br>对观察周期前后的变化趋势有参考价值</div><div class="mviz">${lineChart(TP.series, { x0, x1, color: C.temp, h: 50, gap: 90 * 60000 })}</div>` : noData('今天的体温'),
+    `<div class="mval"><span class="num" style="color:${C.temp}">${(() => { const v = days.filter(q => q.temp_dev != null); return v.length ? (avgOf(v, 'temp_dev') > 0 ? '+' : '') + avgOf(v, 'temp_dev').toFixed(2) : '—'; })()}</span><span class="unit">°C 平均偏差</span></div><div class="mviz">${lineChart(days.map((q, i) => ({ t: i, v: q.temp_dev ?? q.temp_avg })), { index: true, n: 7, color: C.temp, h: 80, dots: true, zero: days.some(q => q.temp_dev != null) ? 0 : null, axis: true, labels: wl.map((l, i) => ({ t: i, s: l.label })) })}</div><div class="msub">${days.some(q => q.temp_dev != null) ? '虚线是你的基线，高于它表示比平时偏热' : '攒够几天后会显示相对基线的偏差'}</div>`,
+    `${TP ? `<div class="dh">今天全天</div>${lineChart(TP.series, { x0, x1, color: C.temp, h: 120, axis: true, labels: dl, gap: 90 * 60000 })}` : ''}${dayTable(['平均 °C', '偏差'], days.slice().reverse().map(q => [q.date, q.temp_avg, q.temp_dev == null ? '—' : (q.temp_dev > 0 ? '+' : '') + q.temp_dev]))}<div class="msub">基线 = 前 14 天的中位数（至少 5 天数据）。这是观察趋势用的，不是医疗判断。</div>`);
+  else html += `<div class="na">体温、HRV：戒指还没有传这两项数据，传了就会自动出现在这里。</div>`;
+
+  html += `</div>`;
+  // sleep history
+  if (av.sleep) html += `<div class="sec">睡眠记录</div><div class="chips" id="dchips">${d.sleep_dates.map(k => `<button class="dchip${k === (SL && SL.date) ? ' on' : ''}" data-d="${k}">${md(k)}<span style="opacity:.6"> 周${wd(k)}</span></button>`).join('')}</div>
+    <section class="mcard wide" style="cursor:default" id="sleephist">${sleepHist(SL)}</section>`;
+  $('app').innerHTML = html;
+}
+function sleepHist(s) {
+  if (!s) return '<div class="na">选一个日期</div>';
+  const m = s.minutes;
+  return `<div class="mhead"><span style="color:${C.sleep}">${ic('bed')}</span>${md(s.date)} 那一晚</div>
+    <div class="mval"><span class="num" style="color:${C.sleep}">${hm(s.total_min)}</span>${s.score != null ? `<span class="chip ok" style="margin-left:6px">评分 ${s.score}${s.score_estimated ? '（估算）' : ''}</span>` : ''}</div>
+    <div class="mviz">${hypnogram(s) || stackBar(m)}</div>${m ? `<div class="stagegrid">${['deep', 'light', 'rem', 'awake'].map(k => `<div><b style="color:${C[k]}">${Math.floor(m[k] / 60)}h ${m[k] % 60}m</b><span>${STAGE_NAME[k]}</span></div>`).join('')}</div>` : ''}${s.start ? `<div class="msub">${clock(s.start)} 入睡 → ${clock(s.end)} 醒来</div>` : ''}`;
+}
+function avgOf(arr, k) { const v = arr.map(q => q[k]).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0; }
+
+// ───────── events ─────────
+$('app').addEventListener('click', async e => {
+  const chip = e.target.closest('.dchip');
+  if (chip) {
+    document.querySelectorAll('.dchip').forEach(c => c.classList.toggle('on', c === chip));
+    const k = chip.dataset.d, s = DEMO ? demoSleep(k) : await fetch('/api/ring/sleep?date=' + k).then(r => r.json()).catch(() => null);
+    $('sleephist').innerHTML = sleepHist(s); return;
+  }
+  if (e.target.closest('.detail')) return;
+  const card = e.target.closest('.mcard[data-k]'); if (!card) return;
+  const k = card.dataset.k; state.open.has(k) ? state.open.delete(k) : state.open.add(k); card.classList.toggle('open');
+});
+$('tabs').addEventListener('click', e => { const t = e.target.closest('.seg-tab'); if (!t) return; state.mode = t.dataset.m; document.querySelectorAll('.seg-tab').forEach(x => x.classList.toggle('active', x === t)); if (state.data) render(); });
+$('reload').onclick = () => load();
+
+// ───────── data ─────────
+async function load() {
+  try { state.data = DEMO ? demoData() : await fetch('/api/ring/summary?days=7').then(r => { if (!r.ok) throw 0; return r.json(); }); render(); }
+  catch { $('app').innerHTML = '<div class="empty-big">没能读到戒指数据，稍后再试。</div>'; }
+}
+if (DEMO) $('demo-badge').innerHTML = '<span class="demo">示例数据，不是你的真实数据</span>';
+load(); if (!DEMO) setInterval(load, 60000);
+
+// ───────── demo (the same shape the server returns; nothing is stored) ─────────
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function demoSleep(k) {
+  const r = mulberry(k.split('-').join('') * 1), start = new Date(k + 'T00:00:00').getTime() - (45 - Math.round(r() * 40)) * 60000;
+  const order = ['light', 'deep', 'light', 'rem', 'light', 'deep', 'light', 'rem', 'light', 'awake', 'light', 'rem']; let t = start, j = 0; const seg = [], m = { deep: 0, light: 0, rem: 0, awake: 0 };
+  while (t < start + (7.2 + r()) * 3600000) { const st = order[j++ % order.length], len = ((st === 'deep' ? 28 : st === 'awake' ? 6 : st === 'rem' ? 24 : 38) + Math.round(r() * 12)); seg.push({ stage: st, start: t, end: t + len * 60000 }); m[st] += len; t += len * 60000; }
+  const tot = m.deep + m.light + m.rem; return { date: k, start, end: t, total_min: tot, minutes: m, score: Math.round(70 + r() * 22), score_estimated: false, segments: seg };
+}
+function demoData() {
+  const now = Date.now(), r = mulberry(9), t0 = new Date(); t0.setHours(0, 0, 0, 0); const x0 = t0.getTime();
+  const key = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const hh = t => { const d = new Date(t); return d.getHours() + d.getMinutes() / 60; };
+  const ser = (fn, step) => { const o = []; for (let t = x0; t <= now; t += step * 60000) o.push({ t, v: Math.round(fn(hh(t)) * 10) / 10 }); return o; };
+  const night = h => h < 7 || h > 23;
+  const hr = ser(h => (night(h) ? 55 : 72 + 13 * Math.max(0, Math.sin((h - 8) / 14 * Math.PI))) + (r() - .5) * 8, 5), spo2 = ser(h => 97 + (r() - .5) * 2, 10), stress = ser(h => Math.max(4, (night(h) ? 14 : 38 + 18 * Math.sin((h - 9) / 10 * Math.PI)) + (r() - .5) * 14), 10),
+    hrv = ser(h => (night(h) ? 72 : 44) + (r() - .5) * 12, 10), temp = ser(h => 36.5 + (night(h) ? .15 : -.05) + .3 + (r() - .5) * .1, 10);
+  const last = a => a[a.length - 1], vs = a => a.map(p => p.v), avg = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const days = []; for (let i = 6; i >= 0; i--) { const d = new Date(x0 - i * 864e5), k = key(d), sl = demoSleep(k), steps = i ? 4500 + Math.round(r() * 7500) : 6840; days.push({ date: k, steps, calories: 1700 + Math.round(r() * 600), hr_avg: 66 + Math.round(r() * 8), hr_min: 50 + Math.round(r() * 4), hr_max: 100 + Math.round(r() * 30), spo2_avg: +(96 + r() * 1.6).toFixed(1), stress_avg: 26 + Math.round(r() * 16), hrv_avg: 48 + Math.round(r() * 14), temp_avg: +(36.45 + r() * .1 + (i < 3 ? .3 : 0)).toFixed(2), temp_dev: i < 3 ? +(.25 + r() * .1).toFixed(2) : +((r() - .5) * .1).toFixed(2), sleep_total: sl.total_min, sleep_score: sl.score, sleep_minutes: sl.minutes }); }
+  const sleepDates = days.map(q => q.date).reverse();
+  return { now, today: key(new Date()), day_start: x0, last_sync: now - 3 * 60000, device: { model: 'COLMI R12 (示例)', battery: 76 }, sleep_dates: sleepDates, sleep: demoSleep(sleepDates[0]),
+    today_data: { steps: { value: 6840, goal: 8000, distance_m: 4900, active_min: 47 }, calories: 1480,
+      hr: { latest: last(hr) ? { v: last(hr).v, ts: last(hr).t } : null, avg: +avg(vs(hr)).toFixed(1), min: Math.min(...vs(hr)), max: Math.max(...vs(hr)), series: hr },
+      spo2: { latest: { v: last(spo2).v }, avg: +avg(vs(spo2)).toFixed(1), min: Math.min(...vs(spo2)), status: 'normal', series: spo2 },
+      stress: { latest: { v: Math.round(last(stress).v) }, avg: +avg(vs(stress)).toFixed(1), level: last(stress).v < 34 ? '低' : last(stress).v < 67 ? '中' : '高', series: stress },
+      hrv: { latest: { v: Math.round(last(hrv).v) }, avg: +avg(vs(hrv)).toFixed(1), baseline: 53, series: hrv },
+      temp: { latest: { v: last(temp).v }, avg: +avg(vs(temp)).toFixed(2), baseline: 36.45, delta: .3, series: temp } },
+    days, availability: { steps: true, hr: true, spo2: true, stress: true, hrv: true, temp: true, sleep: true, calories: true, any: true } };
+}
+</script>
+</body>
+</html>
