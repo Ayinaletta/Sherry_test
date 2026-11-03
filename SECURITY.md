@@ -81,6 +81,9 @@
 | `explore_token` | 设了才会开放 `/api/explore-log` 给 claude.ai 那边读；不设就关着 |
 | `phone_offline_after_min` `phone_low_battery` `phone_check_seconds` | 红米多久没心跳算掉线（默认 15 分钟）；电量低于多少提醒（默认 25）；检查间隔（默认 60 秒） |
 | `phone_keep_hours` | 手机截图保留多少小时，默认 24 |
+| `whisper_url` `whisper_token` `whisper_format` `openai_url` | 语音转写：指向莹的 Mac 上 `public/voice_to_me.py --serve` 的 `/transcribe`（自动识别），Mac 不通时退回 OpenAI |
+| `bridge_voice` | 莹发的语音是否直接送进昀的终端，默认 `true`（旧的聊天线路若也会送，设成 `false` 防重复） |
+| `show_locked_count` `sidecar_poll_seconds` `thought_notice_gap_seconds` | 念头锁，见 docs/THOUGHT_LOCK.md |
 | `vault_dir` | 「递钥匙」页面把令牌存到哪，默认 `~/.config/phone` |
 | `backup_dir` | 备份目录，默认 `/root/backups`（安全页的检查清单用它） |
 | `openai_key` `whisper_url` `elevenlabs_key` `elevenlabs_voice` | 语音 |

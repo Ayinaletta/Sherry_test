@@ -885,7 +885,8 @@ function legacyHandler(req, res) {
       sr.on('data', c => raw += c);
       sr.on('end', () => {
         try {
-          const d = JSON.parse(raw);
+          // locked thoughts are 昀's: only he gets them (see core.filterSnapshot)
+          const d = core.filterSnapshot(JSON.parse(raw), core.who(req) === 'claude', core.conf('show_locked_count', false) === true);
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ snapshot: d, ts: Date.now() }));
         } catch {
